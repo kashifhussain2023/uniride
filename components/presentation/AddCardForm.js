@@ -1,0 +1,331 @@
+import Layout from "@/components/common/Layout";
+import PageTitle from "@/components/common/PageTitle";
+import SmallContent from "@/components/presentation/SmallContent";
+import CustomFormControl from "@/theme/CustomFormControl";
+import CustomSelect from "@/theme/CustomSelect";
+import ThemeProvider from "@/theme/ThemeProvider";
+import { cardValidation } from "@/utils/payment-card";
+import styled from "@emotion/styled";
+import { Button, Typography } from "@mui/material";
+import InputLabel from "@mui/material/InputLabel";
+import Paper from "@mui/material/Paper";
+import Grid from "@mui/material/Unstable_Grid2";
+import { CardElement, useElements, useStripe } from "@stripe/react-stripe-js";
+import { signOut } from "next-auth/react";
+import Head from "next/head";
+import { useState } from "react";
+import { api } from "@/utils/api/common";
+import { toast } from "react-toastify";
+import { useRouter } from "next/router";
+import SpinnerLoader from "../common/SpinnerLoader";
+import { setCookie } from "nookies";
+const Item = styled(Paper)(({ theme }) => ({
+  backgroundColor: theme.palette.mode === "dark" ? "#1A2027" : "#fff",
+  ...theme.typography.body2,
+  padding: theme.spacing(1),
+  textAlign: "center",
+  color: theme.palette.text.secondary,
+}));
+
+export default function AddCardForm({ userAuth }) {
+  const router = useRouter();
+  const stripe = useStripe();
+  const elements = useElements();
+  const [loading, setLoading] = useState(false);
+  const [age, setAge] = useState("");
+  const [responseError, setResponseError] = useState("");
+  const [removeErrors, setRemoveErrors] = useState(false);
+  const [cardError, setCardError] = useState("");
+  const [inputs, setInputs] = useState({
+    card_number: "",
+    card_holder: "",
+    cvv: "",
+    month: "",
+    year: "",
+    card_type: "",
+  });
+  const [errors, setErrors] = useState({
+    card_holder: "",
+    // card_number: "",
+    // card_type: "",
+    // cvv: "",
+    // expiration_month: "",
+    // expiration_year: "",
+  });
+  const handleCardDetail = (event) => {
+    var brandName = event.brand.toUpperCase();
+    setInputs((inputs) => ({
+      ...inputs,
+      ["card_type"]: brandName,
+    }));
+  };
+  const handleInputChange = ({ target }) => {
+    setInputs((inputs) => ({
+      ...inputs,
+      [target.name]: target.value,
+    }));
+
+    if (removeErrors) {
+      setErrors({
+        ...cardValidation({
+          ...inputs,
+        }),
+      });
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    setResponseError("");
+    e.preventDefault();
+
+    let inputForValidation = {
+      card_holder: inputs.card_holder,
+    };
+
+    const validationErrors = cardValidation(inputForValidation);
+    const noErrors = Object.keys(validationErrors).length === 0;
+    setRemoveErrors(true);
+
+    if (noErrors) {
+      setLoading(true);
+      const cardElement = elements.getElement(CardElement); // Make sure to add an ID to your card number input field
+
+      if (!stripe || !elements || !cardElement) {
+        // Stripe.js has not yet loaded.
+        // Make sure to disable form submission until Stripe.js has loaded.
+        return;
+      }
+
+      // Use Stripe.js to create a token
+      const { token, error } = await stripe.createToken(cardElement);
+      const { paymentMethod, error2 } = await stripe.createPaymentMethod({
+        type: 'card',
+        card: cardElement,
+        billing_details: {
+          name: 'Customer Name', // optional, but recommended
+          email: 'customer@example.com',
+        },
+      });
+
+      if (error) {
+        setLoading(false);
+        console.error("Error creating token:", error);
+        //setResponseError("Error creating token. Please check your card details.");
+        setCardError(error.message);
+
+        return false;
+      } else {
+        // Send the token to your server or handle it as needed
+        // Add your logic to send the token to your server and handle the payment
+      }
+
+      const formData = new FormData();
+      formData.append("card_holder", inputs.card_holder);
+      formData.append("card_number", "000000000000" + token.card.last4);
+      formData.append("card_type", inputs.card_type);
+      formData.append("cv2", inputs.type);
+      formData.append(
+        "expire_date",
+        token.card.exp_month + "/" + token.card.exp_year
+      );
+      formData.append("nonce", token.id);
+      formData.append("customer_id", userAuth.customer_id);
+      formData.append("payment_method_id",paymentMethod.id)
+      //formData.append("token_code", userAuth.token_code);
+
+      const requestedBody = {
+        payment_method_id : paymentMethod.id,
+        card_holder :  inputs.card_holder,
+        card_number : "000000000000" + token.card.last4,
+        card_cvv: "", 
+        card_expire: token.card.exp_month + "/" + token.card.exp_year,
+        card_type: token.card.brand
+      }
+
+      const response = await api({
+        url: "/customer/payments/add-card",
+        method: "POST",
+        data: requestedBody,
+      });
+
+      if (response.status === true) {
+        setLoading(false);
+        toast.success(response.message);
+        setCookie(
+          null,
+          "registrationDetail",
+          JSON.stringify({
+            name: userAuth.name,
+            mobile_number: userAuth.mobile_number,
+            customer_id: userAuth.customer_id,
+          }),
+          {
+            maxAge: 5 * 60,
+            path: "/",
+          }
+        );
+        router.push("/verification");
+      } else {
+        setLoading(false);
+        toast.success(response.message);
+      }
+    } else {
+      setErrors(validationErrors);
+    }
+  };
+
+  return (
+    <ThemeProvider>
+      <Head>
+        <title>Uniride</title>
+        <meta name="description" content="Uniride " />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="icon" href="/favicon.ico" />
+      </Head>
+      <SpinnerLoader loading={loading} />
+      <Layout>
+        <SmallContent>
+          <AddpaymentInfo>
+            <Grid container spacing={2} sx={{ mt: 2 }}>
+              <Grid lg={6} md={6} sm={12} xs={12}>
+                <PageTitle
+                  title="Add"
+                  subtitle="Payment Info"
+                  images_icon={"../payment.png"}
+                ></PageTitle>
+
+                <Typography variant="h3" sx={{ mb: 1 }}>
+                  Credit/Debit Card
+                </Typography>
+
+                <FormControl>
+                  <InputLabel required>Card Holder Name</InputLabel>
+                  <CustomFormControl
+                    fullWidth
+                    type="text"
+                    placeholder="Enter Card Holder Name"
+                    value={inputs.card_holder || ""}
+                    name="card_holder"
+                    onChange={handleInputChange}
+                  />
+                  <span className="text-danger">
+                    {errors && errors.card_holder}
+                  </span>
+                </FormControl>
+
+                <FormControl>
+                  <InputLabel required>Card Number </InputLabel>
+                  <CardElement onChange={handleCardDetail} />
+
+                  <span className="text-danger">{cardError}</span>
+                </FormControl>
+
+                <FormControl>
+                  <InputLabel required>Card Type</InputLabel>
+                  <CustomFormControl
+                    fullWidth
+                    type="text"
+                    placeholder="Card Type"
+                    value={inputs.card_type || ""}
+                    name="card_type"
+                    onChange={handleInputChange}
+                    disabled={true}
+                  />
+                </FormControl>
+
+                <ButtonArea>
+                  <Button variant="contained" onClick={handleSubmit}>
+                    Save
+                  </Button>
+                </ButtonArea>
+              </Grid>
+              <Grid lg={6} md={6} sm={12} xs={12}>
+                <AddPaymentImg>
+                  <img src="../addPayment.png" />
+                </AddPaymentImg>
+              </Grid>
+            </Grid>
+          </AddpaymentInfo>
+        </SmallContent>
+      </Layout>
+    </ThemeProvider>
+  );
+}
+
+const AddpaymentInfo = styled.div`
+  ${({ theme }) => `
+    border-radius: 16px 0px 16px 16px;
+    box-shadow: 0px 0px 15px -1px rgba(0, 0, 0, 0.1);
+    background-color: ${theme.colors.palette.white};
+    padding: 24px;
+    margin-top: 60px;
+
+    img {
+      max-width: 100%;
+    }
+    .text-danger {
+      font-size: 13px;
+      color: ${theme.colors.palette.red};
+    }
+  `}
+`;
+
+const FormControl = styled.div`
+  ${({ theme }) => `
+    margin-bottom: 20px;
+    .MuiInputBase-input {
+      font-size: 16px;
+      height: 35px;
+      padding: 5px 10px;
+      border-radius: 6px;
+    }
+    .MuiInputLabel-root {
+      margin-top: 0px;
+      display: block;
+      margin-bottom: 5px;
+      color: ${theme.colors.palette.darkGrey};
+      span {
+        color: ${theme.colors.palette.red};
+      }
+    }
+  `}
+`;
+const CardImg = styled.div`
+  ${({ theme }) => `
+    margin-left: 10px;
+  `}
+`;
+
+const Expiration = styled.div`
+  ${({ theme }) => `
+    .MuiTypography-root {
+      font-size: 16px;
+      color: ${theme.colors.palette.darkGrey};
+      margin-bottom: 4px;
+    }
+  `}
+`;
+
+const ButtonArea = styled.div`
+  ${({ theme }) => `
+    width: 170px;
+    flex: 0 0 170px;
+    margin-bottom: 15px;
+    @media (min-width: ${theme.breakpoints.values.sm}px) {
+      margin-bottom: 0px;
+    }
+  `}
+`;
+
+const AddPaymentImg = styled.div`
+  ${({ theme }) => ` 
+  display:none;
+
+  @media (min-width: ${theme.breakpoints.values.md}px) {
+    display:block;
+  }
+  }
+
+
+  `}
+`;

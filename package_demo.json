@@ -1,0 +1,29 @@
+{
+  "name": "edutech",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 3017",
+    "build": "next build",
+    "start": "next start -p 3017",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.11.1",
+    "@emotion/styled": "^11.11.0",
+    "@mui/icons-material": "^5.14.11",
+    "@mui/material": "^5.14.11",
+    "@mui/system": "^5.14.11",
+    "axios": "^1.6.0",
+    "forever": "^4.0.3",
+    "next": "^13.1.3",
+    "next-auth": "^4.24.3",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.51.0",
+    "eslint-config-next": "^13.1.3",
+    "prettier": "^2.8.8"
+  }
+}

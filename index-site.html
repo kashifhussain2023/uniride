@@ -1,0 +1,16 @@
+<html>
+    <head>
+      <script src="https://cdn.socket.io/4.7.2/socket.io.min.js" integrity="sha384-mZLF4UVrpi/QTWPA7BjNPEnkIfRFn4ZEO3Qt/HFklTJBj/gBOV8G3HcKn4NfQblz" crossorigin="anonymous"></script>
+        <script>
+        const socket = io("https://uniridesocket.24livehost.com/connect-socket");
+        socket.on('connect', () => {
+            console.log('Received message:');
+        });
+
+        socket.on("is_online",()=>{
+            console.log("gehg")
+        })
+        </script>
+    </head>
+</html>
+

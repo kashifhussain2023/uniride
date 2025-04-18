@@ -1,0 +1,30 @@
+const colors = {
+  palette: {
+    white: "#FFFFFF",
+    black: "#000000",
+    offBlack: "#05171b",
+    blue: "#1d89cf",
+    darkBlue: "#003796",
+    ceruleanBlue: "#1d8acf",
+    cyan: "#00bcd4",
+    darkerBlue: "#023896",
+    grayishBlue: "#8c96a3",
+    lighterGrey: "#f9f9f9",
+    mediumGrey: "#aaaaaa",
+    lightGrey: "#f2f2f7",
+    grey: "#e5e5eb",
+    darkGrey: "#555555",
+    darkerGray: "#ebebeb",
+    cream: "#f9fafb",
+    darkRed: "#e92020",
+    green: "#8bc34a",
+    mediumGreen: "#00ba00",
+    purple: "#a767dd",
+    orange: "#feae01",
+    dGray: "#303030",
+    red: "#fd003a",
+    mediumRed: "#ef3c49",
+  },
+};
+
+export default colors;
