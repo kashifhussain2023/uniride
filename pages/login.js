@@ -85,6 +85,7 @@ export default function Login() {
         customer_id: userData.customer_id,
       };
 
+      console.log("userData", userData);
       // Handle different profile statuses
       switch (userData.profile_status) {
         case 1:
@@ -281,27 +282,67 @@ export default function Login() {
   );
 }
 export async function getServerSideProps(context) {
-  // You can access the session and user information here.
-  const session = await getSession(context);
+  try {
+    const session = await getSession(context);
 
-  if (
-    session &&
-    session.user.status === "TRUE" &&
-    session.user.profile_status === "3"
-  ) {
-    // Handle unauthenticated access
+    // If user is already logged in
+    if (session?.user?.data) {
+      const userData = session.user.data;
+
+      // Redirect based on profile status
+      switch (userData.profile_status) {
+        case 1:
+          return {
+            redirect: {
+              destination: '/add-card',
+              permanent: false,
+            },
+          };
+        case 2:
+          return {
+            redirect: {
+              destination: '/verification',
+              permanent: false,
+            },
+          };
+        case 3:
+          return {
+            redirect: {
+              destination: '/uniride',
+              permanent: false,
+            },
+          };
+        default:
+          // If profile_status is not recognized, clear the session
+          context.res.setHeader(
+            'Set-Cookie',
+            [
+              'next-auth.session-token=deleted; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT',
+              'next-auth.csrf-token=deleted; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'
+            ]
+          );
+          return {
+            props: {
+              error: "Invalid profile status"
+            }
+          };
+      }
+    }
+
+    // No session, allow access to login page
     return {
-      redirect: {
-        destination: "/uniride",
-        permanent: false,
-      },
+      props: {
+        null: null
+      }
+    };
+  } catch (error) {
+    console.error("Session check error:", error);
+    return {
+      props: {
+        error: "Session check failed"
+      }
     };
   }
-  return {
-    props: {
-      null: null,
-    },
-  };
 }
 const LoginContainer = styled.div`
   ${({ theme }) => `

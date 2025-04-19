@@ -175,16 +175,18 @@ export default function Login() {
         data: requestBody,
       });
 
+      console.log("response", response);
+
       if (response.status === true) {
         setLoading(false);
-        if (response.profile_status === "1") {
+        if (response.data.profile_status === 1) {
           setCookie(
             null,
             "newUserRegistration",
             JSON.stringify({
               name: inputs.first_name + " " + inputs.last_name,
               mobile_number: countrycode + inputs.mobile,
-              customer_id: response.customer_id,
+              customer_id: response.data.customer_id,
             }),
             {
               //maxAge: 5 * 60,
@@ -193,14 +195,14 @@ export default function Login() {
           );
           toast.success("Please add your card detail.");
           router.push("/add-card");
-        } else if (response.profile_status === "2") {
+        } else if (response.data.profile_status === 2) {
           setCookie(
             null,
             "registrationDetail",
             JSON.stringify({
               name: inputs.first_name + " " + inputs.last_name,
               mobile_number: countrycode + inputs.mobile,
-              customer_id: response.customer_id,
+              customer_id: response.data.customer_id,
             }),
             {
               maxAge: 5 * 60,
