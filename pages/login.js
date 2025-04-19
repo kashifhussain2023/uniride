@@ -13,124 +13,144 @@ import axios from "axios";
 import {
   Button,
   FormControl as MuiFormControl,
-  InputAdornment,IconButton,
+  InputAdornment,
+  IconButton,
   TextField,
   Typography,
+  Grid,
 } from "@mui/material";
-import { Email, Lock } from "@mui/icons-material";
+import { Lock, Phone } from "@mui/icons-material";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import { validateCustomer } from "@/utils/login";
+import CountrySelect from "@/components/common/CountrySelect";
+import CustomFormControl from "@/theme/CustomFormControl";
 
 export default function Login() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  // Add these variables to your component to track the state
+  const [countrycode, setCountryCode] = useState("+1");
   const [showPassword, setShowPassword] = useState(false);
+  const [errors, setErrors] = useState({
+    mobile: "",
+    password: "",
+  });
+  const [inputs, setInputs] = useState({
+    mobile: "",
+    password: "",
+  });
+  const [removeErrors, setRemoveErrors] = useState(false);
+
   const handleClickShowPassword = () => setShowPassword(!showPassword);
   const handleMouseDownPassword = () => setShowPassword(!showPassword);
 
-
-  const [errors, setErrors] = useState({
-    email: "",
-    password: "",
-  });
-
-  const [inputs, setInputs] = useState({
-    email: "",
-    password: "",
-  });
-  const [responseError, setResponseError] = useState("");
-  const [removeErrors, setRemoveErrors] = useState(false);
- 
   const handleInputChange = ({ target }) => {
-    setInputs((inputs) => ({
-      ...inputs,
+    setInputs((prev) => ({
+      ...prev,
       [target.name]: target.value,
     }));
 
     if (removeErrors) {
-      let data = { ...inputs, [target.name]: target.value };
-      setErrors({
-        ...validateCustomer({
-          ...data,
-        }),
-      });
+      const data = { ...inputs, [target.name]: target.value };
+      setErrors(validateCustomer(data));
+    }
+  };
+
+  const handleCountryCode = (value) => {
+    setCountryCode("+" + value);
+  };
+
+  const validateInputs = () => {
+    if (!inputs.mobile) {
+      toast.error("Mobile number is required");
+      return false;
+    }
+    if (!inputs.password) {
+      toast.error("Password is required");
+      return false;
+    }
+    return true;
+  };
+
+  const handleLoginSuccess = async (session) => {
+    try {
+      if (!session?.user?.data) {
+        throw new Error("Invalid session data");
+      }
+
+      const userData = session.user.data;
+      const userProfile = {
+        name: userData.name,
+        mobile_number: userData.mobile_number,
+        customer_id: userData.customer_id,
+      };
+
+      // Handle different profile statuses
+      switch (userData.profile_status) {
+        case 1:
+          setCookie(null, "newUserRegistration", JSON.stringify(userProfile), {
+            path: "/",
+            secure: true,
+          });
+          router.push("/add-card");
+          break;
+
+        case 2:
+          setCookie(null, "registrationDetail", JSON.stringify(userProfile), {
+            maxAge: 5 * 60,
+            path: "/",
+            secure: true,
+          });
+          router.push("/verification");
+          break;
+
+        case 3:
+          toast.success(session.user.message || "Login successful");
+          router.push("/uniride");
+          break;
+
+        default:
+          throw new Error("Invalid profile status");
+      }
+    } catch (error) {
+      console.error("Login success handler error:", error);
+      toast.error("Error processing login response");
     }
   };
 
   const handleSubmit = async (e) => {
-    setResponseError("");
     e.preventDefault();
 
-    let inputForValidation = {
-      email: inputs.email,
-      password: inputs.password,
-    };
+    try {
+      if (!validateInputs()) {
+        return;
+      }
 
-    const validationErrors = validateCustomer(inputForValidation);
-    const noErrors = Object.keys(validationErrors).length === 0;
-    setRemoveErrors(true);
-    //set All data to form data
-
-    if (noErrors) {
       setLoading(true);
       const response = await signIn("credentials", {
-        email: inputs.email,
+        phone: inputs.mobile,
         password: inputs.password,
+        phone_code: countrycode,
         redirect: false,
       });
 
-      if (response.error) {
-        setLoading(false);
-        toast.error(response.error);
-      } else {
-        setLoading(false);
-        const session = await getSession();
-        const userData = {
-          mobile_number: '7728020202',
-          name: 'customer',
-          customer_id: 149,
-          profile_status: 1
-        };
-
-        if (userData?.profile_status == "1") {
-          setCookie(
-            null,
-            "newUserRegistration",
-            JSON.stringify({
-              name: userData.name,
-              mobile_number: userData.mobile_number,
-              customer_id: userData.customer_id,
-            }),
-            {
-              //maxAge: 5 * 60,
-              path: "/",
-            }
-          );
-          router.push("/add-card");
-        } else if (userData?.profile_status == "2") {
-          setCookie(
-            null,
-            "registrationDetail",
-            JSON.stringify({
-              name: userData.name,
-              mobile_number: userData.mobile_number,
-              customer_id: userData.customer_id,
-            }),
-            {
-              maxAge: 5 * 60,
-              path: "/",
-            }
-          );
-          router.push("/verification");
-        } else {
-          toast.success(userData?.message);
-          router.push("/uniride");
-        }
+      if (response?.error) {
+        throw new Error(response.error);
       }
-    } else {
-      setErrors(validationErrors);
+
+      const session = await getSession();
+
+      if (!session?.user?.data) {
+        throw new Error("Invalid session data received");
+      }
+
+      await handleLoginSuccess(session);
+
+    } catch (error) {
+      console.error("Login error:", error);
+      toast.error(error.message || "Login failed. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -168,32 +188,43 @@ export default function Login() {
                   Sign In
                 </Typography>
               </SignInHead>
-              <Typography variant="h6">Email</Typography>
-              <FormControl variant="outlined" fullWidth sx={{ mb: 3 }}>
-                <TextField
-                  id="outlined-start-adornment"
-                  type="email"
-                  name="email"
-                  value={inputs.email}
-                  onChange={handleInputChange}
-                  fullWidth
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <Email />
-                      </InputAdornment>
-                    ),
-                  }}
-                  helperText={errors && errors.email}
-                />
-              </FormControl>
+              <Grid item md={6} sm={12} xs={12}>
+                <label>Mobile Number</label>
+                <CountryMobile>
+                  <CountrySelect
+                    onCountryCode={handleCountryCode}
+                    countrycode={countrycode}
+                  />
+                  <CustomFormControl
+                    fullWidth
+                    type="text"
+                    placeholder="9999999999"
+                    name="mobile"
+                    value={inputs.mobile || ""}
+                    onChange={handleInputChange}
+                    autoComplete="off"
+                  />
+                </CountryMobile>
+                {errors && errors.mobile && (
+                  <div
+                    style={{
+                      color: "#e92020",
+                      fontSize: "12px",
+                      marginTop: "4px",
+                      marginLeft: "14px",
+                    }}
+                  >
+                    {errors.mobile}
+                  </div>
+                )}
+              </Grid>
               <Typography variant="h6">Password</Typography>
               <FormControl variant="outlined" fullWidth sx={{ mb: 2 }}>
                 <TextField
                   id="outlined-start-adornment"
                   fullWidth
                   // type="password"
-                  type={showPassword ? "text" : "password"} // <-- This is where the magic happens
+                  type={showPassword ? "text" : "password"}
                   name="password"
                   value={inputs.password}
                   onChange={handleInputChange}
@@ -203,18 +234,18 @@ export default function Login() {
                         <Lock />
                       </InputAdornment>
                     ),
-                    endAdornment: (<InputAdornment position="end">
-                    <IconButton
-                      aria-label="toggle password visibility"
-                      onClick={handleClickShowPassword}
-                      onMouseDown={handleMouseDownPassword}
-                    >
-                      {showPassword ? <Visibility /> : <VisibilityOff />}
-                    </IconButton>
-                  </InputAdornment>)     
-                    
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          aria-label="toggle password visibility"
+                          onClick={handleClickShowPassword}
+                          onMouseDown={handleMouseDownPassword}
+                        >
+                          {showPassword ? <Visibility /> : <VisibilityOff />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
                   }}
-                 
                   helperText={errors && errors.password}
                 />
               </FormControl>
@@ -228,7 +259,6 @@ export default function Login() {
                   </Button>
                 </Typography>
               </KeepMe>
-              <Typography>{responseError}</Typography>
               <Button
                 variant="contained"
                 color="primary"
@@ -319,18 +349,10 @@ flex:0 0 550px;
     display:block;
     width:704px;
 flex:0 0 704px; 
-
 }
-
 
 img{ width:100%; height:100%; }
-
-
-
-
 }
-
-    
   `}
 `;
 
@@ -518,5 +540,44 @@ const Register = styled.div`
 const SignInHead = styled.div`
   ${({ theme }) => `
     text-align: center;
+  `}
+`;
+
+const CountryMobile = styled.div`
+  ${({ theme }) => `
+    display: flex;
+    border-radius: 4px;
+    border: 1px solid ${theme.colors.palette.grey};
+
+    .MuiOutlinedInput-root {
+      padding: 5px !important;
+      border: 0px solid #000;
+      border-radius: 0px;
+      background-color: transparent;
+      &:hover {
+        border: 0px !important;
+        outline: none !important;
+      }
+      &:focus {
+        border: 0px !important;
+        outline: none !important;
+      }
+    }
+
+    .MuiAutocomplete-endAdornment {
+      right: 3px;
+    }
+
+    .MuiAutocomplete-clearIndicator {
+      display: none;
+    }
+    .css-1aoewgd {
+      border: 0px solid #000;
+      border-radius: 0px;
+      &:focus {
+        border: 0px;
+        outline: none;
+      }
+    }
   `}
 `;

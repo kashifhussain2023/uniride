@@ -9,11 +9,8 @@ import CustomFormControl from "@/theme/CustomFormControl";
 import { Typography } from "@mui/material";
 import Grid from "@mui/material/Grid";
 import Button from "@mui/material/Button";
-import Radio from "@mui/material/Radio";
-import RadioGroup from "@mui/material/RadioGroup";
-import FormControlLabel from "@mui/material/FormControlLabel";
 import Checkbox from "@mui/material/Checkbox";
-import { validateRegisterCustomer } from "@/utils/register";
+import validatorInstance from "@/utils/ValidatorSingleton";
 import { api } from "./api/auth/register";
 import CountrySelect from "@/components/common/CountrySelect";
 import { toast } from "react-toastify";
@@ -32,6 +29,7 @@ export default function Login() {
     cpassword: "",
     gender: "",
     profile_picture: "",
+    terms_condition: "",
   });
   const [termsCondition, setTermsCondition] = useState(true);
   const [inputs, setInputs] = useState({
@@ -91,7 +89,7 @@ export default function Login() {
       }
 
       setErrors({
-        ...validateRegisterCustomer({
+        ...validatorInstance.validateRegisterCustomer({
           ...data,
         }),
       });
@@ -101,23 +99,37 @@ export default function Login() {
     setCountryCode("+" + value);
   };
 
+  const handleTermsChange = (event) => {
+    setTermsCondition(event.target.checked);
+    if (removeErrors) {
+      const validationErrors = validatorInstance.validateRegisterCustomer({
+        ...inputs,
+        terms_condition: event.target.checked
+      });
+      setErrors(validationErrors);
+    }
+  };
+
   const handleSubmit = async (e) => {
     setResponseError("");
     e.preventDefault();
     let inputForValidation = {
+      first_name: inputs.first_name,
+      last_name: inputs.last_name,
       email: inputs.email,
       password: inputs.password,
       cpassword: inputs.cpassword,
-      first_name: inputs.first_name,
-      last_name: inputs.last_name,
       mobile: inputs.mobile,
-      gender: inputs.gender,
-      profile_picture: inputs.profile_picture,
+      terms_condition: termsCondition
     };
 
-    const validationErrors = validateRegisterCustomer(inputForValidation);
+    const validationErrors = validatorInstance.validateRegisterCustomer(inputForValidation);
+
+    console.log({ "termsCondition": termsCondition, "validationErrors": validationErrors });
+
     const noErrors = Object.keys(validationErrors).length === 0;
     setRemoveErrors(true);
+    setErrors(validationErrors);
 
     //set All data to form data
     const formData = new FormData();
@@ -137,7 +149,7 @@ export default function Login() {
     formData.append("gender", inputs.gender);
     formData.append("email", inputs.email);
     formData.append("password", inputs.password);
-    formData.append("confirm_password",inputs.cpassword);
+    formData.append("confirm_password", inputs.cpassword);
     formData.append("profile_picture", base64Image);
 
     const requestBody = {
@@ -155,61 +167,59 @@ export default function Login() {
     };
 
     if (noErrors) {
-      if (termsCondition === false) {
-        toast.error("Please agree to terms & condition and privacy policy.");
-      } else {
-        setLoading(true);
-        const response = await api({
-          url: "/customer/register",
-          method: "POST",
-          data: requestBody,
-        });
 
-        if (response.status === true) {
-          setLoading(false);
-          if (response.profile_status === "1") {
-            setCookie(
-              null,
-              "newUserRegistration",
-              JSON.stringify({
-                name: inputs.first_name + " " + inputs.last_name,
-                mobile_number: countrycode + inputs.mobile,
-                customer_id: response.customer_id,
-              }),
-              {
-                //maxAge: 5 * 60,
-                path: "/",
-              }
-            );
-            toast.success("Please add your card detail.");
-            router.push("/add-card");
-          } else if (response.profile_status === "2") {
-            setCookie(
-              null,
-              "registrationDetail",
-              JSON.stringify({
-                name: inputs.first_name + " " + inputs.last_name,
-                mobile_number: countrycode + inputs.mobile,
-                customer_id: response.customer_id,
-              }),
-              {
-                maxAge: 5 * 60,
-                path: "/",
-              }
-            );
-            toast.success(
-              "OTP has been sent to your registered mobile number. Please verify your account."
-            );
-            router.push("/verification");
-          }
-        } else if (response.status === false) {
-          setLoading(false);
-          toast.error(response.message);
-        } else {
-          setLoading(false);
-          toast.error("Internal Server Error");
+      setLoading(true);
+      const response = await api({
+        url: "/customer/register",
+        method: "POST",
+        data: requestBody,
+      });
+
+      if (response.status === true) {
+        setLoading(false);
+        if (response.profile_status === "1") {
+          setCookie(
+            null,
+            "newUserRegistration",
+            JSON.stringify({
+              name: inputs.first_name + " " + inputs.last_name,
+              mobile_number: countrycode + inputs.mobile,
+              customer_id: response.customer_id,
+            }),
+            {
+              //maxAge: 5 * 60,
+              path: "/",
+            }
+          );
+          toast.success("Please add your card detail.");
+          router.push("/add-card");
+        } else if (response.profile_status === "2") {
+          setCookie(
+            null,
+            "registrationDetail",
+            JSON.stringify({
+              name: inputs.first_name + " " + inputs.last_name,
+              mobile_number: countrycode + inputs.mobile,
+              customer_id: response.customer_id,
+            }),
+            {
+              maxAge: 5 * 60,
+              path: "/",
+            }
+          );
+          toast.success(
+            "OTP has been sent to your registered mobile number. Please verify your account."
+          );
+          router.push("/verification");
         }
+      } else if (response.status === false) {
+        setLoading(false);
+        toast.error(response.message);
+      } else {
+        setLoading(false);
+        toast.error("Internal Server Error");
       }
+
     } else {
       setErrors(validationErrors);
     }
@@ -342,12 +352,18 @@ export default function Login() {
                   <Grid item md={12}>
                     <ByClicking>
                       <Checkbox
-                        defaultChecked
+                        checked={termsCondition}
                         name="terms_condition"
-                        onClick={() => setTermsCondition(!termsCondition)}
+                        onChange={handleTermsChange}
                       />{" "}
                       By clicking register, you agree to our Terms & Conditions
                       & Privacy Policy
+                      {errors.terms_condition && (
+                        <span className="text-danger">
+                          <br />
+                          {errors.terms_condition}
+                        </span>
+                      )}
                     </ByClicking>
                   </Grid>
                 </Grid>

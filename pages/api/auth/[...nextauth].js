@@ -13,21 +13,37 @@ export const authOptions = {
       },
       authorize: async (credentials) => {
         try {
-          const formData = new FormData();
-          formData.append(
-            "device_id",
-            "8091fd16cfaf9978ba777dbdbb7e92c7684da353d9d7f42b6aad6e5f17947829"
-          );
-          formData.append("os", 1);
-          formData.append("app", "customer");
-          formData.append("email", credentials.email);
-          formData.append("password", credentials.password);
+          // const formData = new FormData();
+          // formData.append(
+          //   "device_id",
+          //   "8091fd16cfaf9978ba777dbdbb7e92c7684da353d9d7f42b6aad6e5f17947829"
+          // );
+          // formData.append("os", 1);
+          // formData.append("app", "customer");
+          // formData.append("email", credentials.email);
+          // formData.append("password", credentials.password);
+
+          const formData = {
+            phone: credentials.phone,
+            password: credentials.password,
+            phone_code: credentials.phone_code,
+
+          };
 
           // const url = `${process.env.NEXT_PUBLIC_API_URL}/customers/main_login`;
-          const url = `https://www.unirideus.com/api//customers/main_login`;
-          const { data } = await axios.post(url, formData);
+          const url = `https://uniridedev.24livehost.com/api/v2/customer/login`;
+          console.log("url", url);
 
-          if (data.status === "TRUE") return data;
+          const { data } = await axios.post(url, formData, {
+            headers: {
+              'Device-Type': 'android',
+              'Device-Id': '6363'
+            }
+          });
+
+          console.log("data", data);
+
+          if (data.status) return data;
           else throw new Error(data.message);
         } catch (e) {
           throw new Error(e.message);

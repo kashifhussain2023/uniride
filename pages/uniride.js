@@ -127,8 +127,8 @@ export default function Dashboard({ userAuth }) {
         toast.error(
           "Your account has been logged in on another device.Please login again to continue."
         );
-        await signOut({ redirect: false });
-        router.push("/login");
+        //await signOut({ redirect: false });
+        ////router.push("/login");
       } else if (response.status === "FALSE") {
         toast.error(response.message);
         setLoading(false);
@@ -230,8 +230,8 @@ export default function Dashboard({ userAuth }) {
         toast.error(
           "Your account has been logged in on another device.Please login again to continue."
         );
-        await signOut({ redirect: false });
-        router.push("/login");
+        //({ redirect: false });
+        //router.push("/login");
       } else if (response.status === "FALSE") {
         setLoading(false);
         toast.info(response.message);
@@ -443,8 +443,8 @@ export default function Dashboard({ userAuth }) {
       setLoading(false);
     } else if (response.message == "Invalid token code") {
       setLoading(false);
-      await signOut({ redirect: false });
-      router.push("/login");
+      //await signOut({ redirect: false });
+      //router.push("/login");
     } else {
       setLoading(false);
       setCarStatus(false);
@@ -631,7 +631,7 @@ export default function Dashboard({ userAuth }) {
     socket.emit("add_user", params);
 
     const handleTrackRide = (response) => {
-      console.log('handleTrackRide RS :'+ JSON.stringify(response, null, 4));
+      console.log('handleTrackRide RS :' + JSON.stringify(response, null, 4));
       if (response.status === "TRUE" && response.code === 2) {
         setLoading(false);
         setAcceptDriverDetail(response.data);
@@ -701,7 +701,7 @@ export default function Dashboard({ userAuth }) {
       }
     };
 
-    const handleUpdateDriverLocation = (responseUpdateDriverLocation) => {};
+    const handleUpdateDriverLocation = (responseUpdateDriverLocation) => { };
 
     socket.on("track_ride", handleTrackRide);
     socket.on("driver_location", handleDriverLocation);
