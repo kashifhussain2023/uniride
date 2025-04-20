@@ -124,9 +124,6 @@ export default function Login() {
     };
 
     const validationErrors = validatorInstance.validateRegisterCustomer(inputForValidation);
-
-    console.log({ "termsCondition": termsCondition, "validationErrors": validationErrors });
-
     const noErrors = Object.keys(validationErrors).length === 0;
     setRemoveErrors(true);
     setErrors(validationErrors);
@@ -167,7 +164,6 @@ export default function Login() {
     };
 
     if (noErrors) {
-
       setLoading(true);
       const response = await api({
         url: "/customer/register",
@@ -179,23 +175,10 @@ export default function Login() {
 
       if (response.status === true) {
         setLoading(false);
-        if (response.data.profile_status === 1) {
-          setCookie(
-            null,
-            "newUserRegistration",
-            JSON.stringify({
-              name: inputs.first_name + " " + inputs.last_name,
-              mobile_number: countrycode + inputs.mobile,
-              customer_id: response.data.customer_id,
-            }),
-            {
-              //maxAge: 5 * 60,
-              path: "/",
-            }
-          );
-          toast.success("Please add your card detail.");
-          router.push("/add-card");
-        } else if (response.data.profile_status === 2) {
+
+        // Check OTP verification status first
+        if (response.data.otp_verified === 0) {
+          // User needs to verify OTP
           setCookie(
             null,
             "registrationDetail",
@@ -203,9 +186,10 @@ export default function Login() {
               name: inputs.first_name + " " + inputs.last_name,
               mobile_number: countrycode + inputs.mobile,
               customer_id: response.data.customer_id,
+              email: inputs.email
             }),
             {
-              maxAge: 5 * 60,
+              maxAge: 5 * 60, // 5 minutes
               path: "/",
             }
           );
@@ -214,6 +198,28 @@ export default function Login() {
           );
           router.push("/verification");
         }
+        // If OTP is verified, check profile status
+        else if (response.data.profile_status === 1) {
+          setCookie(
+            null,
+            "newUserRegistration",
+            JSON.stringify({
+              name: inputs.first_name + " " + inputs.last_name,
+              mobile_number: countrycode + inputs.mobile,
+              customer_id: response.data.customer_id,
+              token_code: response.data.token_code // Store token if provided
+            }),
+            {
+              path: "/",
+            }
+          );
+          toast.success("Please add your card detail.");
+          router.push("/add-card");
+        } else {
+          // If both OTP verified and profile complete, redirect to login
+          toast.success("Registration successful. Please login to continue.");
+          router.push("/login");
+        }
       } else if (response.status === false) {
         setLoading(false);
         toast.error(response.message);
@@ -221,7 +227,6 @@ export default function Login() {
         setLoading(false);
         toast.error("Internal Server Error");
       }
-
     } else {
       setErrors(validationErrors);
     }

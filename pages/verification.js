@@ -15,6 +15,7 @@ import {
 import { api } from "@/utils/api/common";
 import { toast } from "react-toastify";
 import { parseCookies } from "nookies";
+import { setCookie } from "nookies";
 
 export default function Verification({ userAuth }) {
   const router = useRouter();
@@ -73,47 +74,74 @@ export default function Verification({ userAuth }) {
     }
 
     if (noErrors) {
-      setLoading(true);
-      const enteredOtp = otp.join("");
-      const formData = new FormData();
-      formData.append("customer_id", userAuth.customer_id);
-      formData.append("otp", enteredOtp);
-      formData.append("mobile_number", userAuth.mobile_number);
+      try {
+        setLoading(true);
+        const enteredOtp = otp.join("");
 
-      const requestBody = {
-        customer_id: userAuth.customer_id,
-        otp: enteredOtp
-      }
-      
-      const response = await api({
-        url: "/customer/verify-otp",
-        method: "POST",
-        data: requestBody,
-      });
-
-      if (response.status === true) {
-        setLoading(false);
-        toast.success(response.message);
-
-        if (session) {
-          session.user.token_code = response.token_code;
-          sessionUpdate({
-            user: {
-              ...session?.user,
-              token_code: response.token_code,
-              profile_status: "3",
-            },
-          });
-          router.push("/uniride");
-        } else {
-          router.push("/login");
+        const requestBody = {
+          customer_id: userAuth.customer_id,
+          otp: enteredOtp
         }
-      } else if (response.status === false) {
+
+        const response = await api({
+          url: "/customer/verify-otp",
+          method: "POST",
+          data: requestBody,
+        });
+
+        if (response.status === true) {
+          // Get profile details to check payment method status
+          const profileResponse = await api({
+            url: "/customer/get-profile-details",
+            method: "GET"
+          });
+
+          if (profileResponse.status === true) {
+            if (session) {
+              session.user.token_code = response.token_code;
+              await sessionUpdate({
+                user: {
+                  ...session?.user,
+                  token_code: response.token_code,
+                  profile_status: "3",
+                },
+              });
+            }
+
+            // Check if user needs to add payment method
+            if (!profileResponse.data.default_payment_method) {
+              // Redirect to add card page with necessary data
+              setCookie(
+                null,
+                "newUserRegistration",
+                JSON.stringify({
+                  name: userAuth.name,
+                  mobile_number: userAuth.mobile_number,
+                  customer_id: userAuth.customer_id,
+                  token_code: response.token_code
+                }),
+                {
+                  path: "/",
+                }
+              );
+              toast.success("Please add your payment details to continue.");
+              router.push("/add-card");
+            } else {
+              // User has payment method, redirect to main app
+              toast.success(response.message || "Verification successful");
+              router.push("/uniride");
+            }
+          } else {
+            throw new Error("Failed to get profile details");
+          }
+        } else {
+          toast.error(response.message);
+        }
+      } catch (error) {
+        console.error("Verification error:", error);
+        toast.error(error.message || "Internal Server Error");
+      } finally {
         setLoading(false);
-        toast.error(response.message);
-      } else {
-        setLoading(false);
-        toast.error("Internal Server Error");
       }
     }
   };
@@ -123,7 +151,7 @@ export default function Verification({ userAuth }) {
     formData.append("customer_id", userAuth.customer_id);
     formData.append("mobile_number", userAuth.mobile_number);
 
-    const requestBody= {
+    const requestBody = {
       customer_id: userAuth.customer_id
     }
 

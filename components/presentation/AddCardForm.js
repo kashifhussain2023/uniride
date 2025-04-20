@@ -118,7 +118,7 @@ export default function AddCardForm({ userAuth }) {
         // Send the token to your server or handle it as needed
         // Add your logic to send the token to your server and handle the payment
       }
-
+      console.log("userAuth", userAuth);
       const formData = new FormData();
       formData.append("card_holder", inputs.card_holder);
       formData.append("card_number", "000000000000" + token.card.last4);
@@ -130,14 +130,14 @@ export default function AddCardForm({ userAuth }) {
       );
       formData.append("nonce", token.id);
       formData.append("customer_id", userAuth.customer_id);
-      formData.append("payment_method_id",paymentMethod.id)
+      formData.append("payment_method_id", paymentMethod.id)
       //formData.append("token_code", userAuth.token_code);
 
       const requestedBody = {
-        payment_method_id : paymentMethod.id,
-        card_holder :  inputs.card_holder,
-        card_number : "000000000000" + token.card.last4,
-        card_cvv: "", 
+        payment_method_id: paymentMethod.id,
+        card_holder: inputs.card_holder,
+        card_number: "000000000000" + token.card.last4,
+        card_cvv: "",
         card_expire: token.card.exp_month + "/" + token.card.exp_year,
         card_type: token.card.brand
       }
@@ -150,24 +150,11 @@ export default function AddCardForm({ userAuth }) {
 
       if (response.status === true) {
         setLoading(false);
-        toast.success(response.message);
-        setCookie(
-          null,
-          "registrationDetail",
-          JSON.stringify({
-            name: userAuth.name,
-            mobile_number: userAuth.mobile_number,
-            customer_id: userAuth.customer_id,
-          }),
-          {
-            maxAge: 5 * 60,
-            path: "/",
-          }
-        );
-        router.push("/verification");
+        toast.success(response.message || "Card added successfully");
+        router.push("/uniride");
       } else {
         setLoading(false);
-        toast.success(response.message);
+        toast.error(response.message || "Failed to add card");
       }
     } else {
       setErrors(validationErrors);

@@ -83,35 +83,39 @@ export default function Login() {
         name: userData.name,
         mobile_number: userData.mobile_number,
         customer_id: userData.customer_id,
+        email: userData.email
       };
 
-      console.log("userData", userData);
-      // Handle different profile statuses
-      switch (userData.profile_status) {
-        case 1:
-          setCookie(null, "newUserRegistration", JSON.stringify(userProfile), {
-            path: "/",
-            secure: true,
-          });
-          router.push("/add-card");
-          break;
+      // First check OTP verification status
+      if (userData.otp_verified === 0) {
+        setCookie(null, "registrationDetail", JSON.stringify(userProfile), {
+          maxAge: 5 * 60, // 5 minutes
+          path: "/",
+          secure: true,
+        });
+        toast.info("Please verify your OTP to continue.");
+        router.push("/verification");
+        return;
+      }
 
-        case 2:
-          setCookie(null, "registrationDetail", JSON.stringify(userProfile), {
-            maxAge: 5 * 60,
-            path: "/",
-            secure: true,
-          });
-          router.push("/verification");
-          break;
-
-        case 3:
-          toast.success(session.user.message || "Login successful");
-          router.push("/uniride");
-          break;
-
-        default:
-          throw new Error("Invalid profile status");
+      // For OTP verified users, check profile status
+      if (userData.profile_status === 1) {
+        // User needs to complete profile by adding card
+        setCookie(null, "newUserRegistration", JSON.stringify({
+          ...userProfile,
+          token_code: userData.token_code
+        }), {
+          path: "/",
+          secure: true,
+        });
+        toast.success("Please add your card details to complete registration.");
+        router.push("/add-card");
+      } else if (userData.profile_status === 3) {
+        // User profile is complete, proceed to main app
+        toast.success(session.user.message || "Login successful");
+        router.push("/uniride");
+      } else {
+        throw new Error("Invalid profile status");
       }
     } catch (error) {
       console.error("Login success handler error:", error);

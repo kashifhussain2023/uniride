@@ -127,8 +127,8 @@ export default function Dashboard({ userAuth }) {
         toast.error(
           "Your account has been logged in on another device.Please login again to continue."
         );
-        //await signOut({ redirect: false });
-        ////router.push("/login");
+        // await signOut({ redirect: false });
+        // router.push("/login");
       } else if (response.status === "FALSE") {
         toast.error(response.message);
         setLoading(false);
@@ -230,8 +230,8 @@ export default function Dashboard({ userAuth }) {
         toast.error(
           "Your account has been logged in on another device.Please login again to continue."
         );
-        //({ redirect: false });
-        //router.push("/login");
+        // await signOut({ redirect: false });
+        // router.push("/login");
       } else if (response.status === "FALSE") {
         setLoading(false);
         toast.info(response.message);
@@ -443,8 +443,8 @@ export default function Dashboard({ userAuth }) {
       setLoading(false);
     } else if (response.message == "Invalid token code") {
       setLoading(false);
-      //await signOut({ redirect: false });
-      //router.push("/login");
+      // await signOut({ redirect: false });
+      // router.push("/login");
     } else {
       setLoading(false);
       setCarStatus(false);
@@ -814,11 +814,86 @@ export default function Dashboard({ userAuth }) {
 }
 
 export async function getServerSideProps(context) {
-  // You can access the session and user information here.
-  const session = await getSession(context);
+  try {
+    const session = await getSession(context);
+    console.log("getServerSideProps session", session);
 
-  if (!session) {
-    // Handle unauthenticated access
+    if (!session || !session.user) {
+      return {
+        redirect: {
+          destination: "/login",
+          permanent: false,
+        },
+      };
+    }
+
+    // Check if user data exists
+    if (!session.user.data) {
+      console.error("No user data in session:", session.user);
+      return {
+        redirect: {
+          destination: "/login",
+          permanent: false,
+        },
+      };
+    }
+
+    // Check profile status - convert to string for comparison
+    //const profileStatus = String(session.user.data.profile_status);
+
+    // if (profileStatus !== "3") {
+    //   // If profile status is 1, redirect to add-card
+    //   if (profileStatus === "1") {
+    //     return {
+    //       redirect: {
+    //         destination: "/add-card",
+    //         permanent: false,
+    //       },
+    //     };
+    //   }
+    //   // If profile status is 2 or anything else, redirect to verification
+    //   if (profileStatus === "2") {
+    //     return {
+    //       redirect: {
+    //         destination: "/verification",
+    //         permanent: false,
+    //       },
+    //     };
+    //   }
+    //   // For any other status, redirect to login
+    //   return {
+    //     redirect: {
+    //       destination: "/login",
+    //       permanent: false,
+    //     },
+    //   };
+    // }
+
+    // Ensure all required user data is present
+    if (!session.user.data.customer_id || !session.user.data.token_code) {
+      console.error("Missing required user data in session:", session.user);
+      return {
+        redirect: {
+          destination: "/login",
+          permanent: false,
+        },
+      };
+    }
+
+    return {
+      props: {
+        userAuth: {
+          customer_id: session.user.data.customer_id,
+          token_code: session.user.data.token_code,
+          name: session.user.data.name || "",
+          mobile_number: session.user.data.mobile_number || "",
+          email: session.user.data.email || "",
+          profile_status: session.user.data.profile_status || ""
+        }
+      },
+    };
+  } catch (error) {
+    console.error("Error in getServerSideProps:", error);
     return {
       redirect: {
         destination: "/login",
@@ -826,19 +901,6 @@ export async function getServerSideProps(context) {
       },
     };
   }
-  if (session && session?.user.profile_status !== "3") {
-    return {
-      redirect: {
-        destination: "/login",
-        permanent: false,
-      },
-    };
-  }
-  return {
-    props: {
-      userAuth: session.user || null,
-    },
-  };
 }
 
 const PannelSection = styled.div`
