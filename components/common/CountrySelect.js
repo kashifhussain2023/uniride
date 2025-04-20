@@ -7,22 +7,29 @@ export default function CountrySelect({
   countrycode,
   disabled,
 }) {
+  // Find the country option that matches the countrycode
+  const findDefaultCountry = () => {
+    const code = countrycode?.replace("+", "");
+    return countries.find(country => country.phone === code) || countries.find(country => country.phone === "1");
+  };
+
   const handleCountryChange = (_, value) => {
     if (value) {
       onCountryCode(value.phone);
     }
   };
+
   return (
     <Autocomplete
       id="country-select-demo"
       sx={{ width: 125 }}
       options={countries}
-      // getOptionSelected={(option, countrycode) => option.phone === countrycode}
-      defaultValue={{ phone: countrycode }}
+      defaultValue={findDefaultCountry()}
       autoHighlight
       getOptionLabel={(option) => option.phone}
       onChange={handleCountryChange}
       disabled={disabled}
+      isOptionEqualToValue={(option, value) => option.code === value.code && option.phone === value.phone}
       componentsProps={{
         paper: {
           sx: {
@@ -30,23 +37,28 @@ export default function CountrySelect({
           },
         },
       }}
-      renderOption={(props, option) => (
-        <CountryDropdown
-          component="div"
-          sx={{ "& > img": { mr: 2, flexShrink: 0 } }}
-          {...props}
-          style={{ overflow: "visible" }}
-        >
-          <img
-            loading="lazy"
-            width="20"
-            src={`https://flagcdn.com/w20/${option.code.toLowerCase()}.png`}
-            srcSet={`https://flagcdn.com/w40/${option.code.toLowerCase()}.png 2x`}
-            alt=""
-          />
-          {option.label} ({option.code}) +{option.phone}
-        </CountryDropdown>
-      )}
+      renderOption={(props, option) => {
+        const key = `${option.code}-${option.phone}`;
+        console.log({ "key": key, "option": option });
+
+        return (
+          <CountryDropdown
+            {...props}
+            component="li"
+            key={key}
+            style={{ overflow: "visible" }}
+          >
+            <img
+              loading="lazy"
+              width="20"
+              src={`https://flagcdn.com/w20/${option.code.toLowerCase()}.png`}
+              srcSet={`https://flagcdn.com/w40/${option.code.toLowerCase()}.png 2x`}
+              alt=""
+            />
+            {option.label} ({option.code}) +{option.phone}
+          </CountryDropdown>
+        );
+      }}
       renderInput={(params) => (
         <TextField
           {...params}
@@ -486,13 +498,21 @@ const countries = [
   { code: "ZW", label: "Zimbabwe", phone: "263" },
 ];
 
-const CountryDropdown = styled.div`
+const CountryDropdown = styled.li`
   ${({ theme }) => `
-  Font-size:13px; padding:0px; 
+  Font-size: 13px;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   
-  .MuiSvgIcon-root{ width:0.80em; height:0.80em;}
-}
-
-
+  .MuiSvgIcon-root { 
+    width: 0.80em;
+    height: 0.80em;
+  }
+  
+  img {
+    margin-right: 8px;
+  }
   `}
 `;

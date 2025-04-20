@@ -83,15 +83,13 @@ export default function Login() {
 
     if (removeErrors) {
       if (target.type === "file") {
-        var data = { ...inputs, [target.name]: target.files[0] };
+        var data = { ...inputs, [target.name]: target.files[0], terms_condition: termsCondition };
       } else {
-        var data = { ...inputs, [target.name]: target.value };
+        var data = { ...inputs, [target.name]: target.value, terms_condition: termsCondition };
       }
 
       setErrors({
-        ...validatorInstance.validateRegisterCustomer({
-          ...data,
-        }),
+        ...validatorInstance.validateRegisterCustomer(data),
       });
     }
   };
