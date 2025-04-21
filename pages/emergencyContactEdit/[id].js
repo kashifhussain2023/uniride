@@ -36,8 +36,10 @@ export default function EmergencyContactEdit({ userAuth }) {
     country_code: "",
   });
   const [removeErrors, setRemoveErrors] = useState(false);
+
+  console.log("userAuth",userAuth?.token_code) 
+
   const handleInputChange = ({ target }) => {
-    // Handle other input types
     setInputs((inputs) => ({
       ...inputs,
       [target.name]: target.value,
@@ -52,6 +54,7 @@ export default function EmergencyContactEdit({ userAuth }) {
       });
     }
   };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -73,20 +76,28 @@ export default function EmergencyContactEdit({ userAuth }) {
       formData.append("email", inputs.email);
       formData.append("phone", inputs.phone);
       formData.append("country_code", inputs.country_code);
-      formData.append("token_code", userAuth.token_code);
+      formData.append("token_code", userAuth?.token_code);
+
+      const requestBody = {
+        id: id,
+        name: inputs.name,
+        email: inputs.email,
+        phone: inputs.phone,
+        country_code: inputs.country_code
+      }
+
       const response = await api({
-        url: "/customer/contacts/update",
-        method: "POST",
-        data: formData,
+        url: "/customer/emergency/update",
+        method: "PUT",
+        data: requestBody,
       });
-      if (response.status === "1") {
+
+      if (response.status === true) {
         setLoading(false);
         toast.success(response.message);
         router.push("../emergency-contact");
       } else if (
-        response.status === "0" &&
-        response.message === "Invalid token code"
-      ) {
+        response.status === false) {
         setLoading(false);
         toast.error(
           "Your account has been logged in on another device.Please login again to continue."
@@ -111,28 +122,40 @@ export default function EmergencyContactEdit({ userAuth }) {
     const formData = new FormData();
 
     //formData.append('customer_id',userAuth.customer_id);
-    formData.append("token_code", userAuth.token_code);
-    const response = await api({
-      url: "/customer/contacts/index",
-      method: "POST",
-      data: formData,
-    });
-    if (response.status === "1") {
-      if (response.data.length > 0) {
-        const filteredContacts = response.data.filter(
-          (contact) => contact.id === id
-        );
-        setContact(filteredContacts[0]);
-        setInputs(filteredContacts[0]);
+    formData.append("token_code", userAuth?.token_code);
 
-        setLoading(false);
-      } else {
-        router.push("/emergencyContactAdd");
-      }
-    } else if (
-      response.status === "0" &&
-      response.message === "Invalid token code"
-    ) {
+    const requestBody = {
+      id: 49,
+      name:inputs.name,
+      email: inputs.email,
+      // phone_code: countrycode,
+      phone_code: "+1",
+      phone: inputs.phone
+    }
+
+    const response = await api({
+      url: "/customer/emergency/update",
+      method: "PUT",
+      data: requestBody,
+    });
+
+    console.log("response", response)
+
+    if (response.status === true) {
+      console.log("yjhyhuyh")
+      // if (response.data.length > 0) {
+      //   const filteredContacts = response.data.filter(
+      //     (contact) => contact.id === id
+      //   );
+      //   setContact(filteredContacts[0]);
+      //   setInputs(filteredContacts[0]);
+
+      //   setLoading(false);
+      // } else {
+      //   router.push("/emergencyContactAdd");
+      // }
+    } 
+    else if (response.status === false) {
       setLoading(false);
       toast.error(
         "Your account has been logged in on another device.Please login again to continue."
@@ -144,6 +167,7 @@ export default function EmergencyContactEdit({ userAuth }) {
   useEffect(() => {
     getEmergencyContactDetail(id);
   }, []);
+
   return (
     <ThemeProvider>
       <Head>
@@ -152,9 +176,8 @@ export default function EmergencyContactEdit({ userAuth }) {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <SpinnerLoader loading={loading} />
       <Layout>
-        {contact ? (
+        {/* {contact ? ( */}
           <>
             <SmallContent>
               <EmergencyContact>
@@ -230,9 +253,9 @@ export default function EmergencyContactEdit({ userAuth }) {
               </EmergencyContact>
             </SmallContent>
           </>
-        ) : (
+        {/* ) : (
           <SpinnerLoader loading={loading} />
-        )}
+        )} */}
       </Layout>
     </ThemeProvider>
   );
@@ -250,17 +273,17 @@ export async function getServerSideProps(context) {
       },
     };
   }
-  if (session && session?.user.profile_status !== "3") {
-    return {
-      redirect: {
-        destination: "/login",
-        permanent: false,
-      },
-    };
-  }
+  // if (session && session?.user.profile_status !== "3") {
+  //   return {
+  //     redirect: {
+  //       destination: "/login",
+  //       permanent: false,
+  //     },
+  //   };
+  // }
   return {
     props: {
-      userAuth: session.user || null,
+      userAuth: session?.user || null,
     },
   };
 }

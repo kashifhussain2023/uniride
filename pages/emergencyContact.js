@@ -25,13 +25,14 @@ import { useRouter } from "next/router";
 export default function EmergencyContacts({userAuth}) {
   const router = useRouter();
   const [ emergencyList, setEmergencyList ] = useState();
+
   const getEmergencyContactList = async () => {
     const formData = new FormData();
     
     //formData.append('customer_id',userAuth.customer_id);
     formData.append('token_code',userAuth.token_code);
     const response = await api({
-      url: '/customer/contacts/index',
+      url: '/customer/emergency/update',
       method: 'POST',
       data: formData,
     });

@@ -29,8 +29,9 @@ export default function CorporateProfile({ userAuth }) {
     corporate_emp_id: "",
     corporate_id: "",
   });
+
   const selectedCorporate = corporateList.find(
-    (item) => item.id == inputs.corporate_id
+    (item) => item.id == inputs?.corporate_id
   );
   const corporateName = selectedCorporate?.corporate_name || "";
 
@@ -138,8 +139,6 @@ export default function CorporateProfile({ userAuth }) {
           corporate_name : corporateName
         };
 
-        console.log("requestBody",requestBody)
-
         const response = await api({
           url: "/customer/save-corporate-profile",
           method: "POST",
@@ -151,7 +150,7 @@ export default function CorporateProfile({ userAuth }) {
           toast.success(response.message);
           router.push("/corporate-profile");
         } else if (
-          response.status === "0" &&
+          response.status === false &&
           response.message === "Invalid token code"
         ) {
           setLoading(false);
@@ -160,7 +159,7 @@ export default function CorporateProfile({ userAuth }) {
           );
           await signOut({ redirect: false });
           router.push("/login");
-        } else if (response.status === "0" && response.errors != "") {
+        } else if (response.status === false && response.errors != "") {
           setLoading(false);
           const valuesArray = Object.values(response.errors);
           const firstValue = valuesArray[0];
@@ -190,7 +189,7 @@ export default function CorporateProfile({ userAuth }) {
       </Head>
       <SpinnerLoader loading={loading} />
       <Layout>
-        {corporateProfile && corporateList ? (
+        {corporateProfile || corporateList ? (
           <>
             <SmallContent>
               <ProfileBox>
@@ -208,7 +207,7 @@ export default function CorporateProfile({ userAuth }) {
                       <CustomFormControl
                         fullWidth
                         type="text"
-                        value={inputs.corporate_email || ""}
+                        value={inputs?.corporate_email || ""}
                         name="corporate_email"
                         onChange={handleInputChange}
                       />
@@ -223,7 +222,7 @@ export default function CorporateProfile({ userAuth }) {
                       <CustomFormControl
                         fullWidth
                         type="text"
-                        value={inputs.corporate_emp_id || ""}
+                        value={inputs?.corporate_emp_id || ""}
                         name="corporate_emp_id"
                         onChange={handleInputChange}
                       />
@@ -239,7 +238,7 @@ export default function CorporateProfile({ userAuth }) {
                         as="select"
                         fullWidth
                         name="corporate_id"
-                        value={inputs.corporate_id || ""}
+                        value={inputs?.corporate_id || ""}
                         onChange={handleInputChange}
                       >
                         <option value="" disabled>
@@ -297,12 +296,11 @@ export default function CorporateProfile({ userAuth }) {
     </ThemeProvider>
   );
 }
+
 export async function getServerSideProps(context) {
   // You can access the session and user information here.
   const session = await getSession(context);
-
   if (!session) {
-    // Handle unauthenticated access
     return {
       redirect: {
         destination: "/login",
@@ -310,20 +308,21 @@ export async function getServerSideProps(context) {
       },
     };
   }
-  if (session && session?.user.profile_status !== "3") {
-    return {
-      redirect: {
-        destination: "/login",
-        permanent: false,
-      },
-    };
-  }
+  // if (session && session?.user.profile_status !== "3") {
+  //   return {
+  //     redirect: {
+  //       destination: "/login",
+  //       permanent: false,
+  //     },
+  //   };
+  // }
   return {
     props: {
       userAuth: session?.user || null,
     },
   };
 }
+
 const ProfileBox = styled.div`
   ${({ theme }) => `
     border-radius: 16px 0px 16px 16px;

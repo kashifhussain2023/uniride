@@ -99,11 +99,11 @@ export default function AddCardForm({ userAuth }) {
       // Use Stripe.js to create a token
       const { token, error } = await stripe.createToken(cardElement);
       const { paymentMethod, error2 } = await stripe.createPaymentMethod({
-        type: 'card',
+        type: "card",
         card: cardElement,
         billing_details: {
-          name: 'Customer Name', // optional, but recommended
-          email: 'customer@example.com',
+          name: "Customer Name", // optional, but recommended
+          email: "customer@example.com",
         },
       });
 
@@ -119,6 +119,7 @@ export default function AddCardForm({ userAuth }) {
         // Add your logic to send the token to your server and handle the payment
       }
       console.log("userAuth", userAuth);
+
       const formData = new FormData();
       formData.append("card_holder", inputs.card_holder);
       formData.append("card_number", "000000000000" + token.card.last4);
@@ -130,8 +131,8 @@ export default function AddCardForm({ userAuth }) {
       );
       formData.append("nonce", token.id);
       formData.append("customer_id", userAuth.customer_id);
-      formData.append("payment_method_id", paymentMethod.id)
-      //formData.append("token_code", userAuth.token_code);
+      formData.append("payment_method_id", paymentMethod.id);
+      formData.append("token_code", userAuth.token_code);
 
       const requestedBody = {
         payment_method_id: paymentMethod.id,
@@ -139,14 +140,16 @@ export default function AddCardForm({ userAuth }) {
         card_number: "000000000000" + token.card.last4,
         card_cvv: "",
         card_expire: token.card.exp_month + "/" + token.card.exp_year,
-        card_type: token.card.brand
-      }
+        card_type: token.card.brand,
+      };
 
       const response = await api({
         url: "/customer/payments/add-card",
         method: "POST",
         data: requestedBody,
       });
+
+      console.log("response", response);
 
       if (response.status === true) {
         setLoading(false);
@@ -312,7 +315,5 @@ const AddPaymentImg = styled.div`
     display:block;
   }
   }
-
-
   `}
 `;

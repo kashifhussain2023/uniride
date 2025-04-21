@@ -63,6 +63,7 @@ export default function Verification({ userAuth }) {
       inputRefs.current[firstEmptyIndex].focus();
     }
   };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -78,6 +79,8 @@ export default function Verification({ userAuth }) {
         setLoading(true);
         const enteredOtp = otp.join("");
 
+        console.log("userAuth",userAuth)
+
         const requestBody = {
           customer_id: userAuth.customer_id,
           otp: enteredOtp
@@ -90,7 +93,6 @@ export default function Verification({ userAuth }) {
         });
 
         if (response.status === true) {
-          // Get profile details to check payment method status
           const profileResponse = await api({
             url: "/customer/get-profile-details",
             method: "GET"
@@ -108,9 +110,7 @@ export default function Verification({ userAuth }) {
               });
             }
 
-            // Check if user needs to add payment method
             if (!profileResponse.data.default_payment_method) {
-              // Redirect to add card page with necessary data
               setCookie(
                 null,
                 "newUserRegistration",
@@ -145,6 +145,7 @@ export default function Verification({ userAuth }) {
       }
     }
   };
+
   const handleResendOtp = async () => {
     setLoading(true);
     const formData = new FormData();
@@ -172,6 +173,7 @@ export default function Verification({ userAuth }) {
       toast.error("Internal Server Error");
     }
   };
+
   const noErrors = 1;
 
   return (

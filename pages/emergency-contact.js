@@ -61,19 +61,18 @@ export default function EmergencyContacts({ userAuth }) {
     const formData = new FormData();
     formData.append("id", deleteContactId);
     formData.append("token_code", userAuth?.token_code);
+
     const response = await api({
-      url: "/customer/contacts/delete",
-      method: "POST",
+      url: `/customer/emergency/remove/${deleteContactId}`,
+      method: "DELETE",
       data: formData,
     });
-    if (response.status === "1") {
+
+    if (response.status === true) {
       //setLoading(false);
       toast.success(response.message);
       getEmergencyContactList();
-    } else if (
-      response.status === "0" &&
-      response.message === "Invalid token code"
-    ) {
+    } else if (response.status === false) {
       setLoading(false);
       toast.error(
         "Your account has been logged in on another device.Please login again to continue."
@@ -189,15 +188,15 @@ export async function getServerSideProps(context) {
   // You can access the session and user information here.
   const session = await getSession(context);
 
-  // if (!session) {
-  //   // Handle unauthenticated access
-  //   return {
-  //     redirect: {
-  //       destination: "/login",
-  //       permanent: false,
-  //     },
-  //   };
-  // }
+  if (!session) {
+    // Handle unauthenticated access
+    return {
+      redirect: {
+        destination: "/login",
+        permanent: false,
+      },
+    };
+  }
   // if (session && session?.user.profile_status !== "3") {
   //   return {
   //     redirect: {

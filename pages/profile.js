@@ -31,7 +31,6 @@ const Profile = ({ userAuth }) => {
   const [removeErrors, setRemoveErrors] = useState(false);
   const [inputs, setInputs] = useState({});
   const [profileImage, setProfileImage] = useState(null);
-  const [base64Image, setBase64Image] = useState("");
   const [errors, setErrors] = useState({
     first_name: "",
     last_name: "",
@@ -46,7 +45,7 @@ const Profile = ({ userAuth }) => {
         last_name: profileData.data.last_name,
         email: profileData.data.email,
         mobile_number: profileData.data.phone,
-        profile_picture: profileData.data.profile_picture,
+        profile_picture: profileData.data.profile_image,
         countrycode: profileData.data.country_code,
         gender: profileData.data.gender,
       });
@@ -63,6 +62,7 @@ const Profile = ({ userAuth }) => {
     });
     getUserProfile();
   };
+
   const getUserProfile = async () => {
     try {
       setLoading(true);
@@ -103,11 +103,14 @@ const Profile = ({ userAuth }) => {
       }
     } catch (error) {
       console.error("Error in getUserProfile:", error);
-      toast.error("An error occurred while fetching your profile. Please try again.");
+      toast.error(
+        "An error occurred while fetching your profile. Please try again."
+      );
     } finally {
       setLoading(false);
     }
   };
+
   const handleInputChange = ({ target }) => {
     if (target.type === "file") {
       const file = target.files[0];
@@ -116,31 +119,21 @@ const Profile = ({ userAuth }) => {
         setProfileImage(file);
         document.getElementById("preview").src = imageUrl;
 
-        const reader = new FileReader();
+        // const reader = new FileReader();
 
-        reader.onloadend = () => {
-          setBase64Image(reader.result.replace("data:image/jpeg;base64", ""));
-        };
+        // reader.onloadend = () => {
+        //   // setBase64Image(reader.result.replace("data:image/jpeg;base64", ""));
+        //   setBase64Image(reader.result);
+        // };
 
-        reader.readAsDataURL(file);
-        // setInputs((inputs) => ({
-        //   ...inputs,
-        //   [target.name]: file,
-        // }));
+        // reader.readAsDataURL(file);
       } else {
-        // No file selected, set imageUrl to null
         document.getElementById("preview").src = inputs.profile_picture
           ? inputs.profile_picture
           : "../avatar-photo.png";
         setProfileImage(null);
-        setBase64Image("");
-        // setInputs((inputs) => ({
-        //   ...inputs,
-        //   [target.name]: null,
-        // }));
       }
     } else {
-      // Handle other input types
       setInputs((inputs) => ({
         ...inputs,
         [target.name]: target.value,
@@ -161,9 +154,11 @@ const Profile = ({ userAuth }) => {
       });
     }
   };
+
   const handleChangePassword = () => {
     router.push("/changePassword");
   };
+
   const updateProfile = async (e) => {
     e.preventDefault();
     setResponseError("");
@@ -192,7 +187,7 @@ const Profile = ({ userAuth }) => {
         formData.append("email", inputs.email);
         formData.append("countrycode", inputs.countrycode);
         formData.append("mobile_number", inputs.mobile_number);
-        formData.append("profile_picture", base64Image);
+        formData.append("profile_image", profileImage);
         formData.append("customer_id", session?.user?.data?.customer_id);
 
         const response = await api({
@@ -202,7 +197,9 @@ const Profile = ({ userAuth }) => {
         });
 
         if (response.status === true && response.update_status === "1") {
-          toast.success(response.message + " Please verify your mobile number.");
+          toast.success(
+            response.message + " Please verify your mobile number."
+          );
           setCookie(
             null,
             "profileOtp",
@@ -223,7 +220,10 @@ const Profile = ({ userAuth }) => {
           toast.success(response.message);
           setDisabled(true);
           getUserProfile();
-        } else if (response.status === false && response.message === "Invalid token code") {
+        } else if (
+          response.status === false &&
+          response.message === "Invalid token code"
+        ) {
           toast.error("Your session has expired. Please login again.");
           await signOut({ redirect: false });
           router.push("/login");
@@ -234,7 +234,9 @@ const Profile = ({ userAuth }) => {
         }
       } catch (error) {
         console.error("Error in updateProfile:", error);
-        toast.error("An error occurred while updating your profile. Please try again.");
+        toast.error(
+          "An error occurred while updating your profile. Please try again."
+        );
       } finally {
         setLoading(false);
       }
@@ -242,15 +244,18 @@ const Profile = ({ userAuth }) => {
       setErrors(validationErrors);
     }
   };
+
   const handleCountryCode = (value) => {
     setInputs((inputs) => ({
       ...inputs,
       ["countrycode"]: "+" + value,
     }));
   };
+
   useEffect(() => {
     getUserProfile();
   }, []);
+
   return (
     <ThemeProvider>
       <Head>
@@ -289,8 +294,16 @@ const Profile = ({ userAuth }) => {
                   </ProfileBtn>
                 </ProfileHead>
                 <ProfileImg>
-                  <img
+                  {/* <img
                     src={inputs.profile_picture || "../avatar-photo.png"}
+                    id="preview"
+                  /> */}
+                  <img
+                    src={
+                      profileImage
+                        ? URL.createObjectURL(profileImage)
+                        : inputs.profile_picture || "/avatar-photo.png"
+                    }
                     id="preview"
                   />
                   <span>
@@ -328,9 +341,9 @@ const Profile = ({ userAuth }) => {
                         name="first_name"
                         onChange={handleInputChange}
                       />
-                    <span className="text-danger">
-                      {errors && errors.first_name}
-                    </span>
+                      <span className="text-danger">
+                        {errors && errors.first_name}
+                      </span>
                     </FormControl>
                   </Grid>
                   <Grid lg={6} md={6} sm={12} xs={12}>
@@ -461,7 +474,6 @@ export async function getServerSideProps(context) {
   const session = await getSession(context);
 
   if (!session) {
-    // Handle unauthenticated access
     return {
       redirect: {
         destination: "/login",
@@ -469,14 +481,14 @@ export async function getServerSideProps(context) {
       },
     };
   }
-  if (session && session?.user.profile_status !== "3") {
-    return {
-      redirect: {
-        destination: "/login",
-        permanent: false,
-      },
-    };
-  }
+  // if (session && session?.user.profile_status !== "3") {
+  //   return {
+  //     redirect: {
+  //       destination: "/login",
+  //       permanent: false,
+  //     },
+  //   };
+  // }
   return {
     props: {
       userAuth: session?.user || null,

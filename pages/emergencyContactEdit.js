@@ -28,7 +28,6 @@ const Item = styled(Paper)(({ theme }) => ({
 
 export default function EmergencyContactEdit({userAuth}) {
   const router = useRouter();
-  const [ historyData, setHistoryData ] = useState([]);
   const [countrycode,setCountryCode] = useState("+1");
   const [inputs, setInputs] = useState({
     name: "",
@@ -43,8 +42,8 @@ export default function EmergencyContactEdit({userAuth}) {
     country_code: "",
   });
   const [removeErrors, setRemoveErrors] = useState(false);
+
   const handleInputChange = ({ target }) => {
-      // Handle other input types
       setInputs((inputs) => ({
         ...inputs,
         [target.name]: target.value,
@@ -59,6 +58,7 @@ export default function EmergencyContactEdit({userAuth}) {
       });
     }
   };
+
   const handleSubmit = async (e) => {
     
     e.preventDefault();
@@ -80,10 +80,14 @@ export default function EmergencyContactEdit({userAuth}) {
     formData.append('email',inputs.email);
     formData.append('phone',inputs.phone);
     formData.append('country_code',countrycode);
-    formData.append('token_code',userAuth.token_code);
+    formData.append('token_code',userAuth?.token_code);
     
     const requestBody = {
-      
+      // id: inputs.
+      name: inputs.name,
+      email: inputs.email,
+      phone: inputs.phone,
+      phone_code: countrycode
     }
     
     if (noErrors) {
@@ -102,22 +106,23 @@ export default function EmergencyContactEdit({userAuth}) {
       setErrors(validationErrors);
     }
   };
+
   const handleCountryCode = (value) =>{
-    
     setCountryCode('+'+value,);
   }
+
   const getEmergencyContactDetail = async () => {
     const formData = new FormData();
     
     //formData.append('customer_id',userAuth.customer_id);
-    formData.append('token_code',userAuth.token_code);
+    formData.append('token_code',userAuth?.token_code);
     const response = await api({
-      url: '/customer/contacts/index',
+      url: '/customer/emergency/update',
       method: 'POST',
       data: formData,
     });
     
-    if (response.status === "1") {
+    if (response.status === true) {
       console.log('contactdata',response.data);
       if(response.data.length>0){
         setInputs(response.data[0]);
@@ -125,13 +130,13 @@ export default function EmergencyContactEdit({userAuth}) {
       }else{
         router.push('/emergencyContactAdd');
       }
-      
-      
     } 
   }; 
+
   useEffect(() => {
     getEmergencyContactDetail();
   }, []);
+
   return (
     <ThemeProvider>
       <Head>
@@ -149,7 +154,7 @@ export default function EmergencyContactEdit({userAuth}) {
                 title="Emergency"
                 subtitle="Contact"
                 images_icon={"../emergencyContact.png"}
-              ></PageTitle>
+              />
               <Typography variant="h3" sx={{ mb: 1 }}>
                 Please update your contact info
               </Typography>
@@ -195,7 +200,7 @@ export default function EmergencyContactEdit({userAuth}) {
                 />
                 
                 </CountryMobile>
-                <span className="text-danger">
+                    <span className="text-danger">
                       {errors && errors.phone}
                     </span>
               </FormControl>
@@ -211,14 +216,33 @@ export default function EmergencyContactEdit({userAuth}) {
   );
 }
 
+export async function getServerSideProps(context) {
+  // You can access the session and user information here.
+  const session = await getSession(context);
+  console.log("first session", session)
+  
+  // if (!session) {
+  //   return {
+  //     redirect: {
+  //       destination: '/login',
+  //       permanent: false,
+  //     },
+  //   };
+  // }
+
+  return {
+    props: {
+      userAuth: session?.user || null,
+    },
+  };
+}
+
 const EmergencyContact = styled.div`
   ${({ theme }) => `
   border-radius: 16px 0px 16px 16px; box-shadow: 0px 0px 15px -1px rgba(0,0,0,0.10); background-color:${theme.colors.palette.white}; padding:24px;  margin-top:60px; display:flex; justify-content:space-between; flex-wrap:wrap;
   @media (min-width: ${theme.breakpoints.values.sm}px) {  
     flex-wrap:nowrap;
   }
-
-
  img{ max-width:100%; height:auto}
 
  .text-danger{ font-size: 13px; color:${theme.colors.palette.red};}
@@ -250,36 +274,9 @@ const FormControl = styled.div`
   .MuiInputBase-input{   font-size:16px; height:35px; padding:5px 10px; border-radius:6px; }
   .MuiInputLabel-root{ margin-top:0px; display:block; margin-bottom:5px; color:${theme.colors.palette.darkGrey};
 span{ color:${theme.colors.palette.red}}
-}
-
-
-  
- 
-    
+} 
   `}
 `;
-
-export async function getServerSideProps(context) {
-  // You can access the session and user information here.
-  const session = await getSession(context);
-  
-  
-  if (!session) {
-    // Handle unauthenticated access
-    return {
-      redirect: {
-        destination: '/login',
-        permanent: false,
-      },
-    };
-  }
-
-  return {
-    props: {
-      userAuth: session.user || null,
-    },
-  };
-}
 
 const CountryMobile = styled.div`
   ${({ theme }) => `
@@ -299,8 +296,6 @@ const CountryMobile = styled.div`
 .MuiAutocomplete-clearIndicator{ display:none}
 .css-1aoewgd{ border:0px solid #000; border-radius:0px;
 &:focus{ border:0px; outline:none}
-
 }
-
   `}
 `;
