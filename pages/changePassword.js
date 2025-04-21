@@ -209,33 +209,7 @@ export default function ChangePassword({ userAuth }) {
     </ThemeProvider>
   );
 }
-export async function getServerSideProps(context) {
-  // You can access the session and user information here.
-  const session = await getSession(context);
 
-  if (!session) {
-    // Handle unauthenticated access
-    return {
-      redirect: {
-        destination: "/login",
-        permanent: false,
-      },
-    };
-  }
-  if (session && session?.user.profile_status !== "3") {
-    return {
-      redirect: {
-        destination: "/login",
-        permanent: false,
-      },
-    };
-  }
-  return {
-    props: {
-      userAuth: session.user || null,
-    },
-  };
-}
 const LoginContainer = styled.div`
   ${({ theme }) => `
     max-width: 1200px;

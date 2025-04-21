@@ -202,8 +202,6 @@ export default function CorporateProfile({ userAuth }) {
           corporate_name: corporateName || ""
         };
 
-        console.log("requestBody", requestBody);
-
         const response = await api({
           url: "/customer/save-corporate-profile",
           method: "POST",
@@ -213,11 +211,18 @@ export default function CorporateProfile({ userAuth }) {
         if (response && response.status === true) {
           toast.success(response.message || "Corporate profile updated successfully");
           router.push("/corporate-profile");
-        } else if (response && response.status === "0" && response.message === "Invalid token code") {
-          toast.error("Your account has been logged in on another device. Please login again to continue.");
+        } else if (
+          response.status === false &&
+          response.message === "Invalid token code"
+        ) {
+          setLoading(false);
+          toast.error(
+            "Your account has been logged in on another device.Please login again to continue."
+          );
           await signOut({ redirect: false });
           router.push("/login");
-        } else if (response && response.status === "0" && response.errors) {
+        } else if (response.status === false && response.errors != "") {
+          setLoading(false);
           const valuesArray = Object.values(response.errors);
           const firstValue = valuesArray[0] || "Unknown error occurred";
           toast.error(firstValue);
@@ -263,7 +268,7 @@ export default function CorporateProfile({ userAuth }) {
                       <CustomFormControl
                         fullWidth
                         type="text"
-                        value={inputs.corporate_email || ""}
+                        value={inputs?.corporate_email || ""}
                         name="corporate_email"
                         onChange={handleInputChange}
                       />
@@ -278,7 +283,7 @@ export default function CorporateProfile({ userAuth }) {
                       <CustomFormControl
                         fullWidth
                         type="text"
-                        value={inputs.corporate_emp_id || ""}
+                        value={inputs?.corporate_emp_id || ""}
                         name="corporate_emp_id"
                         onChange={handleInputChange}
                       />
@@ -294,7 +299,7 @@ export default function CorporateProfile({ userAuth }) {
                         as="select"
                         fullWidth
                         name="corporate_id"
-                        value={inputs.corporate_id || ""}
+                        value={inputs?.corporate_id || ""}
                         onChange={handleInputChange}
                       >
                         <option value="" disabled>
