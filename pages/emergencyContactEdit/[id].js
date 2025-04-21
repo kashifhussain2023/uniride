@@ -140,8 +140,6 @@ export default function EmergencyContactEdit({ userAuth }) {
       data: requestBody,
     });
 
-    console.log("response getEmergencyContactDetail", response)
-
     if (response.status === true) {
       const allContacts = response.data.data;
       const matchedContact = allContacts.find(contact => contact.id === parsedId);
@@ -177,7 +175,7 @@ export default function EmergencyContactEdit({ userAuth }) {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <Layout>
-        {/* {contact ? ( */}
+        {contact ? (
           <>
             <SmallContent>
               <EmergencyContact>
@@ -248,14 +246,13 @@ export default function EmergencyContactEdit({ userAuth }) {
                   <ImageContainer>
                     <Image src="/contract.png" layout="fill" priority />
                   </ImageContainer>
-                  {/* <img src="../contract.png" /> */}
                 </RightSection>
               </EmergencyContact>
             </SmallContent>
           </>
-        {/* ) : (
+        ) : (
           <SpinnerLoader loading={loading} />
-        )} */}
+        )} 
       </Layout>
     </ThemeProvider>
   );

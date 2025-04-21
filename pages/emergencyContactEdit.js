@@ -10,8 +10,6 @@ import { Typography, Button } from "@mui/material";
 import InputLabel from "@mui/material/InputLabel";
 import CustomFormControl from "@/theme/CustomFormControl";
 import { getSession } from "next-auth/react";
-import { getServerSession } from "next-auth/next"
-import { authOptions } from './api/auth/[...nextauth]'
 import CountrySelect from "@/components/common/CountrySelect";
 import { api } from "@/utils/api/common";
 import { validateEmergencyContact } from "@/utils/emergency-contact";
