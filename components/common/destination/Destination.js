@@ -1,4 +1,4 @@
-import * as React from "react";
+import { useState } from "react";
 import styled from "@emotion/styled";
 import { signOut } from "next-auth/react";
 import { useRouter } from "next/router";
@@ -18,37 +18,39 @@ export default function DestinationList({
   userAuth,
 }) {
   const router = useRouter();
+  const [open, setOpen] = useState(false);
+  const [locationId, setLocationId] = useState(null);
+  const [loading, setLoading] = useState(false);
+
   const mapContainerStyle = {
     width: "100%",
-    height: "150px", // Set a specific height
+    height: "150px", 
   };
-  const [open, setOpen] = React.useState(false);
-  const [locationId, setLocationId] = React.useState(null);
-  const [loading, setLoading] = React.useState(false);
 
   const handleOpen = (id) => {
     setOpen(true);
     setLocationId(id);
   };
+
   const handleClose = () => setOpen(false);
+
   const handleDeleteAction = async () => {
     const formData = new FormData();
-    formData.append("customer_id", userAuth.customer_id);
     formData.append("location_id", locationId);
     formData.append("token_code", userAuth.token_code);
     setOpen(false);
     setLoading(true);
     const response = await api({
-      url: "/customers/delete_fav_location",
+      url: `/customer/address/remove/${locationId}`,
       method: "POST",
       data: formData,
     });
-    if (response.status === 1) {
+    if (response.status === true) {
       toast.success(response.message);
       getFavoriteList();
       setLoading(false);
     } else if (
-      response.status === 0 &&
+      response.status === false &&
       response.message === "Invalid token code"
     ) {
       setLoading(false);

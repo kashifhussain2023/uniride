@@ -33,14 +33,14 @@ export default function favoriteDestination({ userAuth }) {
     formData.append("customer_id", userAuth.customer_id);
     formData.append("token_code", userAuth.token_code);
     const response = await api({
-      url: "/customers/get_fav_location",
+      url: "/customer/address/list",
       method: "POST",
       data: formData,
     });
 
-    if (response.status === 1) {
-      if (response.data.length > 0) {
-        setFavoriteLocationList(response.data);
+    if (response.status === true) {
+      if (response.data.data.length > 0) {
+        setFavoriteLocationList(response.data.data);
       }
     } else if (response.message == "Invalid token code") {
       await signOut({ redirect: false });
@@ -111,14 +111,14 @@ export async function getServerSideProps(context) {
       },
     };
   }
-  if (session && session?.user.profile_status !== "3") {
-    return {
-      redirect: {
-        destination: "/login",
-        permanent: false,
-      },
-    };
-  }
+  // if (session && session?.user.profile_status !== "3") {
+  //   return {
+  //     redirect: {
+  //       destination: "/login",
+  //       permanent: false,
+  //     },
+  //   };
+  // }
   return {
     props: {
       userAuth: session.user || null,

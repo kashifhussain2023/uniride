@@ -28,8 +28,8 @@ const AddLocation = ({ open, handleClose, userAuth, getFavoriteList }) => {
   });
   const [loading, setLoading] = useState(false);
   const [inputs, setInputs] = useState({});
+
   const handleInputChange = ({ target }) => {
-    // Handle other input types
     if (target.name == "address") {
       setLoacationAddress("");
     }
@@ -65,9 +65,11 @@ const AddLocation = ({ open, handleClose, userAuth, getFavoriteList }) => {
       });
     }
   };
+
   const handlePickupSearchBoxLoad = (ref) => {
     setSearchPickupBox(ref);
   };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -88,33 +90,33 @@ const AddLocation = ({ open, handleClose, userAuth, getFavoriteList }) => {
       formData.append("tag", inputs.tag);
       formData.append("customer_id", userAuth.customer_id);
       formData.append("token_code", userAuth.token_code);
+
+      const requestBody = {
+        address: loactionAddress,
+        lat: location.lat,
+        lng: location.lng,
+        name: inputs.tag,
+      };
+
       const response = await api({
-        url: "/customers/set_fav_location",
+        url: "/customer/address/add-adddress",
         method: "POST",
-        data: formData,
+        data: requestBody,
       });
 
-      if (response.status === 1) {
+      if (response.status === true) {
         toast.success(response.message);
         setLoading(false);
         handleClose();
         setInputs({});
         getFavoriteList();
-      } else if (
-        response.status === 0 &&
-        response.message === "Invalid token code"
-      ) {
-        setLoading(false);
-        toast.error(
-          "Your account has been logged in on another device.Please login again to continue."
-        );
-        await signOut({ redirect: false });
-        router.push("/login");
-      } else if (response.status === 0) {
+      } else if (response.status === false) {
         setLoading(false);
         toast.error(response.message);
+        await signOut({ redirect: false });
+        router.push("/login");
       } else {
-        setLoading(false);
+        setLoading(false); 
         toast.error("Internal Server Error");
       }
     } else {

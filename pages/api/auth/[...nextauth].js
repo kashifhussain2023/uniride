@@ -28,13 +28,10 @@ export const authOptions = {
             }
           });
 
-          console.log("data", data);
-
           if (data.status) {
-            // Return the complete user object
             return {
               ...data,
-              token_code: data.data.token_code // Ensure token is available for session
+              token_code: data.data.token_code 
             };
           }
           throw new Error(data.message || "Authentication failed");
@@ -47,19 +44,16 @@ export const authOptions = {
   callbacks: {
     async jwt({ token, user, trigger, session }) {
       if (trigger === "update" && session?.user) {
-        // Handle session updates
         return { ...token, user: { ...token.user, ...session.user } };
       }
 
       if (user) {
-        // Initial sign in
         token.user = user;
         token.accessToken = user.data?.token_code;
       }
       return token;
     },
     async session({ session, token }) {
-      // Send properties to the client
       session.user = token.user;
       session.accessToken = token.accessToken;
       return session;
@@ -70,11 +64,11 @@ export const authOptions = {
   },
   session: {
     strategy: "jwt",
-    maxAge: 30 * 24 * 60 * 60, // 30 days
+    maxAge: 30 * 24 * 60 * 60,
   },
   jwt: {
     secret: process.env.NEXT_PUBLIC_NEXTAUTH_SECRET,
-    maxAge: 30 * 24 * 60 * 60, // 30 days
+    maxAge: 30 * 24 * 60 * 60,
   },
   debug: process.env.NODE_ENV === "development",
 }
