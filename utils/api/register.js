@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 import axios from "axios";
-import cookie from "js-cookie";
+import { getSession } from "next-auth/react";
 import { signOut } from "next-auth/react";
 import { toast } from "react-toastify";
 
@@ -8,39 +8,42 @@ import { toast } from "react-toastify";
 const API_BASE_URL = "https://www.unirideus.com/api"; //`http://127.0.0.1:8000/api`;
 
 const headerValue = async () => {
-  const TOKEN = cookie.get("token");
+  // Get the session from NextAuth
+  const session = await getSession();
+  
+  // Get the token from the session
+  const token = session?.user?.data?.token_code;
+  
   const header = {
-    //"Content-Type": "application/json",
     "Version-Code": 1,
     "Device-Type": "android",
-    Accept: "application/json",
-    //Authkey: AUTH_KEY ? JSON.parse(AUTH_KEY)?.auth_key : '',
-    Authorization: TOKEN ? "Bearer " + TOKEN : "",
+    "Accept": "application/json",
+    "Authorization": token ? `Bearer ${token}` : "",
+    "Content-Type": "application/json"
   };
-
+  
   return header;
 };
 
 export const api = async (options) => {
   const header = await headerValue();
-
+  
   try {
     const config = {
       url: `${API_BASE_URL}${options.url}`,
       method: options.method || "GET",
-      //headers: header,
+      headers: {
+        ...header, 
+        ...(options.headers || {}) 
+      },
     };
+    
     if (["POST", "PUT"].includes(options.method)) {
       config["data"] = options.data;
     }
-    if (options.headers) {
-      config["headers"] = {
-        ...header,
-        ...options.headers,
-      };
-    }
+    
     const response = await axios(config);
-
+    
     if (response.data) {
       return response.data;
     }

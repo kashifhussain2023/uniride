@@ -1,18 +1,24 @@
 /* eslint-disable no-console */
 import axios from "axios";
-import cookie from 'js-cookie';
+import { getSession } from "next-auth/react";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_NEW_API_URL; //`http://127.0.0.1:8000/api`;
 
 const headerValue = async () => {
-  const TOKEN = cookie.get('token');
+  // Get the session from NextAuth
+  const session = await getSession();
+  
+  // Get the token from the session
+  const token = session?.user?.data?.token_code;
+  
   const header = {
-   "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRlcmUuZHNAeW9wbWFpbC5jb20iLCJpZCI6MTQ5LCJpYXQiOjE3NDQ5NTYzMDksImV4cCI6MTc3NjQ5MjMwOX0.UR-TDrDQJwfQT3KUhVUCXCEIAuOzGDNExRUWZVRMkCU" ,
-  // "Authorization": TOKEN ? "Bearer " + TOKEN:'' ,
-    "x-login-method" : "jwt"
-  }
-  	
-	return header;
+    "Authorization": token ? `Bearer ${token}` : "",
+    "x-login-method": "jwt",
+    "Accept": "application/json",
+    "Content-Type": "application/json"
+  };
+  
+  return header;
 }
 
 export const api = async (options) => {

@@ -19,7 +19,7 @@ export const authOptions = {
             phone_code: credentials.phone_code,
           };
 
-          const url = `https://uniridedev.24livehost.com/api/v2/customer/login`;
+          const url = `${process.env.NEXT_PUBLIC_NEW_API_URL}/customer/login`;
 
           const { data } = await axios.post(url, formData, {
             headers: {

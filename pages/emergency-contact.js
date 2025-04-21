@@ -7,7 +7,7 @@ import Layout from "@/components/common/Layout";
 import SmallContent from "@/components/presentation/SmallContent";
 import styled from "@emotion/styled";
 import PageTitle from "@/components/common/PageTitle";
-import { Button, IconButton, Typography } from "@mui/material";
+import { Button, Typography } from "@mui/material";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";

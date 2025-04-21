@@ -64,44 +64,48 @@ const Profile = ({ userAuth }) => {
     getUserProfile();
   };
   const getUserProfile = async () => {
-    setLoading(true);
+    try {
+      setLoading(true);
+      const response = await api({
+        url: "/customer/get-profile-details",
+        method: "GET",
+      });
 
-    const formData = new FormData();
-    formData.append("customer_id", 149);
-    formData.append("token_code", 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRlcmUuZHNAeW9wbWFpbC5jb20iLCJpZCI6MTQ5LCJpYXQiOjE3NDQ4NzU3MDAsImV4cCI6MTc3NjQxMTcwMH0.b-KxZ_MKPnV0SCXza8JUwvOg1mQ4ABwu1_j0Ek_F0d8');
-    
-    const response = await api({
-      url: "/customer/get-profile-details",
-      method: "GET",
-    });
-
-    if (response.status === true) {
-      if (session) {
-        session.user.customer_image = response.profile_picture;
-        session.user.name = response.name;
+      if (response.status === true) {
+        if (session) {
+          session.user.customer_image = response.profile_picture;
+          session.user.name = response.name;
+        }
+        sessionUpdate({
+          user: {
+            ...session?.user,
+            customer_image: response.profile_picture,
+            name: response.name,
+          },
+        });
+        setInputs({
+          first_name: response.data.first_name,
+          last_name: response.data.last_name,
+          email: response.data.email,
+          mobile_number: response.data.phone,
+          countrycode: response.data.country_code,
+          gender: response.data.gender,
+          profile_picture: response.data.profile_image,
+        });
+        setProfileData(response);
+        setInputs(response);
+      } else if (response.message === "Invalid token code") {
+        toast.error("Your session has expired. Please login again.");
+        await signOut({ redirect: false });
+        router.push("/login");
+      } else {
+        toast.error(response.message || "Failed to fetch profile details");
       }
-      sessionUpdate({
-        user: {
-          ...session?.user,
-          customer_image: response.profile_picture,
-          name: response.name,
-        },
-      });
-      setInputs({
-        first_name: response.data.first_name,
-        last_name: response.data.last_name,
-        email: response.data.email,
-        mobile_number: response.data.phone,
-        countrycode: response.data.country_code,
-        gender: response.data.gender,
-        profile_picture: response.data.profile_image,
-      });
-      setProfileData(response);
-      setInputs(response);
+    } catch (error) {
+      console.error("Error in getUserProfile:", error);
+      toast.error("An error occurred while fetching your profile. Please try again.");
+    } finally {
       setLoading(false);
-    } else if (response.message == "Invalid token code") {
-      await signOut({ redirect: false });
-      // router.push("/login");
     }
   };
   const handleInputChange = ({ target }) => {
@@ -161,10 +165,9 @@ const Profile = ({ userAuth }) => {
     router.push("/changePassword");
   };
   const updateProfile = async (e) => {
-    setResponseError("");
     e.preventDefault();
+    setResponseError("");
 
-    //return false;
     let inputForValidation = {
       first_name: inputs.first_name,
       last_name: inputs.last_name,
@@ -177,75 +180,63 @@ const Profile = ({ userAuth }) => {
     const validationErrors = validateProfileCustomer(inputForValidation);
     const noErrors = Object.keys(validationErrors).length === 0;
     setRemoveErrors(true);
-    //set All data to form data
-    //return false;
 
     if (noErrors) {
-      //setLoading(true);
+      try {
+        setLoading(true);
+        const formData = new FormData();
+        formData.append("first_name", inputs.first_name);
+        formData.append("last_name", inputs.last_name);
+        formData.append("name", inputs.first_name + inputs.last_name);
+        formData.append("gender", inputs.gender);
+        formData.append("email", inputs.email);
+        formData.append("countrycode", inputs.countrycode);
+        formData.append("mobile_number", inputs.mobile_number);
+        formData.append("profile_picture", base64Image);
+        formData.append("customer_id", session?.user?.data?.customer_id);
 
-      const formData = new FormData();
-      formData.append("first_name", inputs.first_name);
-      formData.append("last_name", inputs.last_name);
-      formData.append("name", inputs.first_name + inputs.last_name);
-      formData.append("gender", inputs.gender);
-      formData.append("email", inputs.email);
-      formData.append("countrycode", inputs.countrycode);
-      formData.append("mobile_number", inputs.mobile_number);
-      formData.append("profile_picture", base64Image);
-      formData.append("customer_id", userAuth?.customer_id);
-      formData.append("token_code", userAuth?.token_code);
+        const response = await api({
+          url: "/customer/update-profile",
+          method: "PUT",
+          data: formData,
+        });
 
-      const requestBody = {
-        first_name: inputs.first_name,
-        last_name: inputs.last_name,
-        name: inputs.first_name + inputs.last_name,
-        gender: inputs.gender,
-      profile_image: base64Image,
-      customer_id: userAuth?.customer_id,
-      }
-
-      const response = await api({
-        url: "/customer/update-profile",
-        method: "PUT",
-        data: requestBody,
-      });
-
-      if (response.status === true && response.update_status === "1") {
-        toast.success(response.message + " Please verify your mobile number.");
-        setCookie(
-          null,
-          "profileOtp",
-          JSON.stringify({
-            name: profileData.first_name + " " + profileData.last_name,
-            mobile_number: inputs.countrycode + inputs.mobile_number,
-            customer_id: userAuth?.customer_id,
-          }),
-          {
-            maxAge: 5 * 60,
-            path: "/",
-          }
-        );
-        setTimeout(() => {
-          router.push("/profile-otp");
-        }, 2000);
-      } else if (response.status === true) {
-        toast.success(response.message);
-        setDisabled(true);
-        getUserProfile();
-        //router.push("/profile");
-      } else if (
-        response.status === false &&
-        response.message === "Invalid token code"
-      ) {
-        toast.error(
-          "Your account has been logged in on another device.Please login again to continue."
-        );
-        await signOut({ redirect: false });
-        router.push("/login");
-      } else if (response.status === false) {
-        toast.error(response.message);
-      } else {
-        toast.error("Internal Server Error");
+        if (response.status === true && response.update_status === "1") {
+          toast.success(response.message + " Please verify your mobile number.");
+          setCookie(
+            null,
+            "profileOtp",
+            JSON.stringify({
+              name: profileData.first_name + " " + profileData.last_name,
+              mobile_number: inputs.countrycode + inputs.mobile_number,
+              customer_id: session?.user?.data?.customer_id,
+            }),
+            {
+              maxAge: 5 * 60,
+              path: "/",
+            }
+          );
+          setTimeout(() => {
+            router.push("/profile-otp");
+          }, 2000);
+        } else if (response.status === true) {
+          toast.success(response.message);
+          setDisabled(true);
+          getUserProfile();
+        } else if (response.status === false && response.message === "Invalid token code") {
+          toast.error("Your session has expired. Please login again.");
+          await signOut({ redirect: false });
+          router.push("/login");
+        } else if (response.status === false) {
+          toast.error(response.message);
+        } else {
+          toast.error("Internal Server Error");
+        }
+      } catch (error) {
+        console.error("Error in updateProfile:", error);
+        toast.error("An error occurred while updating your profile. Please try again.");
+      } finally {
+        setLoading(false);
       }
     } else {
       setErrors(validationErrors);

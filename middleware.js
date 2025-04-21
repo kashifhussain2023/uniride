@@ -66,7 +66,7 @@ export async function middleware(request) {
             }
 
             // Fetch profile details for protected routes
-            const profileResponse = await fetch('https://uniridedev.24livehost.com/api/v2/customer/get-profile-details', {
+            const profileResponse = await fetch(`${process.env.NEXT_PUBLIC_NEW_API_URL}/customer/get-profile-details`, {
                 method: 'GET',
                 headers: {
                     'Accept': 'application/json',
@@ -157,7 +157,7 @@ export async function middleware(request) {
         if (token) {
             // Check if OTP is verified for logged-in users
             try {
-                const profileResponse = await fetch('https://uniridedev.24livehost.com/api/v2/customer/get-profile-details', {
+                const profileResponse = await fetch(`${process.env.NEXT_PUBLIC_NEW_API_URL}/customer/get-profile-details`, {
                     method: 'GET',
                     headers: {
                         'Accept': 'application/json',

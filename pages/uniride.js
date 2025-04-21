@@ -91,65 +91,64 @@ export default function Dashboard({ userAuth }) {
     }
 
     if (availableDriver.length <= 0) {
-      toast.error("no cars available.");
+      toast.error("No cars available.");
       return;
     }
 
     if (currentLocation !== "" && dropLocation !== "") {
-      setLoading(true);
-      setAvailableDriver([]);
-      const formData = new FormData();
-      formData.append("car_type", carTypeId);
-      formData.append("destination_Location_Name", dropLocation.address);
-      formData.append("destination_point_lat", dropLocation.lat);
-      formData.append("destination_point_long", dropLocation.lng);
-      formData.append("picking_Location_Name", currentLocation.address);
-      formData.append("picking_point_lat", currentLocation.lat);
-      formData.append("picking_point_long", currentLocation.lng);
-      formData.append("ride_type", customerRideType);
-      formData.append("customer_id", userAuth.customer_id);
-      formData.append("token_code", userAuth.token_code);
-      const response = await api({
-        url: "/customers/request_information",
-        method: "POST",
-        data: formData,
-      });
+      try {
+        setLoading(true);
+        setAvailableDriver([]);
+        const formData = new FormData();
+        formData.append("car_type", carTypeId);
+        formData.append("destination_Location_Name", dropLocation.address);
+        formData.append("destination_point_lat", dropLocation.lat);
+        formData.append("destination_point_long", dropLocation.lng);
+        formData.append("picking_Location_Name", currentLocation.address);
+        formData.append("picking_point_lat", currentLocation.lat);
+        formData.append("picking_point_long", currentLocation.lng);
+        formData.append("ride_type", customerRideType);
+        formData.append("customer_id", userAuth.customer_id);
 
-      if (response.status === true) {
-        setComfirmBooking(true);
-        setSelectRide(false);
+        const response = await api({
+          url: "/customers/request_information",
+          method: "POST",
+          data: formData,
+        });
+
+        if (response.status === true) {
+          setComfirmBooking(true);
+          setSelectRide(false);
+          setComfirmBookingData(response.data);
+        } else if (response.status === "FALSE" && response.message === "Invalid token code") {
+          toast.error("Your account has been logged in on another device. Please login again to continue.");
+          await signOut({ redirect: false });
+          router.push("/login");
+        } else {
+          toast.error(response.message || "Failed to request ride information");
+        }
+      } catch (error) {
+        console.error("Error in handleSelectRide:", error);
+        toast.error("An error occurred while processing your ride request. Please try again.");
+      } finally {
         setLoading(false);
-        setComfirmBookingData(response.data);
-      } else if (
-        response.status === "FALSE" &&
-        response.message === "Invalid token code"
-      ) {
-        toast.error(
-          "Your account has been logged in on another device.Please login again to continue."
-        );
-        // await signOut({ redirect: false });
-        // router.push("/login");
-      } else if (response.status === "FALSE") {
-        toast.error(response.message);
-        setLoading(false);
-      } else {
-        setLoading(false);
-        toast.error(response.message);
       }
     } else {
       dropPickLocationType("drop");
-      //setOpenValueModel(true);
     }
   };
   const applyCoupon = async (promoCodeValue) => {
     if (!promoCodeValue || promoCodeValue.trim() === "") {
-      setErrors("Please enter promo code");
-    } else {
+      toast.error("Please enter promo code");
+      return;
+    }
+
+    try {
       setLoading(true);
       const formData = new FormData();
       formData.append("promo_code", promoCodeValue);
       formData.append("customer_id", userAuth.customer_id);
-      formData.append("token_code", userAuth.token_code);
+
       const response = await api({
         url: "/customers/promo_code_validation",
         method: "POST",
@@ -157,18 +156,17 @@ export default function Dashboard({ userAuth }) {
       });
 
       if (response.status === "TRUE") {
-        setLoading(false);
         toast.success(response.message);
-      } else if (
-        response.status === "FALSE" &&
-        (response.code === 2 || response.code === 4)
-      ) {
+      } else if (response.status === "FALSE" && (response.code === 2 || response.code === 4)) {
         toast.error(response.message);
-        setLoading(false);
       } else {
-        setLoading(false);
-        toast.error(response.message);
+        toast.error(response.message || "Failed to validate promo code");
       }
+    } catch (error) {
+      console.error("Error in applyCoupon:", error);
+      toast.error("An error occurred while applying the promo code. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
   const dropPickLocationType = (type) => {
@@ -183,107 +181,102 @@ export default function Dashboard({ userAuth }) {
   };
   const proceedGenderModel = async (gender) => {
     if (selectedDate !== null && selectedTime !== null) {
-      setLoading(true);
-      setGenderModelOpen(false);
-      const formData = new FormData();
-      if (couponActive) {
-        formData.append("promo_code", couponCode);
-        formData.append("promotion_id", promotionId);
-      }
-      formData.append("car_type", carTypeId);
-      formData.append(
-        "schedule_date",
-        format(new Date(selectedDate), "yyyy-MM-dd")
-      );
-      formData.append(
-        "schedule_time",
-        format(new Date(selectedTime), "HH:mm:ss")
-      );
+      try {
+        setLoading(true);
+        setGenderModelOpen(false);
+        const formData = new FormData();
+        if (couponActive) {
+          formData.append("promo_code", couponCode);
+          formData.append("promotion_id", promotionId);
+        }
+        formData.append("car_type", carTypeId);
+        formData.append("schedule_date", format(new Date(selectedDate), "yyyy-MM-dd"));
+        formData.append("schedule_time", format(new Date(selectedTime), "HH:mm:ss"));
+        formData.append("destination_Location_Name", dropLocation.address);
+        formData.append("destination_point_lat", dropLocation.lat);
+        formData.append("destination_point_long", dropLocation.lng);
+        formData.append("picking_Location_Name", currentLocation.address);
+        formData.append("picking_point_lat", currentLocation.lat);
+        formData.append("picking_point_long", currentLocation.lng);
+        formData.append("ride_type", "regular");
+        formData.append("gender", gender);
+        formData.append("payment_type", 1);
+        formData.append("customer_id", userAuth.customer_id);
 
-      formData.append("destination_Location_Name", dropLocation.address);
-      formData.append("destination_point_lat", dropLocation.lat);
-      formData.append("destination_point_long", dropLocation.lng);
-      formData.append("picking_Location_Name", currentLocation.address);
-      formData.append("picking_point_lat", currentLocation.lat);
-      formData.append("picking_point_long", currentLocation.lng);
-      formData.append("ride_type", "regular");
-      formData.append("gender", gender);
-      formData.append("payment_type", 1);
-      formData.append("customer_id", userAuth.customer_id);
-      formData.append("token_code", userAuth.token_code);
-      const response = await api({
-        url: "/customers/new_schedule_ride_request",
-        method: "POST",
-        data: formData,
-      });
+        const response = await api({
+          url: "/customers/new_schedule_ride_request",
+          method: "POST",
+          data: formData,
+        });
 
-      if (response.status === "TRUE") {
+        if (response.status === "TRUE") {
+          toast.success(response.message);
+          setTimeout(() => {
+            window.location.reload();
+          }, 3000);
+        } else if (response.status === "FALSE" && response.message === "Invalid token code") {
+          toast.error("Your account has been logged in on another device. Please login again to continue.");
+          await signOut({ redirect: false });
+          router.push("/login");
+        } else {
+          toast.error(response.message || "Failed to schedule ride");
+        }
+      } catch (error) {
+        console.error("Error in proceedGenderModel:", error);
+        toast.error("An error occurred while scheduling your ride. Please try again.");
+      } finally {
         setLoading(false);
-        toast.info(response.message);
-        setTimeout(() => {
-          window.location.reload();
-        }, 3000);
-      } else if (
-        response.status === "FALSE" &&
-        response.message === "Invalid token code"
-      ) {
-        toast.error(
-          "Your account has been logged in on another device.Please login again to continue."
-        );
-        // await signOut({ redirect: false });
-        // router.push("/login");
-      } else if (response.status === "FALSE") {
-        setLoading(false);
-        toast.info(response.message);
-      } else {
-        setLoading(false);
-        toast.info(response.message);
       }
     } else {
-      setLoading(true);
-      setGenderModelOpen(false);
-      const formData = new FormData();
-      if (couponActive) {
-        formData.append("promo_code", couponCode);
-        formData.append("promotion_id", promotionId);
-      }
-      formData.append("car_type", carTypeId);
-      formData.append("destination_Location_Name", dropLocation.address);
-      formData.append("destination_point_lat", dropLocation.lat);
-      formData.append("destination_point_long", dropLocation.lng);
-      formData.append("picking_Location_Name", currentLocation.address);
-      formData.append("picking_point_lat", currentLocation.lat);
-      formData.append("picking_point_long", currentLocation.lng);
-      formData.append("ride_type", "regular");
-      formData.append("gender", gender);
-      formData.append("payment_type", 1);
-      formData.append("customer_id", userAuth.customer_id);
-      formData.append("token_code", userAuth.token_code);
-      const response = await api({
-        url: "/customers/request_driver",
-        method: "POST",
-        data: formData,
-      });
+      try {
+        setLoading(true);
+        setGenderModelOpen(false);
+        const formData = new FormData();
+        if (couponActive) {
+          formData.append("promo_code", couponCode);
+          formData.append("promotion_id", promotionId);
+        }
+        formData.append("car_type", carTypeId);
+        formData.append("destination_Location_Name", dropLocation.address);
+        formData.append("destination_point_lat", dropLocation.lat);
+        formData.append("destination_point_long", dropLocation.lng);
+        formData.append("picking_Location_Name", currentLocation.address);
+        formData.append("picking_point_lat", currentLocation.lat);
+        formData.append("picking_point_long", currentLocation.lng);
+        formData.append("ride_type", "regular");
+        formData.append("gender", gender);
+        formData.append("payment_type", 1);
+        formData.append("customer_id", userAuth.customer_id);
 
-      if (response.status === true && response.code === 200) {
-      } else if (response.status === false && response.code === 200) {
+        const response = await api({
+          url: "/customers/request_driver",
+          method: "POST",
+          data: formData,
+        });
+
+        if (response.status === true && response.code === 200) {
+          // Success case handled by socket
+        } else if (response.status === false && response.code === 200) {
+          setComfirmBooking(false);
+          setSelectRide(true);
+          toast.error(response.message);
+          setTimeout(() => {
+            window.location.reload();
+          }, 3000);
+        } else if (response.status === false && response.code === 417) {
+          toast.error(response.message);
+          router.push("/addPaymentInfo");
+        } else {
+          toast.error(response.message || "Failed to request driver");
+          setTimeout(() => {
+            window.location.reload();
+          }, 3000);
+        }
+      } catch (error) {
+        console.error("Error in proceedGenderModel:", error);
+        toast.error("An error occurred while requesting a driver. Please try again.");
+      } finally {
         setLoading(false);
-        setComfirmBooking(false);
-        setSelectRide(true);
-        toast.info(response.message);
-        setTimeout(() => {
-          window.location.reload();
-        }, 3000);
-      } else if (response.status === false && response.code === 417) {
-        setLoading(false);
-        toast.info(response.message);
-        router.push("/addPaymentInfo");
-      } else {
-        setLoading(false);
-        toast.info(response.message);
-        setTimeout(() => {
-          window.location.reload();
-        }, 3000);
       }
     }
   };
@@ -291,70 +284,78 @@ export default function Dashboard({ userAuth }) {
     setInRRoute(true);
   };
   const handleRideCancelModel = async () => {
-    setLoading(true);
-    const formData = new FormData();
-    formData.append("request_id", acceptDriverDetail.request_id);
-    formData.append("ride_id", acceptDriverDetail.ride_id);
-    formData.append("customer_id", userAuth.customer_id);
-    formData.append("token_code", userAuth.token_code);
-    const response = await api({
-      url: "/customers/customer_cancel",
-      method: "POST",
-      data: formData,
-    });
+    try {
+      setLoading(true);
+      const formData = new FormData();
+      formData.append("request_id", acceptDriverDetail.request_id);
+      formData.append("ride_id", acceptDriverDetail.ride_id);
+      formData.append("customer_id", userAuth.customer_id);
+      formData.append("token_code", userAuth.token_code);
 
-    if (response.status === "TRUE") {
+      const response = await api({
+        url: "/customers/customer_cancel",
+        method: "POST",
+        data: formData,
+      });
+
+      if (response.status === "TRUE") {
+        setSelectRide(true);
+        setComfirmBooking(false);
+        setInRRoute(false);
+        toast.success(response.message);
+        const params = {
+          customer_id: userAuth.customer_id,
+          user_type: "customer",
+          request_id: acceptDriverDetail.request_id,
+          auth_token: userAuth.token_code,
+          token_code: userAuth.token_code,
+        };
+        socket.emit("cancel_ride", params);
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
+      } else {
+        toast.error(response.message || "Failed to cancel ride");
+      }
+    } catch (error) {
+      console.error("Error in handleRideCancelModel:", error);
+      toast.error("An error occurred while canceling your ride. Please try again.");
+    } finally {
       setLoading(false);
-      setSelectRide(true);
-      setComfirmBooking(false);
-      setInRRoute(false);
-      toast.info(response.message);
-      const params = {
-        customer_id: userAuth.customer_id,
-        user_type: "customer",
-        request_id: acceptDriverDetail.request_id,
-        auth_token: userAuth.token_code,
-        token_code: userAuth.token_code,
-      };
-      socket.emit("cancel_ride", params);
-      setTimeout(() => {
-        window.location.reload();
-      }, 2000);
-    } else if (response.status === "FALSE") {
-      toast.info(response.message);
-    } else {
-      toast.info(response.message);
     }
   };
   const handleCancelRunningRide = async () => {
-    setLoading(true);
-    const formData = new FormData();
-    formData.append("request_id", acceptDriverDetail.request_id);
-    formData.append("ride_id", acceptDriverDetail.ride_id);
-    formData.append("driver_id", driverId);
-    formData.append("ride_status", rideStatus);
-    formData.append("ride_type", acceptDriverDetail.ride_type);
-    formData.append("customer_id", userAuth.customer_id);
-    formData.append("token_code", userAuth.token_code);
-    const response = await api({
-      url: "/customers/end_journey_by_customer",
-      method: "POST",
-      data: formData,
-    });
+    try {
+      setLoading(true);
+      const formData = new FormData();
+      formData.append("request_id", acceptDriverDetail.request_id);
+      formData.append("ride_id", acceptDriverDetail.ride_id);
+      formData.append("driver_id", driverId);
+      formData.append("ride_status", rideStatus);
+      formData.append("ride_type", acceptDriverDetail.ride_type);
+      formData.append("customer_id", userAuth.customer_id);
+      formData.append("token_code", userAuth.token_code);
 
-    if (response.status === "TRUE") {
+      const response = await api({
+        url: "/customers/end_journey_by_customer",
+        method: "POST",
+        data: formData,
+      });
+
+      if (response.status === "TRUE") {
+        setSelectRide(true);
+        setComfirmBooking(false);
+        setInRRoute(false);
+        toast.success(response.message);
+        setShowReview(true);
+      } else {
+        toast.error(response.message || "Failed to end journey");
+      }
+    } catch (error) {
+      console.error("Error in handleCancelRunningRide:", error);
+      toast.error("An error occurred while ending your journey. Please try again.");
+    } finally {
       setLoading(false);
-      setSelectRide(true);
-      setComfirmBooking(false);
-      setInRRoute(false);
-      toast.info(response.message);
-      setShowReview(true);
-    } else if (response.status === "FALSE") {
-      setLoading(false);
-      toast.info(response.message);
-    } else {
-      setLoading(false);
-      toast.info(response.message);
     }
   };
 
@@ -410,7 +411,6 @@ export default function Dashboard({ userAuth }) {
     formData.append("ride_type", customerRideType);
     formData.append("customer_id", session.user.customer_id);
     formData.append("check_city", true);
-    formData.append("token_code", session.user.token_code);
     setLoading(true);
     const response = await api({
       url: "/common/get_cars",

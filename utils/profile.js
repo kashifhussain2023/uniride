@@ -57,7 +57,7 @@ export const validateProfileCustomer = (inputs) => {
  * @returns {Promise<Object>} The profile data
  */
 export async function fetchProfileDetails(token) {
-  const response = await fetch('https://uniridedev.24livehost.com/api/v2/customer/get-profile-details', {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_NEW_API_URL}/customer/get-profile-details`, {
     headers: {
       'x-login-method': 'jwt',
       'Authorization': `Bearer ${token}`,
