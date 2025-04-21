@@ -37,8 +37,6 @@ export default function EmergencyContactEdit({ userAuth }) {
   });
   const [removeErrors, setRemoveErrors] = useState(false);
 
-  console.log("contact",contact)
-
   const handleInputChange = ({ target }) => {
     setInputs((inputs) => ({
       ...inputs,
