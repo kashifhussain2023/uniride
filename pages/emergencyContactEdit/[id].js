@@ -37,7 +37,7 @@ export default function EmergencyContactEdit({ userAuth }) {
   });
   const [removeErrors, setRemoveErrors] = useState(false);
 
-  console.log("userAuth",userAuth?.token_code) 
+  console.log("contact",contact)
 
   const handleInputChange = ({ target }) => {
     setInputs((inputs) => ({
@@ -78,13 +78,15 @@ export default function EmergencyContactEdit({ userAuth }) {
       formData.append("country_code", inputs.country_code);
       formData.append("token_code", userAuth?.token_code);
 
-      const requestBody = {
-        id: id,
-        name: inputs.name,
-        email: inputs.email,
-        phone: inputs.phone,
-        country_code: inputs.country_code
-      }
+      const numericId = id ? parseInt(id, 10) : null;
+
+     const requestBody = {
+      id: numericId,
+      name: inputs.name,
+      email: inputs.email,
+      phone: inputs.phone,
+      country_code: inputs.country_code
+    }
 
       const response = await api({
         url: "/customer/emergency/update",
@@ -102,8 +104,8 @@ export default function EmergencyContactEdit({ userAuth }) {
         toast.error(
           "Your account has been logged in on another device.Please login again to continue."
         );
-        await signOut({ redirect: false });
-        router.push("/login");
+        // await signOut({ redirect: false });
+        // router.push("/login");
       } else {
         setLoading(false);
         toast.error(response.message);
@@ -112,48 +114,47 @@ export default function EmergencyContactEdit({ userAuth }) {
       setErrors(validationErrors);
     }
   };
+
   const handleCountryCode = (value) => {
     setInputs((inputs) => ({
       ...inputs,
       ["country_code"]: "+" + value,
     }));
   };
+
   const getEmergencyContactDetail = async (id) => {
+    const parsedId = parseInt(id); 
     const formData = new FormData();
 
-    //formData.append('customer_id',userAuth.customer_id);
     formData.append("token_code", userAuth?.token_code);
 
     const requestBody = {
-      id: 49,
+      id: id,
       name:inputs.name,
       email: inputs.email,
-      // phone_code: countrycode,
-      phone_code: "+1",
+      phone_code: inputs.country_code,
       phone: inputs.phone
     }
 
     const response = await api({
-      url: "/customer/emergency/update",
-      method: "PUT",
+      url: "/customer/emergency/list",
+      method: "GET",
       data: requestBody,
     });
 
-    console.log("response", response)
+    console.log("response getEmergencyContactDetail", response)
 
     if (response.status === true) {
-      console.log("yjhyhuyh")
-      // if (response.data.length > 0) {
-      //   const filteredContacts = response.data.filter(
-      //     (contact) => contact.id === id
-      //   );
-      //   setContact(filteredContacts[0]);
-      //   setInputs(filteredContacts[0]);
+      const allContacts = response.data.data;
+      const matchedContact = allContacts.find(contact => contact.id === parsedId);
 
-      //   setLoading(false);
-      // } else {
-      //   router.push("/emergencyContactAdd");
-      // }
+      if (matchedContact) {
+        setContact(matchedContact);
+        setInputs(matchedContact);
+        setLoading(false);
+      } else {
+        router.push("/emergencyContactAdd");
+      }
     } 
     else if (response.status === false) {
       setLoading(false);
@@ -164,6 +165,7 @@ export default function EmergencyContactEdit({ userAuth }) {
       router.push("/login");
     }
   };
+
   useEffect(() => {
     getEmergencyContactDetail(id);
   }, []);
@@ -198,7 +200,7 @@ export default function EmergencyContactEdit({ userAuth }) {
                       type="text"
                       placeholder="Enter name"
                       name="name"
-                      value={inputs.name || ""}
+                      value={inputs?.name || ""}
                       onChange={handleInputChange}
                     />
                     <span className="text-danger">{errors && errors.name}</span>
@@ -210,7 +212,7 @@ export default function EmergencyContactEdit({ userAuth }) {
                       type="text"
                       placeholder="Enter email"
                       name="email"
-                      value={inputs.email || ""}
+                      value={inputs?.email || ""}
                       onChange={handleInputChange}
                     />
                     <span className="text-danger">
@@ -222,14 +224,14 @@ export default function EmergencyContactEdit({ userAuth }) {
                     <CountryMobile>
                       <CountrySelect
                         onCountryCode={handleCountryCode}
-                        countrycode={inputs.country_code || ""}
+                        countrycode={inputs?.country_code || ""}
                       />
                       <CustomFormControl
                         fullWidth
                         type="text"
                         placeholder="Enter mobile"
                         name="phone"
-                        value={inputs.phone || ""}
+                        value={inputs?.phone || ""}
                         onChange={handleInputChange}
                       />
                     </CountryMobile>

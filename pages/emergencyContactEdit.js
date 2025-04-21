@@ -28,6 +28,7 @@ const Item = styled(Paper)(({ theme }) => ({
 
 export default function EmergencyContactEdit({userAuth}) {
   const router = useRouter();
+  const { id } = router.query;
   const [countrycode,setCountryCode] = useState("+1");
   const [inputs, setInputs] = useState({
     name: "",
@@ -62,7 +63,6 @@ export default function EmergencyContactEdit({userAuth}) {
   const handleSubmit = async (e) => {
     
     e.preventDefault();
-    console.log('submit',inputs);
     
     let inputForValidation = {
       email: inputs.email,
@@ -81,20 +81,22 @@ export default function EmergencyContactEdit({userAuth}) {
     formData.append('phone',inputs.phone);
     formData.append('country_code',countrycode);
     formData.append('token_code',userAuth?.token_code);
+
+    const numericId = id ? parseInt(id, 10) : null;
     
     const requestBody = {
-      // id: inputs.
+      id: numericId,
       name: inputs.name,
       email: inputs.email,
       phone: inputs.phone,
-      phone_code: countrycode
+      country_code: inputs.country_code
     }
-    
+
     if (noErrors) {
       const response = await api({
         url: '/customer/emergency/update',
         method: 'PUT',
-        data: formData,
+        data: requestBody,
       });
       if (response.status === true) {
         toast.success(response.message);
@@ -117,16 +119,14 @@ export default function EmergencyContactEdit({userAuth}) {
     //formData.append('customer_id',userAuth.customer_id);
     formData.append('token_code',userAuth?.token_code);
     const response = await api({
-      url: '/customer/emergency/update',
-      method: 'POST',
+      url: '/customer/emergency/list',
+      method: 'GET',
       data: formData,
     });
     
     if (response.status === true) {
-      console.log('contactdata',response.data);
       if(response.data.length>0){
         setInputs(response.data[0]);
-        console.log(response.data);
       }else{
         router.push('/emergencyContactAdd');
       }
@@ -219,16 +219,15 @@ export default function EmergencyContactEdit({userAuth}) {
 export async function getServerSideProps(context) {
   // You can access the session and user information here.
   const session = await getSession(context);
-  console.log("first session", session)
   
-  // if (!session) {
-  //   return {
-  //     redirect: {
-  //       destination: '/login',
-  //       permanent: false,
-  //     },
-  //   };
-  // }
+  if (!session) {
+    return {
+      redirect: {
+        destination: '/login',
+        permanent: false,
+      },
+    };
+  }
 
   return {
     props: {
