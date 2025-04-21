@@ -16,7 +16,7 @@ import { useRouter } from "next/router";
 import { useState } from "react";
 import { toast } from "react-toastify";
 
-export default function EmergencyContactAdd({ userAuth }) {
+export default function EmergencyContactAdd() {
   const router = useRouter();
   const [countrycode, setCountryCode] = useState("+1");
   const [loading, setLoading] = useState(false);
@@ -68,7 +68,7 @@ export default function EmergencyContactAdd({ userAuth }) {
     formData.append("email", inputs.email);
     formData.append("phone", inputs.phone);
     formData.append("country_code", countrycode);
-    formData.append("token_code", userAuth?.token_code);
+
 
     const requestBody = {
       name: inputs.name,
@@ -182,33 +182,7 @@ export default function EmergencyContactAdd({ userAuth }) {
     </ThemeProvider>
   );
 }
-export async function getServerSideProps(context) {
-  // You can access the session and user information here.
-  const session = await getSession(context);
 
-  if (!session) {
-    // Handle unauthenticated access
-    return {
-      redirect: {
-        destination: "/login",
-        permanent: false,
-      },
-    };
-  }
-  if (session && session?.user.profile_status !== "3") {
-    return {
-      redirect: {
-        destination: "/login",
-        permanent: false,
-      },
-    };
-  }
-  return {
-    props: {
-      userAuth: session?.user || null,
-    },
-  };
-}
 
 const EmergencyContact = styled.div`
   ${({ theme }) => `

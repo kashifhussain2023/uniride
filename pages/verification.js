@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { getSession, useSession } from "next-auth/react";
+import { getSession, useSession, signIn } from "next-auth/react";
 import Head from "next/head";
 import ThemeProvider from "@/theme/ThemeProvider";
 import Layout from "@/components/common/Layout";
@@ -65,111 +65,129 @@ export default function Verification({ userAuth }) {
   };
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setOtpError("");
 
-    var noErrors = true;
     const isOtpValid = otp.every((digit) => digit !== "");
-    if (isOtpValid === false) {
-      noErrors = false;
-      setOtpError("Otp field is required");
+    if (!isOtpValid) {
+      setOtpError("Please enter the complete OTP");
+      return;
     }
 
-    if (noErrors) {
-      try {
-        setLoading(true);
-        const enteredOtp = otp.join("");
+    try {
+      setLoading(true);
+      const enteredOtp = otp.join("");
 
-        const requestBody = {
-          customer_id: userAuth.customer_id,
-          otp: enteredOtp
-        }
+      const requestBody = {
+        customer_id: userAuth.customer_id,
+        otp: enteredOtp
+      }
 
-        const response = await api({
-          url: "/customer/verify-otp",
-          method: "POST",
-          data: requestBody,
+      const response = await api({
+        url: "/customer/verify-otp",
+        method: "POST",
+        data: requestBody,
+      });
+
+      if (response.status === true) {
+        // Get profile details to check payment method status
+        const profileResponse = await api({
+          url: "/customer/get-profile-details",
+          method: "GET",
+          headers: {
+            "Authorization": `Bearer ${response.data.token_code}`
+          }
         });
 
-        if (response.status === true) {
-          // Get profile details to check payment method status
-          const profileResponse = await api({
-            url: "/customer/get-profile-details",
-            method: "GET"
+        if (profileResponse.status === true) {
+          // Sign in the user using NextAuth
+          const signInResult = await signIn("credentials", {
+            phone: userAuth.mobile_number,
+            password: userAuth.password,
+            phone_code:userAuth.phone_code,
+            redirect: false,
           });
 
-          if (profileResponse.status === true) {
-            if (session) {
-              session.user.token_code = response.token_code;
-              await sessionUpdate({
-                user: {
-                  ...session?.user,
-                  token_code: response.token_code,
-                  profile_status: "3",
-                },
-              });
-            }
+          if (signInResult?.error) {
+            throw new Error(signInResult.error);
+          }
 
-            // Check if user needs to add payment method
-            if (!profileResponse.data.default_payment_method) {
-              // Redirect to add card page with necessary data
-              setCookie(
-                null,
-                "newUserRegistration",
-                JSON.stringify({
-                  name: userAuth.name,
-                  mobile_number: userAuth.mobile_number,
-                  customer_id: userAuth.customer_id,
-                  token_code: response.token_code
-                }),
-                {
-                  path: "/",
+          // Update session with new token and profile status
+          if (session) {
+            await sessionUpdate({
+              user: {
+                ...session?.user,
+                token_code: response.data.token_code,
+                profile_status: "3",
+                data: {
+                  ...session?.user?.data,
+                  token_code: response.data.token_code,
+                  profile_status: "3"
                 }
-              );
-              toast.success("Please add your payment details to continue.");
-              router.push("/add-card");
-            } else {
-              // User has payment method, redirect to main app
-              toast.success(response.message || "Verification successful");
-              router.push("/uniride");
-            }
+              },
+            });
+          }
+
+          // Check if user needs to add payment method
+          if (!profileResponse.data.default_payment_method) {
+            // Store registration data in cookie for add-card page
+            setCookie(
+              null,
+              "newUserRegistration",
+              JSON.stringify({
+                name: userAuth.name,
+                mobile_number: userAuth.mobile_number,
+                customer_id: userAuth.customer_id,
+                token_code: response.data.token_code
+              }),
+              {
+                path: "/",
+                maxAge: 30 * 60, // 30 minutes
+                secure: true
+              }
+            );
+            toast.success("Please add your payment details to continue.");
+            router.push("/add-card");
           } else {
-            throw new Error("Failed to get profile details");
+            // User has payment method, redirect to main app
+            toast.success("Verification successful");
+            router.push("/uniride");
           }
         } else {
-          toast.error(response.message);
+          throw new Error(profileResponse.message || "Failed to get profile details");
         }
-      } catch (error) {
-        console.error("Verification error:", error);
-        toast.error(error.message || "Internal Server Error");
-      } finally {
-        setLoading(false);
+      } else {
+        toast.error(response.message || "Invalid OTP");
       }
+    } catch (error) {
+      console.error("Verification error:", error);
+      toast.error(error.message || "An error occurred during verification. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
   const handleResendOtp = async () => {
-    setLoading(true);
-    const formData = new FormData();
-    formData.append("customer_id", userAuth.customer_id);
-    formData.append("mobile_number", userAuth.mobile_number);
+    try {
+      setLoading(true);
+      const requestBody = {
+        customer_id: userAuth.customer_id
+      }
 
-    const requestBody = {
-      customer_id: userAuth.customer_id
-    }
+      const response = await api({
+        url: "/customer/resend-otp",
+        method: "POST",
+        data: requestBody,
+      });
 
-    const response = await api({
-      url: "/customer/resend-otp",
-      method: "POST",
-      data: requestBody,
-    });
-
-    if (response.status === true) {
+      if (response.status === true) {
+        toast.success(response.message || "OTP resent successfully");
+      } else {
+        toast.error(response.message || "Failed to resend OTP");
+      }
+    } catch (error) {
+      console.error("Resend OTP error:", error);
+      toast.error("An error occurred while resending OTP. Please try again.");
+    } finally {
       setLoading(false);
-      toast.success(response.message);
-    } else if (response.status === false) {
-      setLoading(false);
-      toast.error(response.message);
-    } else {
-      setLoading(false);
-      toast.error("Internal Server Error");
     }
   };
   const noErrors = 1;

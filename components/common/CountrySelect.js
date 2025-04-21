@@ -9,8 +9,21 @@ export default function CountrySelect({
 }) {
   // Find the country option that matches the countrycode
   const findDefaultCountry = () => {
-    const code = countrycode?.replace("+", "");
-    return countries.find(country => country.phone === code) || countries.find(country => country.phone === "1");
+    if (!countrycode) return countries.find(country => country.phone === "1");
+    
+    // Remove the + sign if present
+    const code = countrycode.replace("+", "");
+    
+    // First try to find an exact match
+    let country = countries.find(country => country.phone === code);
+    
+    // If no exact match, try to find a country where the code is part of the phone number
+    if (!country) {
+      country = countries.find(country => country.phone.includes(code));
+    }
+    
+    // If still no match, default to US/Canada
+    return country || countries.find(country => country.phone === "1");
   };
 
   const handleCountryChange = (_, value) => {
@@ -24,7 +37,7 @@ export default function CountrySelect({
       id="country-select-demo"
       sx={{ width: 125 }}
       options={countries}
-      defaultValue={findDefaultCountry()}
+      value={findDefaultCountry()}
       autoHighlight
       getOptionLabel={(option) => option.phone}
       onChange={handleCountryChange}

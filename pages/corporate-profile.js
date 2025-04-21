@@ -16,12 +16,19 @@ import { toast } from "react-toastify";
 import SpinnerLoader from "@/components/common/SpinnerLoader";
 
 export default function CorporateProfile({ userAuth }) {
+  
+  console.log("userAuth", userAuth);
+
   const [loading, setLoading] = useState(true);
-  const [corporateProfile, setCorporateProfile] = useState();
+  const [corporateProfile, setCorporateProfile] = useState(null);
   const [corporateList, setCorporateList] = useState([]);
   const [responseError, setResponseError] = useState("");
   const [removeErrors, setRemoveErrors] = useState(false);
-  const [inputs, setInputs] = useState({});
+  const [inputs, setInputs] = useState({
+    corporate_email: "",
+    corporate_emp_id: "",
+    corporate_id: "",
+  });
   const [corporateStatus, setCorporateStatus] = useState(true);
   const router = useRouter();
   const [errors, setErrors] = useState({
@@ -29,9 +36,12 @@ export default function CorporateProfile({ userAuth }) {
     corporate_emp_id: "",
     corporate_id: "",
   });
-  const selectedCorporate = corporateList.find(
-    (item) => item.id == inputs.corporate_id
-  );
+  
+  // Safely find the selected corporate with null checks
+  const selectedCorporate = corporateList && inputs && inputs.corporate_id 
+    ? corporateList.find(item => item && item.id == inputs.corporate_id) 
+    : null;
+  
   const corporateName = selectedCorporate?.corporate_name || "";
 
   useEffect(() => {
@@ -45,100 +55,154 @@ export default function CorporateProfile({ userAuth }) {
   }, [corporateProfile]);  
 
   const getCorporateProfile = async () => {
-    const formData = new FormData();
-    formData.append("user_id", userAuth?.customer_id);
-    formData.append("token_code", userAuth?.token_code);
-    const response = await api({
-      url: "/customer/get-corporate-profile",
-      method: "GET",
-      data: formData,
-    });
+    try {
+      if (!userAuth?.data?.customer_id || !userAuth?.data?.token_code) {
+        console.error("Missing user authentication data");
+        setLoading(false);
+        return;
+      }
 
-    if (response.status === true) {
-      setLoading(false);
-      setCorporateProfile(response.data);
-      setInputs(response.data);
-      setLoading(false);
-    } else {
-      setLoading(false);
+      const formData = new FormData();
+      formData.append("user_id", userAuth.data.customer_id);
+      formData.append("token_code", userAuth.data.token_code);
+      
+      const response = await api({
+        url: "/customer/get-corporate-profile",
+        method: "GET",
+        data: formData,
+      });
+
+      if (response && response.status === true && response.data) {
+        setCorporateProfile(response.data);
+        setInputs({
+          corporate_email: response.data.corporate_email || "",
+          corporate_emp_id: response.data.corporate_emp_id || "",
+          corporate_id: response.data.corporate_id || "",
+        });
+      } else {
+        console.error("Invalid response from get-corporate-profile:", response);
+      }
+    } catch (error) {
+      console.error("Error fetching corporate profile:", error);
+      toast.error("Failed to load corporate profile data");
     }
   };
 
   const getCorporateList = async () => {
-    const formData = new FormData();
-    formData.append("customer_id", userAuth?.customer_id);
-    formData.append("token_code", userAuth?.token_code);
+    try {
+      if (!userAuth?.data?.customer_id || !userAuth?.data?.token_code) {
+        console.error("Missing user authentication data");
+        setLoading(false);
+        return;
+      }
 
-    const response = await api({
-      url: "/customer/get-corporate-list",
-      method: "GET",
-      data: formData,
-    });
+      const formData = new FormData();
+      formData.append("customer_id", userAuth.data.customer_id);
+      formData.append("token_code", userAuth.data.token_code);
 
-    if (response.status === true) {
-      setCorporateList(response.data);
-      setInputs(response);
-      setLoading(false);
-    } else if (response.message == "Invalid token code") {
-      await signOut({ redirect: false });
-      router.push("/login");
-    } else {
+      const response = await api({
+        url: "/customer/get-corporate-list",
+        method: "GET",
+        data: formData,
+      });
+
+      if (response && response.status === true && Array.isArray(response.data)) {
+        setCorporateList(response.data);
+      } else if (response && response.message === "Invalid token code") {
+        await signOut({ redirect: false });
+        router.push("/login");
+      } else {
+        console.error("Invalid response from get-corporate-list:", response);
+        setCorporateStatus(false);
+      }
+    } catch (error) {
+      console.error("Error fetching corporate list:", error);
+      toast.error("Failed to load corporate list");
       setCorporateStatus(false);
-      setLoading(false);
     }
   };
 
+  // Combined data fetching in a single useEffect
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!userAuth?.data?.customer_id || !userAuth?.data?.token_code) {
+        console.error("Missing user authentication data");
+        setLoading(false);
+        toast.error("Authentication data is missing");
+        return;
+      }
+
+      setLoading(true);
+      try {
+        // Fetch both profile and list data in parallel
+        await Promise.all([
+          getCorporateProfile(),
+          getCorporateList()
+        ]);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
   const handleInputChange = ({ target }) => {
-    setInputs((inputs) => ({
-      ...inputs,
-      [target.name]: target.value,
+    if (!target || !target.name) return;
+    
+    setInputs((prevInputs) => ({
+      ...prevInputs,
+      [target.name]: target.value || "",
     }));
 
     if (removeErrors) {
+      const updatedInputs = { ...inputs, [target.name]: target.value || "" };
       setErrors({
-        ...validateCorporateProfile({
-          ...inputs,
-        }),
+        ...validateCorporateProfile(updatedInputs),
       });
     }
   };
 
   const updateCorporateProfile = async (e) => {
+    if (e) e.preventDefault();
+    
     setResponseError("");
-    e.preventDefault();
+    
+    // Validate required fields
+    if (!inputs.corporate_email || !inputs.corporate_emp_id || !inputs.corporate_id) {
+      toast.error("Please fill in all required fields");
+      return;
+    }
 
     let inputForValidation = {
-      corporate_email: inputs.corporate_email,
-      corporate_emp_id: inputs.corporate_emp_id,
-      corporate_id: inputs.corporate_id,
+      corporate_email: inputs.corporate_email || "",
+      corporate_emp_id: inputs.corporate_emp_id || "",
+      corporate_id: inputs.corporate_id || "",
     };
 
     const validationErrors = validateCorporateProfile(inputForValidation);
     const noErrors = Object.keys(validationErrors).length === 0;
     setRemoveErrors(true);
-    //set All data to form data
-    //return false;
 
     if (noErrors) {
       if (corporateStatus === false) {
         toast.error("Please select corporate");
-      } else {
+        return;
+      }
+      
+      try {
         setLoading(true);
-        //inputs.corporate_id = corporateId;
-        const formData = new FormData();
-        formData.append("official_email", inputs.corporate_email);
-        formData.append("employee_id", inputs.corporate_emp_id);
-        formData.append("corporate", inputs.corporate_id);
-        formData.append("token_code", userAuth?.token_code);
-
+        
         const requestBody = {
-          email: inputs.corporate_email,
-          eomployee_id: inputs.corporate_emp_id,
-          corporate_id: inputs.corporate_id,
-          corporate_name : corporateName
+          email: inputs.corporate_email || "",
+          eomployee_id: inputs.corporate_emp_id || "",
+          corporate_id: inputs.corporate_id || "",
+          corporate_name: corporateName || ""
         };
 
-        console.log("requestBody",requestBody)
+        console.log("requestBody", requestBody);
 
         const response = await api({
           url: "/customer/save-corporate-profile",
@@ -146,39 +210,30 @@ export default function CorporateProfile({ userAuth }) {
           data: requestBody,
         });
 
-        if (response.status === true) {
-          setLoading(false);
-          toast.success(response.message);
+        if (response && response.status === true) {
+          toast.success(response.message || "Corporate profile updated successfully");
           router.push("/corporate-profile");
-        } else if (
-          response.status === "0" &&
-          response.message === "Invalid token code"
-        ) {
-          setLoading(false);
-          toast.error(
-            "Your account has been logged in on another device.Please login again to continue."
-          );
+        } else if (response && response.status === "0" && response.message === "Invalid token code") {
+          toast.error("Your account has been logged in on another device. Please login again to continue.");
           await signOut({ redirect: false });
           router.push("/login");
-        } else if (response.status === "0" && response.errors != "") {
-          setLoading(false);
+        } else if (response && response.status === "0" && response.errors) {
           const valuesArray = Object.values(response.errors);
-          const firstValue = valuesArray[0];
+          const firstValue = valuesArray[0] || "Unknown error occurred";
           toast.error(firstValue);
         } else {
-          setLoading(false);
-          toast.error("Internal Server Error");
+          toast.error(response?.message || "Internal Server Error");
         }
+      } catch (error) {
+        console.error("Error updating corporate profile:", error);
+        toast.error("Failed to update corporate profile");
+      } finally {
+        setLoading(false);
       }
     } else {
       setErrors(validationErrors);
     }
   };
-
-  useEffect(() => {
-    getCorporateProfile();
-    getCorporateList();
-  }, []);
 
   return (
     <ThemeProvider>
@@ -190,7 +245,7 @@ export default function CorporateProfile({ userAuth }) {
       </Head>
       <SpinnerLoader loading={loading} />
       <Layout>
-        {corporateProfile && corporateList ? (
+        {corporateProfile && corporateList && corporateList.length > 0 ? (
           <>
             <SmallContent>
               <ProfileBox>
@@ -245,13 +300,14 @@ export default function CorporateProfile({ userAuth }) {
                         <option value="" disabled>
                           Select
                         </option>
-                        {corporateList?.map((list) => {
+                        {corporateList && corporateList.map((list) => {
+                          if (!list || !list.id) return null;
                           return (
                             <option
                               key={list.id}
                               value={list.id}
                             >
-                              {list.corporate_name}
+                              {list.corporate_name || "Unnamed Corporate"}
                             </option>
                           );
                         })}
@@ -275,7 +331,6 @@ export default function CorporateProfile({ userAuth }) {
                 </Button>
               </UpdateCorporate>
             </SmallContent>
-            <SpinnerLoader loading={loading} />
           </>
         ) : (
           <SmallContent>
@@ -297,12 +352,29 @@ export default function CorporateProfile({ userAuth }) {
     </ThemeProvider>
   );
 }
-export async function getServerSideProps(context) {
-  // You can access the session and user information here.
-  const session = await getSession(context);
 
-  if (!session) {
-    // Handle unauthenticated access
+export async function getServerSideProps(context) {
+  try {
+    // You can access the session and user information here.
+    const session = await getSession(context);
+
+    if (!session) {
+      // Handle unauthenticated access
+      return {
+        redirect: {
+          destination: "/login",
+          permanent: false,
+        },
+      };
+    }
+
+    return {
+      props: {
+        userAuth: session?.user || null,
+      },
+    };
+  } catch (error) {
+    console.error("Error in getServerSideProps:", error);
     return {
       redirect: {
         destination: "/login",
@@ -310,20 +382,8 @@ export async function getServerSideProps(context) {
       },
     };
   }
-  if (session && session?.user.profile_status !== "3") {
-    return {
-      redirect: {
-        destination: "/login",
-        permanent: false,
-      },
-    };
-  }
-  return {
-    props: {
-      userAuth: session?.user || null,
-    },
-  };
 }
+
 const ProfileBox = styled.div`
   ${({ theme }) => `
     border-radius: 16px 0px 16px 16px;

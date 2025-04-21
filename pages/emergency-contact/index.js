@@ -21,7 +21,7 @@ import SpinnerLoader from "@/components/common/SpinnerLoader";
 import DeleteModel from "@/components/common/model/DeleteModel";
 import { toast } from "react-toastify";
 
-export default function EmergencyContacts({ userAuth }) {
+export default function EmergencyContacts() {
   const router = useRouter();
   const [emergencyList, setEmergencyList] = useState();
   const [open, setOpen] = useState(false);
@@ -30,8 +30,6 @@ export default function EmergencyContacts({ userAuth }) {
 
   const getEmergencyContactList = async () => {
     const formData = new FormData();
-    formData.append("token_code", userAuth?.token_code);
-
     const response = await api({
       url: "/customer/emergency/list",
       method: "GET",
@@ -52,38 +50,33 @@ export default function EmergencyContacts({ userAuth }) {
   };
 
   const editContact = (id) => {
-    router.push(`/emergencyContactEdit/${id}`);
+    router.push(`/emergency-contact/edit/${id}`);
   };
 
-  const deleteContact = async () => {
-    setOpen(false);
-    setLoading(true);
-    const formData = new FormData();
-    formData.append("id", deleteContactId);
-    formData.append("token_code", userAuth?.token_code);
-    const response = await api({
-      url: "/customer/contacts/delete",
-      method: "POST",
-      data: formData,
-    });
-    if (response.status === "1") {
-      //setLoading(false);
-      toast.success(response.message);
-      getEmergencyContactList();
-    } else if (
-      response.status === "0" &&
-      response.message === "Invalid token code"
-    ) {
-      setLoading(false);
-      toast.error(
-        "Your account has been logged in on another device.Please login again to continue."
-      );
-      await signOut({ redirect: false });
-      router.push("/login");
-    } else {
-      setLoading(false);
-      toast.error(response.message);
-    }
+  const handleDelete = async (contactId) => {
+    //if (window.confirm("Are you sure you want to delete this contact?")) {
+      try {
+        setLoading(true);
+        const response = await api({
+          url: `/customer/emergency/remove/${contactId}`,
+          method: "DELETE"
+        });
+
+        if (response.status === true) {
+          toast.success("Emergency contact deleted successfully");
+          // Update local state by filtering out the deleted contact
+          setOpen(false);
+          setEmergencyList(prevContacts => prevContacts.filter(contact => contact.id !== contactId));
+        } else {
+          toast.error(response.message || "Failed to delete emergency contact");
+        }
+      } catch (error) {
+        console.error("Error deleting emergency contact:", error);
+        toast.error("An error occurred while deleting the contact");
+      } finally {
+        setLoading(false);
+      }
+    //}
   };
 
   const handleOpen = (id) => {
@@ -119,7 +112,7 @@ export default function EmergencyContacts({ userAuth }) {
               <Button
                 variant="contained"
                 color="primary"
-                onClick={() => router.push("/emergencyContactAdd")}
+                onClick={() => router.push("/emergency-contact-add")}
               >
                 Add Contact
               </Button>
@@ -158,7 +151,7 @@ export default function EmergencyContacts({ userAuth }) {
                                 open={open}
                                 handleOpen={handleOpen}
                                 handleClose={handleClose}
-                                actionDelete={() => deleteContact()}
+                                actionDelete={() => handleDelete(list.id)}
                               />
                             </TableCell>
                           </TableRow>
@@ -185,33 +178,7 @@ export default function EmergencyContacts({ userAuth }) {
     </ThemeProvider>
   );
 }
-export async function getServerSideProps(context) {
-  // You can access the session and user information here.
-  const session = await getSession(context);
 
-  // if (!session) {
-  //   // Handle unauthenticated access
-  //   return {
-  //     redirect: {
-  //       destination: "/login",
-  //       permanent: false,
-  //     },
-  //   };
-  // }
-  // if (session && session?.user.profile_status !== "3") {
-  //   return {
-  //     redirect: {
-  //       destination: "/login",
-  //       permanent: false,
-  //     },
-  //   };
-  // }
-  return {
-    props: {
-      userAuth: session?.user || null,
-    },
-  };
-}
 const EmergencyContact = styled.div`
   ${({ theme }) => `
     border-radius: 16px 0px 16px 16px;

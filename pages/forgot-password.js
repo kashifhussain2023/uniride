@@ -9,8 +9,6 @@ import { toast } from "react-toastify";
 import {
   Button,
   FormControl as MuiFormControl,
-  InputAdornment,
-  TextField,
   Typography,
   Grid,
 } from "@mui/material";
@@ -30,7 +28,7 @@ export default function ForgotPassword() {
   const [inputs, setInputs] = useState({
     mobile: "",
   });
-  const [responseError, setResponseError] = useState("");
+
   const [removeErrors, setRemoveErrors] = useState(false);
   const [countrycode, setCountryCode] = useState("+1");
   
@@ -55,7 +53,7 @@ export default function ForgotPassword() {
   };
 
   const handleSubmit = async (e) => {
-    setResponseError("");
+
     e.preventDefault();
 
     let inputForValidation = {
@@ -189,29 +187,7 @@ export default function ForgotPassword() {
     </ThemeProvider>
   );
 }
-export async function getServerSideProps(context) {
-  // You can access the session and user information here.
-  const session = await getSession(context);
 
-  if (
-    session &&
-    session.user.status === "TRUE" &&
-    session.user.profile_status === "3"
-  ) {
-    // Handle unauthenticated access
-    return {
-      redirect: {
-        destination: "/uniride",
-        permanent: false,
-      },
-    };
-  }
-  return {
-    props: {
-      null: null,
-    },
-  };
-}
 const LoginContainer = styled.div`
   ${({ theme }) => `
     max-width: 1200px;

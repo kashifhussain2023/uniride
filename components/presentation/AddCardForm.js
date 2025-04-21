@@ -87,74 +87,76 @@ export default function AddCardForm({ userAuth }) {
     setRemoveErrors(true);
 
     if (noErrors) {
-      setLoading(true);
-      const cardElement = elements.getElement(CardElement); // Make sure to add an ID to your card number input field
+      try {
+        setLoading(true);
+        const cardElement = elements.getElement(CardElement);
 
-      if (!stripe || !elements || !cardElement) {
-        // Stripe.js has not yet loaded.
-        // Make sure to disable form submission until Stripe.js has loaded.
-        return;
-      }
+        if (!stripe || !elements || !cardElement) {
+          toast.error("Payment system is not ready. Please try again.");
+          return;
+        }
 
-      // Use Stripe.js to create a token
-      const { token, error } = await stripe.createToken(cardElement);
-      const { paymentMethod, error2 } = await stripe.createPaymentMethod({
-        type: 'card',
-        card: cardElement,
-        billing_details: {
-          name: 'Customer Name', // optional, but recommended
-          email: 'customer@example.com',
-        },
-      });
+        // Create payment method with Stripe
+        const { paymentMethod, error: paymentError } = await stripe.createPaymentMethod({
+          type: 'card',
+          card: cardElement,
+          billing_details: {
+            name: inputs.card_holder,
+          },
+        });
 
-      if (error) {
+        if (paymentError) {
+          console.error("Stripe payment method error:", paymentError);
+          setCardError(paymentError.message);
+          toast.error(paymentError.message);
+          return;
+        }
+
+        // Send payment method to server
+        const requestBody = {
+          payment_method_id: paymentMethod.id,
+          card_holder: inputs.card_holder,
+          card_number: "000000000000" + paymentMethod.card.last4,
+          card_cvv: "",
+          card_expire: paymentMethod.card.exp_month + "/" + paymentMethod.card.exp_year,
+          card_type: paymentMethod.card.brand.toUpperCase()
+        }
+
+        const response = await api({
+          url: "/customer/payments/add-card",
+          method: "POST",
+          data: requestBody,
+        });
+
+        if (response.status === true) {
+          toast.success(response.message || "Card added successfully");
+          
+          // Update session with new payment method status
+          // if (session) {
+          //   await sessionUpdate({
+          //     user: {
+          //       ...session?.user,
+          //       data: {
+          //         ...session?.user?.data,
+          //         default_payment_method: true
+          //       }
+          //     },
+          //   });
+          // }
+          
+          router.push("/uniride");
+        } else if (response.status === false && response.message === "Invalid token code") {
+          toast.error("Your session has expired. Please login again.");
+          await signOut({ redirect: false });
+          router.push("/login");
+        } else {
+          toast.error(response.message || "Failed to add card");
+        }
+      } catch (error) {
+        console.error("Add card error:", error);
+        toast.error("An error occurred while adding your card. Please try again.");
+      } finally {
         setLoading(false);
-        console.error("Error creating token:", error);
-        //setResponseError("Error creating token. Please check your card details.");
-        setCardError(error.message);
-
-        return false;
-      } else {
-        // Send the token to your server or handle it as needed
-        // Add your logic to send the token to your server and handle the payment
-      }
-      console.log("userAuth", userAuth);
-      const formData = new FormData();
-      formData.append("card_holder", inputs.card_holder);
-      formData.append("card_number", "000000000000" + token.card.last4);
-      formData.append("card_type", inputs.card_type);
-      formData.append("cv2", inputs.type);
-      formData.append(
-        "expire_date",
-        token.card.exp_month + "/" + token.card.exp_year
-      );
-      formData.append("nonce", token.id);
-      formData.append("customer_id", userAuth.customer_id);
-      formData.append("payment_method_id", paymentMethod.id)
-      //formData.append("token_code", userAuth.token_code);
-
-      const requestedBody = {
-        payment_method_id: paymentMethod.id,
-        card_holder: inputs.card_holder,
-        card_number: "000000000000" + token.card.last4,
-        card_cvv: "",
-        card_expire: token.card.exp_month + "/" + token.card.exp_year,
-        card_type: token.card.brand
-      }
-
-      const response = await api({
-        url: "/customer/payments/add-card",
-        method: "POST",
-        data: requestedBody,
-      });
-
-      if (response.status === true) {
-        setLoading(false);
-        toast.success(response.message || "Card added successfully");
-        router.push("/uniride");
-      } else {
-        setLoading(false);
-        toast.error(response.message || "Failed to add card");
       }
     } else {
       setErrors(validationErrors);
