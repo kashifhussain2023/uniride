@@ -16,29 +16,33 @@ export default function RiderHistoryPage({ userAuth }) {
   const [historyData, setHistoryData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [subTitle, setSubTitle] = useState("History");
+
   const getRiderHistoryList = async () => {
     const formData = new FormData();
     formData.append("customer_id", userAuth.customer_id);
     formData.append("token_code", userAuth.token_code);
     formData.append("offset", 0);
+
     const response = await api({
-      url: "/customers/ride_history",
-      method: "POST",
-      data: formData,
+      url: "/customer/booking/ride-history",
+      method: "GET",
     });
-    if (response.status === "TRUE") {
+
+    if (response.status === true) {
       setLoading(false);
-      setHistoryData(response.ride_details);
-    } else if (response.message == "Invalid token code") {
+      setHistoryData(response.data.data);
+    } else if (response.data.message == "Invalid token code") {
       await signOut({ redirect: false });
       router.push("/login");
     } else {
       setLoading(false);
     }
   };
+
   useEffect(() => {
     getRiderHistoryList();
   }, []);
+
   return (
     <ThemeProvider>
       <Head>
@@ -67,19 +71,9 @@ export default function RiderHistoryPage({ userAuth }) {
   );
 }
 export async function getServerSideProps(context) {
-  // You can access the session and user information here.
   const session = await getSession(context);
 
   if (!session) {
-    // Handle unauthenticated access
-    return {
-      redirect: {
-        destination: "/login",
-        permanent: false,
-      },
-    };
-  }
-  if (session && session?.user.profile_status !== "3") {
     return {
       redirect: {
         destination: "/login",

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Head from "next/head";
 import styled from "@emotion/styled";
@@ -7,9 +7,34 @@ import Layout from "@/components/common/Layout";
 import PageTitle from "@/components/common/PageTitle";
 import LargeInnerContent from "@/components/presentation/LargeInnerContent";
 import ThemeProvider from "@/theme/ThemeProvider";
+import { api } from "@/utils/api/common";
 
 export default function riderHistoryDetail() {
-  const [value, setValue] = useState(2);
+  const [value, setValue] = useState(0);
+  const [historyDetailData, setHistoryDetailData] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const getRideHistoryDetail = async () => {
+    const response = await api({
+      url: `/customer/booking/ride-history-details?request_id=${738}`,
+      method: "GET",
+    });
+
+    if (response.status === true) {
+      setLoading(false);
+      setHistoryDetailData(response.data);
+      setValue(response.data.rated || 0);
+    } else if (response.message === "Invalid token code") {
+      await signOut({ redirect: false });
+      router.push("/login");
+    } else {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    getRideHistoryDetail();
+  }, []);
 
   return (
     <ThemeProvider>
@@ -26,16 +51,17 @@ export default function riderHistoryDetail() {
               title="Rider"
               subtitle="History Detail"
               images_icon={"../history.png"}
-            ></PageTitle>
-            <HistoryImage onClick={() => router.push("/riderHistoryDetail")}>
+            />
+
+            <HistoryImage>
               <Image
-                src="/map.png"
+                src={historyDetailData.path_image || "/map.png"}
                 alt="Map Image Uniride"
                 layout="fill"
                 objectFit="cover"
               />
             </HistoryImage>
-            <RiderName variant="h3">Chirayu Dsa</RiderName>
+            <RiderName variant="h3">{historyDetailData.driver_name}</RiderName>
             <InfoList disablePadding style={{ marginBottom: 30 }}>
               <ListItem>
                 <Typography color="error">PICKUP LOCATION</Typography>
@@ -44,11 +70,9 @@ export default function riderHistoryDetail() {
                 </Right>
               </ListItem>
               <ListItem>
-                <Typography>Jagatpura, Jaipur, Rajasthan, India</Typography>
+                <Typography>{historyDetailData.pickup_location}</Typography>
                 <Right>
-                  <Typography>
-                    Jhalana Doongri, Jaipur, Rajasthan 302004, India
-                  </Typography>
+                  <Typography>{historyDetailData.dropoff_location}</Typography>
                 </Right>
               </ListItem>
             </InfoList>
@@ -56,51 +80,61 @@ export default function riderHistoryDetail() {
               <ListItem>
                 <Typography>Ride Type</Typography>
                 <Right>
-                  <Typography>Regular</Typography>
+                  <Typography>{historyDetailData.ride_type}</Typography>
                 </Right>
               </ListItem>
               <ListItem>
                 <Typography>Trip Time</Typography>
                 <Right>
-                  <Typography>10:20:58</Typography>
+                  <Typography>
+                    {new Date(
+                      historyDetailData.trip_date_time
+                    ).toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      second: "2-digit",
+                    })}
+                  </Typography>
                 </Right>
               </ListItem>
               <ListItem>
                 <Typography>Trip Date</Typography>
                 <Right>
-                  <Typography>08/01/2024</Typography>
+                  <Typography>
+                    {new Date(
+                      historyDetailData.trip_date_time
+                    ).toLocaleDateString()}
+                  </Typography>
                 </Right>
               </ListItem>
               <ListItem>
                 <Typography>Rated</Typography>
                 <Right>
-                  <Typography>
-                    <Rating name="read-only" value={value} readOnly />
-                  </Typography>
+                  <Rating name="read-only" value={value} readOnly />
                 </Right>
               </ListItem>
               <ListItem>
                 <Typography>Total Fare</Typography>
                 <Right>
-                  <Typography>$1.00</Typography>
+                  <Typography>₹{historyDetailData.total_fare}</Typography>
                 </Right>
               </ListItem>
               <ListItem>
                 <Typography>Trip Distance</Typography>
                 <Right>
-                  <Typography>0.00mi</Typography>
+                  <Typography>{historyDetailData.trip_distance} mi</Typography>
                 </Right>
               </ListItem>
               <ListItem>
                 <Typography>Trip Duration</Typography>
                 <Right>
-                  <Typography>00:00:02</Typography>
+                  <Typography>{historyDetailData.trip_duration}</Typography>
                 </Right>
               </ListItem>
               <ListItem>
                 <Typography>Payment done by</Typography>
                 <Right>
-                  <Typography>Card</Typography>
+                  <Typography>Card ({historyDetailData.card_no})</Typography>
                 </Right>
               </ListItem>
               <ListItem>

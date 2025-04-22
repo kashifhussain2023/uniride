@@ -9,12 +9,12 @@ export default function RideDetails({
   setRideDetailStatus,
   setSubTitle,
 }) {
+  
   const handleBackButton = () => {
     setRideDetailStatus(true);
     setSubTitle("History");
   };
-  // const image =  "https://unirideus.com/staging/uploads/rides/ride-1704448848-4390-2.jpg";
-  const image1w = rideDetail ? rideDetail.detail_map : "/mapImg.png";
+
   return (
     <Box>
       <ActionTop>
@@ -28,17 +28,15 @@ export default function RideDetails({
         </Button>
       </ActionTop>
       <HistoryImage onClick={() => router.push("/riderHistoryDetail")}>
-        <img
-          src={image1w}
-          alt="Map Image"
-          onError={(e) => {
-            e.target.onerror = null;
-            e.target.src = "/mapImg.png";
-          }}
+        <Image
+          src={rideDetail?.request?.path_image || "/map.png"}
+          alt="Map Image Uniride"
+          layout="fill"
+          objectFit="cover"
         />
       </HistoryImage>
       <RiderName variant="h3" style={{ textAlign: "center" }}>
-        {rideDetail?.name}
+        {rideDetail?.request?.unique_request_id}
       </RiderName>
       <InfoList disablePadding style={{ marginBottom: 30 }}>
         <ListItem>
@@ -48,9 +46,9 @@ export default function RideDetails({
           </Right>
         </ListItem>
         <ListItem>
-          <Typography>{rideDetail?.pickup_location_name}</Typography>
+          <Typography>{rideDetail?.request?.start_location_name}</Typography>
           <Right>
-            <Typography>{rideDetail?.destination_name}</Typography>
+            <Typography>{rideDetail?.request?.end_location_name}</Typography>
           </Right>
         </ListItem>
       </InfoList>
@@ -58,36 +56,33 @@ export default function RideDetails({
         <ListItem>
           <Typography>Ride Type</Typography>
           <Right>
-            <Typography>{rideDetail?.ride_type}</Typography>
+            <Typography>{rideDetail?.request?.ride_type}</Typography>
           </Right>
         </ListItem>
         <ListItem>
           <Typography>Trip Time</Typography>
           <Right>
             <Typography>
-              {format(
-                parse(
-                  rideDetail?.ride_time,
-                  "dd-MM-yyyy hh:mm:ss a",
-                  new Date()
-                ),
-                "dd-MM-yyyy hh:mm a"
-              )}
+              {rideDetail?.ride_start_time
+                ? format(
+                    new Date(rideDetail?.ride_start_time),
+                    "dd-MM-yyyy hh:mm a"
+                  )
+                : "N/A"}
             </Typography>
           </Right>
         </ListItem>
         <ListItem>
           <Typography>Rated</Typography>
           <Right>
-            <Typography>
-              <Rating
-                name="read-only"
-                value={rideDetail?.customer_rating}
-                readOnly
-              />
-            </Typography>
+            <Rating
+              name="read-only"
+              value={parseFloat(rideDetail?.customer_rating) || 0}
+              readOnly
+            />
           </Right>
         </ListItem>
+
         {rideDetail?.promotion_discount != "0.00" &&
           rideDetail?.promotion_discount != "0" && (
             <>
@@ -96,8 +91,8 @@ export default function RideDetails({
                 <Right>
                   <Typography>
                     $
-                    {parseFloat(rideDetail?.total) +
-                      parseFloat(rideDetail?.promotion_discount)}
+                    {parseFloat(rideDetail?.tip || 0) +
+                      parseFloat(rideDetail?.promotion_discount || 0)}
                   </Typography>
                 </Right>
               </ListItem>
@@ -114,33 +109,39 @@ export default function RideDetails({
         <ListItem>
           <Typography>Total Fare</Typography>
           <Right>
-            <Typography>${rideDetail?.total}</Typography>
+            <Typography>${rideDetail?.tip || "0.00"}</Typography>
           </Right>
         </ListItem>
 
         <ListItem>
           <Typography>Trip Distance</Typography>
           <Right>
-            <Typography>{rideDetail?.trip_distance} mi</Typography>
+            <Typography>{rideDetail?.distance_travelled} mi</Typography>
           </Right>
         </ListItem>
+
         <ListItem>
           <Typography>Trip Duration</Typography>
           <Right>
-            <Typography>{rideDetail?.trip_duration}</Typography>
+            <Typography>{rideDetail?.ride_duration}</Typography>
           </Right>
         </ListItem>
+
         <ListItem>
           <Typography>Payment done by</Typography>
           <Right>
-            <Typography>Card</Typography>
+            <Typography>
+              {rideDetail?.request?.payment_mode === 1 ? "Card" : "Cash"}
+            </Typography>
           </Right>
         </ListItem>
+
         <ListItem>
           <Typography>Status</Typography>
           <Right>
             <Typography variant="success">
-              {rideDetail.customer_cancel_status === "Cancelled"
+              {rideDetail?.customer_cancel_ride ||
+              rideDetail?.driver_cancel_ride
                 ? "Cancelled"
                 : "Success"}
             </Typography>

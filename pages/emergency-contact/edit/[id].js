@@ -52,13 +52,10 @@ export default function EditEmergencyContact() {
 
       if (response.status === true) {
         const contact = response.data;
-        console.log("contact", contact);
         
-        // Set the country code from the API response
         const countryCode = contact.country_code || "+1";
         setCountryCode(countryCode);
         
-        // Update all form inputs with the fetched data
         setInputs({
           name: contact.name || "",
           email: contact.email || "",
@@ -79,7 +76,6 @@ export default function EditEmergencyContact() {
   };
 
   const handleInputChange = ({ target }) => {
-    // Handle other input types
     setInputs((inputs) => ({
       ...inputs,
       [target.name]: target.value,

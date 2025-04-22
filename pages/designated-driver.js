@@ -96,6 +96,7 @@ export default function Dashboard({ userAuth }) {
       formData.append("customer_id", userAuth.customer_id);
       formData.append("token_code", userAuth.token_code);
       formData.append("ride_type", "designated");
+
       const response = await api({
         url: "/customers/request_information",
         method: "POST",
@@ -369,7 +370,7 @@ export default function Dashboard({ userAuth }) {
   const closeValueModel = () => {
     setOpenValueModel(false);
   };
-  //handle  api
+
   const getAllCarsList = async (location) => {
     const session = await getSession();
 
@@ -753,11 +754,9 @@ export default function Dashboard({ userAuth }) {
 }
 
 export async function getServerSideProps(context) {
-  // You can access the session and user information here.
   const session = await getSession(context);
 
   if (!session) {
-    // Handle unauthenticated access
     return {
       redirect: {
         destination: "/login",

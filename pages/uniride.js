@@ -76,10 +76,10 @@ export default function Dashboard({ userAuth }) {
 
   const scheduleMsg =
     "Another ride is only possible after scheduled ride complete or scheduled ride cancel";
-  //handle all component data
   const handleCarTypeId = (carId) => {
     setCarTypeId(carId);
   };
+
   const handleSelectRide = async (rideType) => {
     if (scheduleRideStatus) {
       setScheduleMessage(true);
@@ -137,6 +137,7 @@ export default function Dashboard({ userAuth }) {
       dropPickLocationType("drop");
     }
   };
+
   const applyCoupon = async (promoCodeValue) => {
     if (!promoCodeValue || promoCodeValue.trim() === "") {
       toast.error("Please enter promo code");
@@ -169,16 +170,20 @@ export default function Dashboard({ userAuth }) {
       setLoading(false);
     }
   };
+
   const dropPickLocationType = (type) => {
     setLocationType(type);
     setOpenValueModel(true);
   };
+
   const handleComfirmBooking = () => {
     setGenderModelOpen(true);
   };
+
   const handleGenderClose = () => {
     setGenderModelOpen(close);
   };
+
   const proceedGenderModel = async (gender) => {
     if (selectedDate !== null && selectedTime !== null) {
       try {
@@ -280,9 +285,11 @@ export default function Dashboard({ userAuth }) {
       }
     }
   };
+
   const handleInRoute = () => {
     setInRRoute(true);
   };
+
   const handleRideCancelModel = async () => {
     try {
       setLoading(true);
@@ -324,6 +331,7 @@ export default function Dashboard({ userAuth }) {
       setLoading(false);
     }
   };
+
   const handleCancelRunningRide = async () => {
     try {
       setLoading(true);
@@ -342,7 +350,7 @@ export default function Dashboard({ userAuth }) {
         data: formData,
       });
 
-      if (response.status === "TRUE") {
+      if (response.status === true) {
         setSelectRide(true);
         setComfirmBooking(false);
         setInRRoute(false);
@@ -368,17 +376,19 @@ export default function Dashboard({ userAuth }) {
           page: "uniride",
         },
       },
-      undefined, // Empty 'as' parameter
-      { shallow: true } // Use the 'shallow' option to preserve the URL
+      undefined, 
+      { shallow: true } 
     );
   };
 
   const handleActionScheduleRide = () => {
     router.push("/schedule-ride");
   };
+
   const closeScheduleMessage = () => {
     setScheduleMessage(false);
   };
+
   const getDropPickLocation = (location) => {
     if (locationType === "pickup") {
       getAllCarsList(location);
@@ -400,7 +410,7 @@ export default function Dashboard({ userAuth }) {
   const closeValueModel = () => {
     setOpenValueModel(false);
   };
-  //handle  api
+
   const getAllCarsList = async (location) => {
     const session = await getSession();
 
@@ -422,9 +432,6 @@ export default function Dashboard({ userAuth }) {
       setCarStatus(true);
       setCarsList(response.data.cars);
 
-      // const defaultCars = response.data.cars?.filter(
-      //   (car) => car.default_car === true && car.is_corporate === "0"
-      // );
       const defaultCars = response.data.cars?.filter((car) => {
         return (
           car.default_car === true &&
@@ -450,6 +457,7 @@ export default function Dashboard({ userAuth }) {
       setCarStatus(false);
     }
   };
+
   const getUserCurrentLoacation = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -489,6 +497,7 @@ export default function Dashboard({ userAuth }) {
       console.error("Geolocation is not supported by this browser.");
     }
   };
+
   const getCurrentRideStatus = async () => {
     setLoading(true);
     const formData = new FormData();

@@ -8,76 +8,72 @@ import { useState } from "react";
 export default function RiderHistory({ riderHistory, setSubTitle }) {
   const [rideDetailStatus, setRideDetailStatus] = useState(true);
   const [rideDetail, setRideDetail] = useState();
+
   const rideDetailData = (index) => {
     setRideDetailStatus(false);
     setRideDetail(riderHistory[index]);
     setSubTitle("History Detail");
   };
+
   return (
     <>
       {rideDetailStatus ? (
         riderHistory.length !== 0 ? (
           riderHistory.map((historyItem, index) => (
-            <>
-              <HistoryRow key={index}>
-                <HistoryImage onClick={() => rideDetailData(index)}>
-                  <img
-                    src={historyItem.ride_map}
-                    alt="Map Image"
-                    onError={(e) => {
-                      e.target.onerror = null; // Prevent infinite loop if fallback image also fails
-                      e.target.src = "../mapImg.png"; // Set fallback image source
-                    }}
-                  />
-                </HistoryImage>
-                <HistoryDescription>
-                  <Title variant="h3" onClick={() => rideDetailData(index)}>
-                    Ride Type
-                  </Title>
-                  <Typography variant="subtitle1">
-                    {historyItem.ride_type.charAt(0).toUpperCase() +
-                      historyItem.ride_type.slice(1)}
+            <HistoryRow key={index}>
+              <HistoryImage onClick={() => rideDetailData(index)}>
+                <img
+                  src={historyItem.path_image || "../mapImg.png"}
+                  alt="Map Image"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = "../mapImg.png";
+                  }}
+                />
+              </HistoryImage>
+              <HistoryDescription>
+                <Title variant="h3" onClick={() => rideDetailData(index)}>
+                  Ride Type
+                </Title>
+                <Typography variant="subtitle1">
+                  {historyItem.request.ride_type?.charAt(0).toUpperCase() +
+                    historyItem.request.ride_type?.slice(1)}
+                </Typography>
+                <DateTime>
+                  <CalendarMonthIcon />
+                  {new Date(historyItem.ride_start_time).toLocaleString("en-GB", {
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </DateTime>
+  
+                <Typography variant="subtitle1">
+                  {historyItem.distance_travelled} mi
+                </Typography>
+                <Typography variant="subtitle1" sx={{ mt: 1 }}>
+                  {historyItem.request.ride_type}
+                </Typography>
+              </HistoryDescription>
+              <HistoryAction>
+                <Price>
+                  $
+                  {(parseFloat(historyItem.request.approximate_fare) || 0).toLocaleString("en-US", {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}
+                </Price>
+                <Action>
+                  <Typography variant="success">
+                    {historyItem.customer_cancel_ride || historyItem.driver_cancel_ride
+                      ? "Cancelled"
+                      : "Success"}
                   </Typography>
-                  <DateTime>
-                    <CalendarMonthIcon />{" "}
-                    {format(
-                      parse(
-                        historyItem.ride_time,
-                        "dd-MM-yyyy hh:mm:ss a",
-                        new Date()
-                      ),
-                      "dd-MM-yyyy hh:mm a"
-                    )}
-                  </DateTime>
-
-                  <Typography variant="subtitle1">
-                    {historyItem.trip_distance} mi
-                  </Typography>
-                  <Typography variant="subtitle1" sx={{ mt: 1 }}>
-                    Regular ride
-                  </Typography>
-                </HistoryDescription>
-                <HistoryAction>
-                  <Price>
-                    $
-                    {(typeof historyItem.total === "string"
-                      ? parseFloat(historyItem.total)
-                      : historyItem.total
-                    ).toLocaleString("en-US", {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    })}
-                  </Price>
-                  <Action>
-                    <Typography variant="success">
-                      {historyItem.customer_cancel_status === "Cancelled"
-                        ? "Cancelled"
-                        : "Success"}
-                    </Typography>
-                  </Action>
-                </HistoryAction>
-              </HistoryRow>
-            </>
+                </Action>
+              </HistoryAction>
+            </HistoryRow>
           ))
         ) : (
           <HistoryRow>
@@ -93,6 +89,7 @@ export default function RiderHistory({ riderHistory, setSubTitle }) {
       )}
     </>
   );
+  
 }
 
 const HistoryRow = styled.div`

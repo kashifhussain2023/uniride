@@ -2,13 +2,11 @@
 import axios from "axios";
 import { getSession } from "next-auth/react";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_NEW_API_URL; //`http://127.0.0.1:8000/api`;
+const API_BASE_URL = process.env.NEXT_PUBLIC_NEW_API_URL;
 
 const headerValue = async () => {
-  // Get the session from NextAuth
   const session = await getSession();
   
-  // Get the token from the session
   const token = session?.user?.data?.token_code;
   
   const header = {

@@ -12,11 +12,11 @@ const ScheduleRideTile = ({
     <ScheduleList disablePadding>
       <ListItem disableGutters>
         <Typography component="span">Start Point: </Typography>
-        {content.customer_pick_up_point_name}
+        {content.start_location_name}
       </ListItem>
       <ListItem disableGutters>
         <Typography component="span">End Point: </Typography>
-        {content.customer_destination_point_name}
+        {content.end_location_name}
       </ListItem>
       <ListItem disableGutters>
         <Typography component="span">Date: </Typography>

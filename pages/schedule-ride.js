@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import Head from "next/head";
 import { getSession } from "next-auth/react";
@@ -15,13 +15,10 @@ import SpinnerLoader from "@/components/common/SpinnerLoader";
 const favoriteDestination = ({ ScheduleRide, session }) => {
   const [loading, setLoading] = useState();
   const [open, setOpen] = useState(false);
-  const areYouSure = () => {
-    setOpen(true);
-  };
+  const [scheduleRideData, setScheduleRideData] = useState(null);
 
-  const close = () => {
-    setOpen(false);
-  };
+  const areYouSure = () => setOpen(true);
+  const close = () => setOpen(false);
 
   const cancelSchedule = async () => {
     const {
@@ -30,11 +27,14 @@ const favoriteDestination = ({ ScheduleRide, session }) => {
 
     const formData = new FormData();
 
+    console.log("customer_id",customer_id)
+
     formData.append("customer_id", customer_id);
     formData.append("token_code", token_code);
     setLoading(true);
+
     const scheduleRide = await api({
-      url: "/customers/schedule_ride_cancel",
+      url: "/customer/booking/cancel-schedule-ride",
       method: "POST",
       data: formData,
     });
@@ -50,6 +50,31 @@ const favoriteDestination = ({ ScheduleRide, session }) => {
       toast.error("Something went wrong");
     }
   };
+
+  useEffect(() => {
+    const fetchScheduleRide = async () => {
+      if (!session) return;
+
+      try {
+        const response = await api({
+          url: "/customer/booking/schedule-ride",
+          method: "GET",
+        });
+
+        if (response?.status === true && response?.data) {
+          setScheduleRideData(response.data);
+        } else {
+          toast.error(response.message || "Failed to load scheduled rides");
+        }
+      } catch (err) {
+        toast.error("Something went wrong");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchScheduleRide();
+  }, [session]);
 
   return (
     <ThemeProvider>
@@ -71,18 +96,30 @@ const favoriteDestination = ({ ScheduleRide, session }) => {
               ></PageTitle>
             </HeadSection>
             <Grid container spacing={3}>
-              {ScheduleRide.length > 0 ? (
-                ScheduleRide.map((content, index) => (
-                  <Grid item xs={12} md={12} key={`schedule-${index}`}>
+              {scheduleRideData ? (
+                Array.isArray(scheduleRideData) ? (
+                  scheduleRideData.map((content, index) => (
+                    <Grid item xs={12} md={12} key={`schedule-${index}`}>
+                      <ScheduleRideTile
+                        content={content}
+                        cancelSchedule={cancelSchedule}
+                        open={open}
+                        areYouSure={areYouSure}
+                        close={close}
+                      />
+                    </Grid>
+                  ))
+                ) : (
+                  <Grid item xs={12} md={12}>
                     <ScheduleRideTile
-                      content={content}
+                      content={scheduleRideData}
                       cancelSchedule={cancelSchedule}
                       open={open}
                       areYouSure={areYouSure}
                       close={close}
                     />
                   </Grid>
-                ))
+                )
               ) : (
                 <Grid item xs={12} md={12} textAlign="center">
                   <Typography>No schedule ride found</Typography>
@@ -102,7 +139,6 @@ export async function getServerSideProps(context) {
   const session = await getSession(context);
 
   if (!session) {
-    // Handle unauthenticated access
     return {
       redirect: {
         destination: "/login",
@@ -110,39 +146,9 @@ export async function getServerSideProps(context) {
       },
     };
   }
-  if (session && session?.user.profile_status !== "3") {
-    return {
-      redirect: {
-        destination: "/login",
-        permanent: false,
-      },
-    };
-  }
-  const {
-    user: { token_code, customer_id },
-  } = session;
 
-  const formData = new FormData();
-
-  formData.append("customer_id", customer_id);
-  formData.append("token_code", token_code);
-
-  const ScheduleRide = await api({
-    url: "/customers/schedule_ride_detail",
-    method: "POST",
-    data: formData,
-  });
-  if (ScheduleRide.message == "Invalid token code") {
-    return {
-      redirect: {
-        destination: "/login",
-        permanent: false,
-      },
-    };
-  }
   return {
     props: {
-      ScheduleRide: ScheduleRide.data,
       session,
     },
   };

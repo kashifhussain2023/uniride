@@ -17,7 +17,7 @@ const headers = [
 
 const nextConfig = {
   images: {
-    domains: ["https://www.unirideus.com"],
+    domains: ["https://www.unirideus.com",  "blogadmin.uberinternal.com"],
   },
   reactStrictMode: true,
   env: {

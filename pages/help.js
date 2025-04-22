@@ -19,35 +19,35 @@ export default function emergencyContact({ userAuth }) {
   const [loading, setLoading] = useState(true);
   const [helpData, setHelpData] = useState([]);
   const router = useRouter();
+
   const getHelpData = async () => {
     setLoading(true);
-    const formData = new FormData();
-    formData.append("user_Type", 1);
-    formData.append("customer_id", userAuth.customer_id);
-    formData.append("token_code", userAuth.token_code);
+
     const response = await api({
-      url: "/customers/help",
-      method: "POST",
-      data: formData,
+      url: "/customer/get-faq",
+      method: "GET",
     });
-    if (response.status === "TRUE") {
+
+    if (response.status === true) {
       setLoading(false);
-      setHelpData(response.help);
-    } else if (response.message == "Invalid token code") {
+      setHelpData(response.data.data);
+    } else if (response.data.message == "Invalid token code") {
       await signOut({ redirect: false });
       router.push("/login");
     } else {
       setLoading(false);
     }
   };
+
   useEffect(() => {
     getHelpData();
   }, []);
+
   return (
     <ThemeProvider>
       <Head>
         <title>Uniride</title>
-        <meta name="description" content="Uniride " />
+        <meta name="description" content="Uniride" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
@@ -86,19 +86,9 @@ export default function emergencyContact({ userAuth }) {
   );
 }
 export async function getServerSideProps(context) {
-  // You can access the session and user information here.
   const session = await getSession(context);
 
   if (!session) {
-    // Handle unauthenticated access
-    return {
-      redirect: {
-        destination: "/login",
-        permanent: false,
-      },
-    };
-  }
-  if (session && session?.user.profile_status !== "3") {
     return {
       redirect: {
         destination: "/login",

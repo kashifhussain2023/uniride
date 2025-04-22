@@ -16,8 +16,6 @@ import { toast } from "react-toastify";
 import SpinnerLoader from "@/components/common/SpinnerLoader";
 
 export default function CorporateProfile({ userAuth }) {
-  
-  console.log("userAuth", userAuth);
 
   const [loading, setLoading] = useState(true);
   const [corporateProfile, setCorporateProfile] = useState(null);
