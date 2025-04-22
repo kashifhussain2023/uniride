@@ -182,8 +182,10 @@ export default function Login() {
             "registrationDetail",
             JSON.stringify({
               name: inputs.first_name + " " + inputs.last_name,
-              mobile_number: countrycode + inputs.mobile,
-              customer_id: response.data.customer_id,
+              mobile_number: inputs.mobile,
+              password: inputs.password,
+              phone_code:countrycode,
+              customer_id: response.data.id,
               email: inputs.email
             }),
             {
@@ -202,8 +204,10 @@ export default function Login() {
             null,
             "newUserRegistration",
             JSON.stringify({
+              customer_id: response.data.id,
               name: inputs.first_name + " " + inputs.last_name,
-              mobile_number: countrycode + inputs.mobile,
+              mobile_number: inputs.mobile,
+              password: inputs.password,
               customer_id: response.data.customer_id,
               token_code: response.data.token_code // Store token if provided
             }),

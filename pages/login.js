@@ -79,6 +79,9 @@ export default function Login() {
       }
 
       const userData = session.user.data;
+      
+      console.log("userData", userData);
+
       const userProfile = {
         name: userData.name,
         mobile_number: userData.mobile_number,
@@ -108,8 +111,15 @@ export default function Login() {
           path: "/",
           secure: true,
         });
-        toast.success("Please add your card details to complete registration.");
-        router.push("/add-card");
+       
+
+        if(userData.default_payment_method===null){
+          toast.success("Please add your card details to complete registration.");
+          router.push("/add-card");
+        }else{
+          router.push("/uniride");
+        }
+
       } else if (userData.profile_status === 3) {
         // User profile is complete, proceed to main app
         toast.success(session.user.message || "Login successful");

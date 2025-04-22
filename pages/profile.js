@@ -21,7 +21,7 @@ import { setCookie } from "nookies";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
-const Profile = ({ userAuth }) => {
+const Profile = () => {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const { data: session, update: sessionUpdate } = useSession();
@@ -62,7 +62,6 @@ const Profile = ({ userAuth }) => {
     });
     getUserProfile();
   };
-
   const getUserProfile = async () => {
     try {
       setLoading(true);
@@ -103,14 +102,11 @@ const Profile = ({ userAuth }) => {
       }
     } catch (error) {
       console.error("Error in getUserProfile:", error);
-      toast.error(
-        "An error occurred while fetching your profile. Please try again."
-      );
+      toast.error("An error occurred while fetching your profile. Please try again.");
     } finally {
       setLoading(false);
     }
   };
-
   const handleInputChange = ({ target }) => {
     if (target.type === "file") {
       const file = target.files[0];
@@ -119,14 +115,6 @@ const Profile = ({ userAuth }) => {
         setProfileImage(file);
         document.getElementById("preview").src = imageUrl;
 
-        // const reader = new FileReader();
-
-        // reader.onloadend = () => {
-        //   // setBase64Image(reader.result.replace("data:image/jpeg;base64", ""));
-        //   setBase64Image(reader.result);
-        // };
-
-        // reader.readAsDataURL(file);
       } else {
         document.getElementById("preview").src = inputs.profile_picture
           ? inputs.profile_picture
@@ -154,11 +142,9 @@ const Profile = ({ userAuth }) => {
       });
     }
   };
-
   const handleChangePassword = () => {
     router.push("/changePassword");
   };
-
   const updateProfile = async (e) => {
     e.preventDefault();
     setResponseError("");
@@ -244,18 +230,15 @@ const Profile = ({ userAuth }) => {
       setErrors(validationErrors);
     }
   };
-
   const handleCountryCode = (value) => {
     setInputs((inputs) => ({
       ...inputs,
       ["countrycode"]: "+" + value,
     }));
   };
-
   useEffect(() => {
     getUserProfile();
   }, []);
-
   return (
     <ThemeProvider>
       <Head>
@@ -341,9 +324,9 @@ const Profile = ({ userAuth }) => {
                         name="first_name"
                         onChange={handleInputChange}
                       />
-                      <span className="text-danger">
-                        {errors && errors.first_name}
-                      </span>
+                    <span className="text-danger">
+                      {errors && errors.first_name}
+                    </span>
                     </FormControl>
                   </Grid>
                   <Grid lg={6} md={6} sm={12} xs={12}>
@@ -469,32 +452,6 @@ const Profile = ({ userAuth }) => {
   );
 };
 
-export async function getServerSideProps(context) {
-  // You can access the session and user information here.
-  const session = await getSession(context);
-
-  if (!session) {
-    return {
-      redirect: {
-        destination: "/login",
-        permanent: false,
-      },
-    };
-  }
-  // if (session && session?.user.profile_status !== "3") {
-  //   return {
-  //     redirect: {
-  //       destination: "/login",
-  //       permanent: false,
-  //     },
-  //   };
-  // }
-  return {
-    props: {
-      userAuth: session?.user || null,
-    },
-  };
-}
 
 export default Profile;
 
