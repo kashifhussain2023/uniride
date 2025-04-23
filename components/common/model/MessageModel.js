@@ -1,10 +1,22 @@
 import styled from "@emotion/styled";
-import { Button, Dialog, Typography } from "@mui/material";
+import { Button, Dialog, TextField, Typography } from "@mui/material";
 
-const MessageModel = ({ handleAction, open, close, message }) => (
+const MessageModel = ({ handleAction, open, close, message, showPasswordField = false,
+  password = "",
+  onPasswordChange = () => {}, }) => (
   <Dialog open={open} size="sm" onClose={close}>
     <Body>
       <Typography variant="h3">{message}</Typography>
+      {showPasswordField && (
+        <PasswordField
+          type="password"
+          label="Enter your password"
+          fullWidth
+          value={password}
+          onChange={(e) => onPasswordChange(e.target.value)}
+          variant="outlined"
+        />
+      )}
     </Body>
     <ButtonBox>
       <Button variant="secondary" onClick={close}>
@@ -33,4 +45,8 @@ const Body = styled.div`
     text-align: center;
     padding: ${theme.spacing(3)}
   `}
+`;
+
+const PasswordField = styled(TextField)`
+  margin-top: 1.5rem;
 `;

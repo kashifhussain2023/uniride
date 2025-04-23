@@ -580,7 +580,6 @@ export default function privacyPolicy({ userAuth }) {
   );
 }
 export async function getServerSideProps(context) {
-  // You can access the session and user information here.
   const session = await getSession(context);
 
   if (!session) {

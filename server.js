@@ -37,7 +37,7 @@ app.prepare().then(() => {
     handle(req, res, parsedUrl);
   }).listen(3002, (err) => {
     if (err) throw err;
-    console.log('> Ready on https://uniride.frontend:3000');
+    console.log('> Ready on https://uniride.frontend:3002');
     console.log('> HTTPS server running with custom certificates');
   });
 });

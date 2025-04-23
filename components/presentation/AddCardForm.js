@@ -45,6 +45,7 @@ export default function AddCardForm({ userAuth }) {
     year: "",
     card_type: "",
   });
+
   const [errors, setErrors] = useState({
     card_holder: "",
     // card_number: "",
@@ -53,6 +54,7 @@ export default function AddCardForm({ userAuth }) {
     // expiration_month: "",
     // expiration_year: "",
   });
+
   const handleCardDetail = (event) => {
     var brandName = event.brand.toUpperCase();
     setInputs((inputs) => ({
@@ -76,6 +78,7 @@ export default function AddCardForm({ userAuth }) {
   };
 
   const handleSubmit = async (e) => {
+
     setResponseError("");
     e.preventDefault();
 
@@ -121,6 +124,7 @@ export default function AddCardForm({ userAuth }) {
           card_cvv: "",
           card_expire: paymentMethod.card.exp_month + "/" + paymentMethod.card.exp_year,
           card_type: paymentMethod.card.brand.toUpperCase()
+          // customer_id: userAuth
         }
 
         const response = await api({

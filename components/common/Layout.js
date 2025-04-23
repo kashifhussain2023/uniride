@@ -14,17 +14,37 @@ export default function Layout({ children }) {
   const { data: session } = useSession();
   const [openDelete, setOpenDelete] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [password, setPassword] = useState("");
+  const [showPasswordField, setShowPasswordField] = useState(false);
 
   const handleDeleteAccount = async () => {
+    if (!showPasswordField) {
+      setShowPasswordField(true);
+      return; // Wait for user to enter password first
+    }
+
+    if (!password) {
+      toast.error("Please enter your password.");
+      return;
+    }
+
     setLoading(true);
     const formData = new FormData();
     formData.append("customer_id", session?.user.customer_id);
     formData.append("token_code", session?.user.token_code);
+    formData.append("password", password);
+    
+  const requestBody = {
+    password: password
+  }
+
     const response = await api({
-      url: "/customers/delete_customer",
-      method: "POST",
-      data: formData,
+      url: "/customer/delete-account",
+      method: "DELETE",
+      data: requestBody,
     });
+
+    console.log("response",response)
 
     if (response.status === true) {
       setLoading(false);
@@ -36,11 +56,8 @@ export default function Layout({ children }) {
       router.push("/login");
     } else {
       setLoading(false);
+      toast.error(response.message || "Failed to delete account");
     }
-  };
-
-  const closeDelete = () => {
-    setOpenDelete(false);
   };
 
   return (
@@ -48,10 +65,18 @@ export default function Layout({ children }) {
       <SpinnerLoader loading={loading} />
       <MessageModel
         open={openDelete}
-        close={closeDelete}
+        close={() => {
+          setOpenDelete(false);
+          setShowPasswordField(false);
+          setPassword("");
+        }}
         handleAction={handleDeleteAccount}
-        message="Do you want to delete account ?"
+        message="Do you want to delete account?"
+        showPasswordField={showPasswordField}
+        password={password}
+        onPasswordChange={setPassword}
       />
+
       <Main>
         {session &&
         session.user.status === true ? (

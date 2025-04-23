@@ -11,26 +11,23 @@ export default function CardsList({
   onDefaultCardChange,
   onDeleteCard,
 }) {
+
   const [openDeleteModel, setOpenDeleteModel] = useState(false);
-  const [selectedValue, setSelectedValue] = React.useState();
   const [cardId, setCardId] = useState(null);
   const [defaultValue, setDefaultValue] = useState(null);
+  
   const handleChange = (event, index) => {
     setDefaultValue(index);
     onDefaultCardChange(event.target.value);
   };
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
-  const handleClick = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
+  
   const handleDelete = (event) => {
     setCardId(event);
     setOpenDeleteModel(true);
   };
+
   const cardCardDelete = () => {
     setDefaultValue(null);
     onDeleteCard(cardId);
@@ -40,60 +37,62 @@ export default function CardsList({
     setOpenDeleteModel(false);
   };
   return (
-    <>
-      {cardList.length !== 0 ? (
-        cardList.map((list, index) => (
-          <CardList key={index}>
-            <Cards>
-              <Radio
-                checked={
-                  defaultValue !== null ? defaultValue === index : index === 0
-                }
-                onChange={(event) => handleChange(event, index)}
-                value={list.card_id || ""}
-                color="success"
-                name="radio-buttons"
-                inputProps={{ "aria-label": "A" }}
-              />
-              {/* <img src="../visa.png" /> */}
-              <ImageContainer>
-                <Image
-                  src={`/${list.card_type.toLowerCase()}.jpg`}
-                  alt={list.card_type}
-                  layout="fill"
-                  priority
-                />
-              </ImageContainer>
-            </Cards>
-            <CardsInfo>
-              <Typography variant="h6">{list.card_type}</Typography>
-              <Typography variant="h4">{list.card_no}</Typography>
-            </CardsInfo>
-            <CardAction>
-              <IconButton>
-                <DeleteIcon
-                  color="error"
-                  fontSize="small"
-                  onClick={() => handleDelete(list.card_id)}
-                />
-              </IconButton>
-              <Delete
-                open={openDeleteModel}
-                handleClose={handleCloseDeleteModel}
-                handleChangeOnDelete={cardCardDelete}
-                cardvalue={cardId}
-              />
-            </CardAction>
-          </CardList>
-        ))
-      ) : (
-        <NoList>
-          <Typography variant="h3" align="center">
-            No records found
-          </Typography>
-        </NoList>
-      )}
-    </>
+  <>
+  {cardList?.length !== 0 ? (
+    cardList?.map((list, index) => (
+      <CardList key={index}>
+        <Cards>
+          <Radio
+            checked={
+              defaultValue !== null ? defaultValue === index : index === 0
+            }
+            onChange={(event) => handleChange(event, index)}
+            value={list.payment_id || ""}
+            color="success"
+            name="radio-buttons"
+            inputProps={{ "aria-label": "A" }}
+          />
+          <ImageContainer>
+            <Image
+              src={`/${list.card_type?.toLowerCase() || "default"}.jpg`}
+              alt={list.card_type}
+              layout="fill"
+              priority
+            />
+          </ImageContainer>
+        </Cards>
+
+        <CardsInfo>
+          <Typography variant="h6">{list.card_type}</Typography>
+          <Typography variant="h4">{list.card_no}</Typography>
+        </CardsInfo>
+
+        <CardAction>
+          <IconButton>
+            <DeleteIcon
+              color="error"
+              fontSize="small"
+              onClick={() => handleDelete(list.payment_id)}
+            />
+          </IconButton>
+          <Delete
+            open={openDeleteModel}
+            handleClose={handleCloseDeleteModel}
+            handleChangeOnDelete={cardCardDelete}
+            cardvalue={cardId}
+          />
+        </CardAction>
+      </CardList>
+    ))
+  ) : (
+    <NoList>
+      <Typography variant="h3" align="center">
+        No records found
+      </Typography>
+    </NoList>
+  )}
+</>
+
   );
 }
 

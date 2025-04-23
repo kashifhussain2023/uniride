@@ -58,7 +58,7 @@ export default function emergencyContact({ userAuth }) {
             <PageTitle subtitle="Help" images_icon={"../help.png"}></PageTitle>
             <HelpAccordion>
               {helpData ? (
-                helpData?.map((helpData, index) => (
+                helpData?.map((helpData) => (
                   <Accordion>
                     <AccordionSummary
                       expandIcon={<ExpandMoreIcon />}

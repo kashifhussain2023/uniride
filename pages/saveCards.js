@@ -18,19 +18,20 @@ export default function SaveCards({ userAuth }) {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const { data: session, update: sessionUpdate } = useSession();
-  
+
   const getCustomerCardList = async () => {
     const formData = new FormData();
     formData.append("customer_id", userAuth.customer_id);
     formData.append("token_code", userAuth.token_code);
+
     const response = await api({
-      url: "/customers/customer_card_list",
+      url: "/customer/payments/list",
       method: "POST",
       data: formData,
     });
 
     if (response.status === true) {
-      setCardList(response.card_list);
+      setCardList(response.data);
     } else if (response.message == "Invalid token code") {
       toast.error(
         "Your account has been logged in on another device.Please login again to continue."
@@ -53,32 +54,31 @@ export default function SaveCards({ userAuth }) {
     });
 
     if (response.status === true) {
-      // Fetch updated profile data to get the latest default_payment_method status
       const profileResponse = await api({
         url: "/customer/get-profile-details",
         method: "GET",
       });
-      
+
       if (profileResponse.status === true) {
-        // Update session with new payment method status
         if (session) {
           await sessionUpdate({
             user: {
               ...session?.user,
               data: {
                 ...session?.user?.data,
-                default_payment_method: profileResponse.data.default_payment_method
-              }
+                default_payment_method:
+                  profileResponse.data.default_payment_method,
+              },
             },
           });
         }
       }
-      
+
       setLoading(false);
       toast.success(response.message);
       getCustomerCardList();
     } else if (
-      response.status === "FALSE" &&
+      response.status === false &&
       response.message === "Invalid token code"
     ) {
       setLoading(false);
@@ -92,16 +92,22 @@ export default function SaveCards({ userAuth }) {
       toast.success(response.message);
     }
   };
+
   const handleDeleteCard = async (value) => {
     setLoading(true);
     const formData = new FormData();
     formData.append("customer_id", userAuth.customer_id);
     formData.append("card_id", value);
     formData.append("token_code", userAuth.token_code);
+
+    const requestBody = {
+      payment_id: value,
+    };
+
     const response = await api({
-      url: "/customers/delete_card",
+      url: "/customer/payments/remove-card",
       method: "POST",
-      data: formData,
+      data: requestBody,
     });
 
     if (response.status === true) {
@@ -109,7 +115,7 @@ export default function SaveCards({ userAuth }) {
       toast.success(response.message);
       getCustomerCardList();
     } else if (
-      response.status === "FALSE" &&
+      response.status === false &&
       response.message === "Invalid token code"
     ) {
       setLoading(false);

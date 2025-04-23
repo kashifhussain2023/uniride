@@ -8,34 +8,34 @@ export const profileMenus = [
 ];
 
 export const menuIcons = [
-  { label: "Profile", path: "/profile", icon: "../icon/profileIcon.png" },
+  { label: "Profile", path: "/profile", icon: "/icon/profileIcon.png" },
   {
     label: "Favorite Location",
     path: "/favoriteDestination",
-    icon: "../icon/favoriteLocationIcon.png",
+    icon: "/icon/favoriteLocationIcon.png",
   },
   {
     label: "Corporate Profile",
     path: "/corporate-profile",
-    icon: "../icon/corporateProfileIcon.png",
+    icon: "/icon/corporateProfileIcon.png",
   },
   {
     label: "Emergency Contact",
     path: "/emergency-contact",
-    icon: "../icon/emergencyContactIcon.png",
+    icon: "/icon/emergencyContactIcon.png",
   },
-  { label: "Payment", path: "/saveCards", icon: "../icon/paymentIcon.png" },
+  { label: "Payment", path: "/saveCards", icon: "/icon/paymentIcon.png" },
   {
     label: "Rider History",
     path: "riderHistory",
-    icon: "../icon/riderHistoryIcon.png",
+    icon: "/icon/riderHistoryIcon.png",
   },
-  { label: "Help", path: "/help", icon: "../icon/helpIcon.png" },
-  { label: "Legal", path: "/legal", icon: "../icon/LegalIcon.png" },
+  { label: "Help", path: "/help", icon: "/icon/helpIcon.png" },
+  { label: "Legal", path: "/legal", icon: "/icon/LegalIcon.png" },
   {
     label: "Privacy Policy",
     path: "/privacyPolicy",
-    icon: "../icon/privacyIcon.png",
+    icon: "/icon/privacyIcon.png",
   },
   // { label: "Delete Account", path: "", icon: "../icon/deleteAccountIcon.png" },
 ];
