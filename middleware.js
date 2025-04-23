@@ -100,12 +100,6 @@ export async function middleware(request) {
                     console.log('Redirecting to add-card: No default payment method');
                     return NextResponse.redirect(new URL('/add-card', request.url));
                 }
-
-                // Check if corporate profile is verified
-                if (!profileData.data.corporate_profile_verified) {
-                    console.log('Redirecting to corporate-verification: Profile not verified');
-                    return NextResponse.redirect(new URL('/corporate-verification', request.url));
-                }
             }
 
             // Store profile data in request headers for use in the page

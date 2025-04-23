@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { getSession, signOut } from "next-auth/react";
+import { getSession, signOut, useSession } from "next-auth/react";
 import Head from "next/head";
 import ThemeProvider from "@/theme/ThemeProvider";
 import Layout from "@/components/common/Layout";
@@ -17,6 +17,8 @@ export default function SaveCards({ userAuth }) {
   const [cardList, setCardList] = useState([]);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const { data: session, update: sessionUpdate } = useSession();
+  
   const getCustomerCardList = async () => {
     const formData = new FormData();
     formData.append("customer_id", userAuth.customer_id);
@@ -51,9 +53,30 @@ export default function SaveCards({ userAuth }) {
     });
 
     if (response.status === "TRUE") {
+      // Fetch updated profile data to get the latest default_payment_method status
+      const profileResponse = await api({
+        url: "/customer/get-profile-details",
+        method: "GET",
+      });
+      
+      if (profileResponse.status === true) {
+        // Update session with new payment method status
+        if (session) {
+          await sessionUpdate({
+            user: {
+              ...session?.user,
+              data: {
+                ...session?.user?.data,
+                default_payment_method: profileResponse.data.default_payment_method
+              }
+            },
+          });
+        }
+      }
+      
       setLoading(false);
       toast.success(response.message);
-      //getCustomerCardList();
+      getCustomerCardList();
     } else if (
       response.status === "FALSE" &&
       response.message === "Invalid token code"

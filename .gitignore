@@ -36,3 +36,5 @@ icon
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+certificates

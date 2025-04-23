@@ -11,7 +11,7 @@ import InputLabel from "@mui/material/InputLabel";
 import Paper from "@mui/material/Paper";
 import Grid from "@mui/material/Unstable_Grid2";
 import { CardElement, useElements, useStripe } from "@stripe/react-stripe-js";
-import { signOut } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import Head from "next/head";
 import { useState } from "react";
 import { api } from "@/utils/api/common";
@@ -31,6 +31,7 @@ export default function AddCardForm({ userAuth }) {
   const router = useRouter();
   const stripe = useStripe();
   const elements = useElements();
+  const { data: session, update: sessionUpdate } = useSession();
   const [loading, setLoading] = useState(false);
   const [age, setAge] = useState("");
   const [responseError, setResponseError] = useState("");
@@ -131,18 +132,26 @@ export default function AddCardForm({ userAuth }) {
         if (response.status === true) {
           toast.success(response.message || "Card added successfully");
           
-          // Update session with new payment method status
-          // if (session) {
-          //   await sessionUpdate({
-          //     user: {
-          //       ...session?.user,
-          //       data: {
-          //         ...session?.user?.data,
-          //         default_payment_method: true
-          //       }
-          //     },
-          //   });
-          // }
+          // Fetch updated profile data to get the latest default_payment_method status
+          const profileResponse = await api({
+            url: "/customer/get-profile-details",
+            method: "GET",
+          });
+          
+          if (profileResponse.status === true) {
+            // Update session with new payment method status
+            if (session) {
+              await sessionUpdate({
+                user: {
+                  ...session?.user,
+                  data: {
+                    ...session?.user?.data,
+                    default_payment_method: profileResponse.data.default_payment_method
+                  }
+                },
+              });
+            }
+          }
           
           router.push("/uniride");
         } else if (response.status === false && response.message === "Invalid token code") {

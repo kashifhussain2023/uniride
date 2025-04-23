@@ -15,9 +15,8 @@ const handle = app.getRequestHandler();
 
 // HTTPS configuration with existing certificates
 const httpsOptions = {
-  key: fs.readFileSync(path.join(__dirname, "cert", "customer.key")),
-  cert: fs.readFileSync(path.join(__dirname, "cert", "customer.crt")),
-  ca: fs.readFileSync(path.join(__dirname, "cert", "customer.ca.cert"))
+  key: fs.readFileSync(path.join(__dirname, "cert", "uniride.frontend-key.pem")),
+  cert: fs.readFileSync(path.join(__dirname, "cert", "uniride.frontend.pem"))
 };
 
 /* app.prepare().then(() => {
@@ -38,7 +37,7 @@ app.prepare().then(() => {
     handle(req, res, parsedUrl);
   }).listen(3002, (err) => {
     if (err) throw err;
-    console.log('> Ready on https://localhost:3002');
+    console.log('> Ready on https://uniride.frontend:3000');
     console.log('> HTTPS server running with custom certificates');
   });
 });

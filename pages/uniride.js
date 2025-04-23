@@ -5,7 +5,7 @@ import RiderInfo from "@/components/common/RiderInfo";
 import SpinnerLoader from "@/components/common/SpinnerLoader";
 import LocationValueModel from "@/components/common/model/LocationValueModel";
 import InnerContent from "@/components/presentation/InnerContent";
-import socket from "@/components/presentation/Socket";
+import socket, { socketEvents, socketHelpers,socketService } from "@/components/presentation/Socket";
 import ThemeProvider from "@/theme/ThemeProvider";
 import { api } from "@/utils/api/register";
 import styled from "@emotion/styled";
@@ -78,6 +78,17 @@ export default function Dashboard({ userAuth }) {
     "Another ride is only possible after scheduled ride complete or scheduled ride cancel";
   const handleCarTypeId = (carId) => {
     setCarTypeId(carId);
+    
+    // Request driver locations when car type changes
+    if (currentLocation && carId) {
+      const requestData = {
+        pickup_lat: currentLocation.lat,
+        pickup_lng: currentLocation.lng,
+        car_type: carId
+      };
+      
+      socketHelpers.getDriverLocation(requestData);
+    }
   };
 
   const handleSelectRide = async (rideType) => {
@@ -317,7 +328,7 @@ export default function Dashboard({ userAuth }) {
           auth_token: userAuth.token_code,
           token_code: userAuth.token_code,
         };
-        socket.emit("cancel_ride", params);
+        socketHelpers.cancel_ride(params);
         setTimeout(() => {
           window.location.reload();
         }, 2000);
@@ -412,50 +423,146 @@ export default function Dashboard({ userAuth }) {
   };
 
   const getAllCarsList = async (location) => {
-    const session = await getSession();
 
-    const formData = new FormData();
-    formData.append("os", 1);
-    formData.append("lat", location.lat);
-    formData.append("lng", location.lng);
-    formData.append("ride_type", customerRideType);
-    formData.append("customer_id", session.user.customer_id);
-    formData.append("check_city", true);
-    setLoading(true);
-    const response = await api({
-      url: "/common/get_cars",
-      method: "POST",
-      data: formData,
-    });
-
-    if (response.status === true) {
-      setCarStatus(true);
-      setCarsList(response.data.cars);
-
-      const defaultCars = response.data.cars?.filter((car) => {
-        return (
-          car.default_car === true &&
-          car.is_corporate === (customerRideType === "regular" ? "0" : "1")
-        );
-      });
-
-      if (defaultCars.length > 0) {
-        setCarTypeId(defaultCars[0].id);
-        setAvgTime(defaultCars[0].avg_time);
-        setAvailableDriver(defaultCars[0].drivers);
-      } else {
-        setCarTypeId(null);
-        setAvailableDriver([]);
+    const carsList = [
+      {
+          "is_corporate": "0",
+          "id": "5",
+          "name": "Sedan",
+          "no_of_seats": "4",
+          "map_car_image": "https://www.unirideus.com/staging/uploads/managers/images/1498112898.png",
+          "list_car_image": "https://www.unirideus.com/staging/uploads/managers/images/1568266092.png",
+          "base_fare": "20.00",
+          "allow_basefare": "1",
+          "cancelation_fee": "30.00",
+          "per_mile_fare": "10.00",
+          "per_minute_fare": "10.00",
+          "minimum_fare": "35.00",
+          "default_car": false,
+          "avg_time": "no cars",
+          "drivers": []
+      },
+      {
+          "is_corporate": "0",
+          "id": "6",
+          "name": "SUV",
+          "no_of_seats": "6",
+          "map_car_image": "https://www.unirideus.com/staging/uploads/managers/images/1568195848.png",
+          "list_car_image": "https://www.unirideus.com/staging/uploads/managers/images/1568266034.png",
+          "base_fare": "25.00",
+          "allow_basefare": "1",
+          "cancelation_fee": "30.00",
+          "per_mile_fare": "8.00",
+          "per_minute_fare": "1.50",
+          "minimum_fare": "40.00",
+          "default_car": true,
+          "avg_time": "no cars",
+          "drivers": []
+      },
+      {
+          "is_corporate": "0",
+          "id": "3",
+          "name": "Lux",
+          "no_of_seats": "4",
+          "map_car_image": "https://www.unirideus.com/staging/uploads/managers/images/1498112920.png",
+          "list_car_image": "https://www.unirideus.com/staging/uploads/managers/images/1568266147.png",
+          "base_fare": "25.00",
+          "allow_basefare": "1",
+          "cancelation_fee": "30.00",
+          "per_mile_fare": "25.00",
+          "per_minute_fare": "25.00",
+          "minimum_fare": "50.00",
+          "default_car": false,
+          "avg_time": "no cars",
+          "drivers": []
+      },
+      {
+          "is_corporate": "0",
+          "id": "2",
+          "name": "Mini Van",
+          "no_of_seats": "8",
+          "map_car_image": "https://www.unirideus.com/staging/uploads/managers/images/1498112909.png",
+          "list_car_image": "https://www.unirideus.com/staging/uploads/managers/images/1568266130.png",
+          "base_fare": "20.00",
+          "allow_basefare": "1",
+          "cancelation_fee": "30.00",
+          "per_mile_fare": "6.00",
+          "per_minute_fare": "6.00",
+          "minimum_fare": "10.00",
+          "default_car": false,
+          "avg_time": "no cars",
+          "drivers": []
       }
-      setLoading(false);
-    } else if (response.message == "Invalid token code") {
-      setLoading(false);
-      // await signOut({ redirect: false });
-      // router.push("/login");
-    } else {
-      setLoading(false);
-      setCarStatus(false);
-    }
+  ]
+
+  const defaultCars = carsList.filter((car) => {
+    return (
+      car.default_car === true &&
+      car.is_corporate === (customerRideType === "regular" ? "0" : "1")
+    );
+  });
+
+  setCarsList(carsList);
+  setCarStatus(true);
+  if (defaultCars.length > 0) {
+    setCarTypeId(defaultCars[0].id);
+    setAvgTime(defaultCars[0].avg_time);
+    setAvailableDriver(defaultCars[0].drivers);
+  } else {
+    setCarTypeId(null);
+    setAvailableDriver([]);
+  }
+  setLoading(false);
+
+
+
+    // const session = await getSession();
+
+    // const formData = new FormData();
+    // formData.append("os", 1);
+    // formData.append("lat", location.lat);
+    // formData.append("lng", location.lng);
+    // formData.append("ride_type", customerRideType);
+    // formData.append("customer_id", userAuth.customer_id);
+    // formData.append("check_city", true);
+    // setLoading(true);
+    // const response = await api({
+    //   url: "/common/get_cars",
+    //   method: "POST",
+    //   data: formData,
+    // });
+
+    // if (response.status === true) {
+    //   setCarStatus(true);
+    //   setCarsList(response.data.cars);
+
+    //   // const defaultCars = response.data.cars?.filter(
+    //   //   (car) => car.default_car === true && car.is_corporate === "0"
+    //   // );
+    //   const defaultCars = response.data.cars?.filter((car) => {
+    //     return (
+    //       car.default_car === true &&
+    //       car.is_corporate === (customerRideType === "regular" ? "0" : "1")
+    //     );
+    //   });
+
+    //   if (defaultCars.length > 0) {
+    //     setCarTypeId(defaultCars[0].id);
+    //     setAvgTime(defaultCars[0].avg_time);
+    //     setAvailableDriver(defaultCars[0].drivers);
+    //   } else {
+    //     setCarTypeId(null);
+    //     setAvailableDriver([]);
+    //   }
+    //   setLoading(false);
+    // } else if (response.message == "Invalid token code") {
+    //   setLoading(false);
+    //   // await signOut({ redirect: false });
+    //   // router.push("/login");
+    // } else {
+    //   setLoading(false);
+    //   setCarStatus(false);
+    // }
   };
 
   const getUserCurrentLoacation = () => {
@@ -627,103 +734,135 @@ export default function Dashboard({ userAuth }) {
 
   useEffect(() => {
     getUserCurrentLoacation();
-    getCurrentRideStatus();
-    getScheduleRideDetail();
+    // getCurrentRideStatus();
+    // getScheduleRideDetail();
 
-    const params = {
-      user_id: userAuth.customer_id,
-      user_type: "customer",
-      auth_token: userAuth.token_code,
-      device_id: "fjsndfjdsfnsdkjfnskdfnsd",
-      device_type: "ios",
-    };
-    socket.emit("add_user", params);
+    // Initialize socket with auth token
+    const initializeSocket = async () => {
+      try {
+        //const session = await getSession();
 
-    const handleTrackRide = (response) => {
-      console.log('handleTrackRide RS :' + JSON.stringify(response, null, 4));
-      if (response.status === "TRUE" && response.code === 2) {
-        setLoading(false);
-        setAcceptDriverDetail(response.data);
-        setRideStatus(response.data.ride_status);
-        setDriverId(response.data.driver_id);
-        toast.info(response.message);
-        setDriverLocation({
-          lat: parseFloat(response.data.driver_latitude),
-          lng: parseFloat(response.data.driver_longitude),
-        });
-        setComfirmBooking(false);
-        setInRRoute(true);
-      } else if (response.status === "FALSE" && response.code === 3) {
-        setLoading(false);
-        setComfirmBooking(false);
-        setSelectRide(true);
-        toast.info(response.message);
-        setTimeout(() => {
-          window.location.reload();
-        }, 2000);
-      } else if (response.status === "TRUE" && response.code === 5) {
-        setAcceptDriverDetail(response.data);
-        setRideStatus(response.data.ride_status);
-        toast.info(response.message);
-      } else if (response.status === "TRUE" && response.code === 6) {
-        setRideStatus(response.data.ride_status);
-        setAcceptDriverDetail(response.data);
-        toast.info(response.message);
-      } else if (response.status === "TRUE" && response.code === 7) {
-        setShowReview(true);
-        setEndRideData(response.data);
-        toast.info(response.message);
-      } else {
-        setLoading(false);
-        setComfirmBooking(false);
-        setSelectRide(true);
-        toast.info(response.message);
-        router.push("/uniride");
-      }
-    };
-    const handleDriverLocation = (responseLocation) => {
-      if (responseLocation && responseLocation.length > 0) {
-        // Assuming driver_id is unique, check if the driver is not already in the array
-        const newDriver = responseLocation[0];
-        if (
-          !availableDriver.some(
-            (driver) => driver.driver_id === newDriver.driver_id
-          )
-        ) {
-          setAvailableDriver((prevDrivers) => [...prevDrivers, newDriver]);
+        // console.log("userAuth",userAuth);
+        // console.log("Session data:", session);
+        
+        if (userAuth && userAuth.token_code) {
+          // Set the auth token in the socket service
+          console.log("Setting auth token:", userAuth.token_code);
+          socketService.setAuthToken(userAuth.token_code);
+        } else {
+          console.warn("No access token found in session");
+          // Try to use the token from userAuth as a fallback
+          if (userAuth && userAuth.token_code) {
+            console.log("Using token_code as fallback:", userAuth.token_code);
+            socketService.setAuthToken(userAuth.token_code);
+          }
         }
-      }
-      setDriverLocation({
-        lat: parseFloat(responseLocation[0].lat),
-        lng: parseFloat(responseLocation[0].lng),
-      });
-    };
-    const handleDriverOutOfRange = (responseOutOfRange) => {
-      if (responseOutOfRange && responseOutOfRange.length > 0) {
-        // Remove the driver with the specified driver_id from availableDriver array
-        const newDriver = responseOutOfRange[0];
-        setAvailableDriver((prevDrivers) =>
-          prevDrivers.filter(
-            (driver) => driver.driver_id !== newDriver.driver_id
-          )
-        );
+      } catch (error) {
+        console.error("Error initializing socket:", error);
       }
     };
 
-    const handleUpdateDriverLocation = (responseUpdateDriverLocation) => { };
-
-    socket.on("track_ride", handleTrackRide);
-    socket.on("driver_location", handleDriverLocation);
-    socket.on("update_driver_location", handleUpdateDriverLocation);
-    socket.on("driver_out_of_range", handleDriverOutOfRange);
-
-    return () => {
-      socket.off("track_ride", handleTrackRide);
-      socket.off("driver_location", handleDriverLocation);
-      socket.off("update_driver_location", handleUpdateDriverLocation);
-      socket.off("driver_out_of_range", handleDriverOutOfRange);
+    // Save socket info when component mounts
+    const saveSocketInfo = () => {
+      const socketInfo = {
+        user_type: "customer"
+      };
+      
+      //console.log("Saving socket info:", socketInfo);
+      
+      socketHelpers.saveSocketInfo(socketInfo)
+        .then(response => {
+          console.log("Socket info saved:", response);
+          // if (response.status === "TRUE") {
+          //   console.log("Socket connection established successfully");
+          // } else {
+          //   console.error("Failed to save socket info:", response.message);
+          // }
+        })
+        .catch(error => {
+          console.error("Error saving socket info:", error);
+        });
     };
-  }, []);
+    
+    // Listen for car locations
+    const handleCarLocations = (response) => {
+      console.log("Received car locations:", response);
+      if (response && response.length > 0) {
+        // Update available drivers with the new locations
+        setAvailableDriver(prevDrivers => {
+          // Create a map of existing drivers for quick lookup
+          const driverMap = new Map();
+          prevDrivers.forEach(driver => {
+            driverMap.set(driver.driver_id, driver);
+          });
+          
+          // Update or add new driver locations
+          response.forEach(location => {
+            if (driverMap.has(location.driver_id)) {
+              // Update existing driver
+              const updatedDriver = {
+                ...driverMap.get(location.driver_id),
+                lat: location.lat,
+                lng: location.lng
+              };
+              driverMap.set(location.driver_id, updatedDriver);
+            } else {
+              // Add new driver
+              driverMap.set(location.driver_id, location);
+            }
+          });
+          
+          // Convert map back to array
+          return Array.from(driverMap.values());
+        });
+      }
+    };
+
+    // Request driver locations when pickup location is set
+    const requestDriverLocations = () => {
+      if (currentLocation && carTypeId) {
+        const requestData = {
+          pickup_lat: currentLocation.lat,
+          pickup_lng: currentLocation.lng,
+          car_type: carTypeId
+        };
+        
+        socketHelpers.getDriverLocation(requestData);
+      }
+    };
+
+    // Initialize socket and set up event listeners
+    initializeSocket().then(() => {
+      // Set up socket event listeners
+      const unsubscribeCarLocations = socketService.on(socketEvents.CAR_LOCATIONS, handleCarLocations);
+      
+      // Save socket info and request driver locations
+      saveSocketInfo();
+      
+      // Request driver locations when component mounts and when currentLocation or carTypeId changes
+      if (currentLocation && carTypeId) {
+        requestDriverLocations();
+      }
+
+      // Clean up socket event listeners when component unmounts
+      return () => {
+        unsubscribeCarLocations();
+      };
+    });
+  }, []); // Empty dependency array to run only once on mount
+
+  // Add a separate effect to handle location and car type changes
+  useEffect(() => {
+    if (currentLocation && carTypeId) {
+      const requestData = {
+        pickup_lat: currentLocation.lat,
+        pickup_lng: currentLocation.lng,
+        car_type: carTypeId
+      };
+      
+      socketHelpers.getDriverLocation(requestData);
+    }
+  }, [currentLocation, carTypeId]);
 
   useEffect(() => {
     getUserCurrentLoacation();
