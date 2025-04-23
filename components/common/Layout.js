@@ -26,7 +26,7 @@ export default function Layout({ children }) {
       data: formData,
     });
 
-    if (response.status === "TRUE") {
+    if (response.status === true) {
       setLoading(false);
       toast.success(response.message);
       await signOut({ redirect: false });
@@ -54,8 +54,7 @@ export default function Layout({ children }) {
       />
       <Main>
         {session &&
-        session.user.status === "TRUE" &&
-        session.user.profile_status === "3" ? (
+        session.user.status === true ? (
           <TopBar setOpenDelete={setOpenDelete} />
         ) : (
           ""

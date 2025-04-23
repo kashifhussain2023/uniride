@@ -85,7 +85,7 @@ export default function Verification({ userAuth }) {
         data: formData,
       });
 
-      if (response.status === "TRUE") {
+      if (response.status === true) {
         if (session) {
           session.user.token_code = response.token_code;
         }
@@ -120,7 +120,7 @@ export default function Verification({ userAuth }) {
       data: formData,
     });
 
-    if (response.status === "TRUE") {
+    if (response.status === true) {
       setLoading(false);
       toast.success(response.message);
     } else if (response.status === "FALSE") {

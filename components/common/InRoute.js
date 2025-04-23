@@ -39,7 +39,7 @@ export default function InRoute({
       data: formData,
     });
 
-    if (response.status === "TRUE") {
+    if (response.status === true) {
       //setLoading(false);
       setDeleteMessage(response.message);
       setOpenCancelModel(true);

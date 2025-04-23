@@ -38,7 +38,7 @@ export default function Review({ userAuth }) {
   };
   useEffect(() => {
     socket.on("track_ride", (response) => {
-      if (response.status === "TRUE" && response.code === 7) {
+      if (response.status === true && response.code === 7) {
         getReviewPageDetail(response.data.ride_type);
       }
     });
@@ -480,14 +480,7 @@ export async function getServerSideProps(context) {
       },
     };
   }
-  if (session && session?.user.profile_status !== "3") {
-    return {
-      redirect: {
-        destination: "/login",
-        permanent: false,
-      },
-    };
-  }
+
   return {
     props: {
       userAuth: session.user || null,

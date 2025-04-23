@@ -171,7 +171,7 @@ const HelpAccordion = styled.div`
         }
       }
 
-      &[aria-expanded="true"] {
+      &[aria-expanded=true] {
         .MuiAccordionSummary-content {
           background-image: url(../minus.png);
           background-repeat: no-repeat;

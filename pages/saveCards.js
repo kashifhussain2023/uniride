@@ -29,7 +29,7 @@ export default function SaveCards({ userAuth }) {
       data: formData,
     });
 
-    if (response.status === "TRUE") {
+    if (response.status === true) {
       setCardList(response.card_list);
     } else if (response.message == "Invalid token code") {
       toast.error(
@@ -52,7 +52,7 @@ export default function SaveCards({ userAuth }) {
       data: formData,
     });
 
-    if (response.status === "TRUE") {
+    if (response.status === true) {
       // Fetch updated profile data to get the latest default_payment_method status
       const profileResponse = await api({
         url: "/customer/get-profile-details",
@@ -104,7 +104,7 @@ export default function SaveCards({ userAuth }) {
       data: formData,
     });
 
-    if (response.status === "TRUE") {
+    if (response.status === true) {
       setLoading(false);
       toast.success(response.message);
       getCustomerCardList();
@@ -182,14 +182,7 @@ export async function getServerSideProps(context) {
       },
     };
   }
-  if (session && session?.user.profile_status !== "3") {
-    return {
-      redirect: {
-        destination: "/login",
-        permanent: false,
-      },
-    };
-  }
+
   return {
     props: {
       userAuth: session.user || null,

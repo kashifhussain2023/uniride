@@ -29,14 +29,6 @@ export async function getServerSideProps(context) {
       },
     };
   }
-  if (session && session?.user.profile_status !== "3") {
-    return {
-      redirect: {
-        destination: "/login",
-        permanent: false,
-      },
-    };
-  }
 
   return {
     props: {

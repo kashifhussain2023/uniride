@@ -59,7 +59,7 @@ export default function Profile({userAuth}) {
       data: formData,
     });
     
-    if (response.status === "TRUE") {
+    if (response.status === true) {
 
       setProfileData(response);
       setInputs(response);

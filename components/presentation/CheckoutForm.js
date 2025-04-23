@@ -131,7 +131,7 @@ export default function AddPaymentInfo({ userAuth }) {
         data: formData,
       });
 
-      if (response.status === "TRUE") {
+      if (response.status === true) {
         // Fetch updated profile data to get the latest default_payment_method status
         const profileResponse = await api({
           url: "/customer/get-profile-details",

@@ -202,7 +202,7 @@ export default function Dashboard({ userAuth }) {
         data: formData,
       });
 
-      if (response.status === "TRUE") {
+      if (response.status === true) {
         setLoading(false);
         toast.info(response.message);
         setTimeout(() => {
@@ -285,7 +285,7 @@ export default function Dashboard({ userAuth }) {
       data: formData,
     });
 
-    if (response.status === "TRUE") {
+    if (response.status === true) {
       setLoading(false);
       setSelectRide(true);
       setComfirmBooking(false);
@@ -314,7 +314,7 @@ export default function Dashboard({ userAuth }) {
       data: formData,
     });
 
-    if (response.status === "TRUE") {
+    if (response.status === true) {
       setLoading(false);
       setSelectRide(true);
       setComfirmBooking(false);
@@ -460,14 +460,14 @@ export default function Dashboard({ userAuth }) {
     });
 
     if (
-      response.status === "TRUE" &&
+      response.status === true &&
       response.message === "Tip is not given for this ride"
     ) {
       setShowReview(true);
       setLoading(false);
       // /setCurrentRideResponse(response);
     } else if (
-      response.status === "TRUE" &&
+      response.status === true &&
       response.message === "Driver is not arrived"
     ) {
       setSelectRide(false);
@@ -490,7 +490,7 @@ export default function Dashboard({ userAuth }) {
       setAcceptDriverDetail(response);
       setRideStatus(2);
     } else if (
-      response.status === "TRUE" &&
+      response.status === true &&
       response.message === "Driver arrived at the the pick up location"
     ) {
       setSelectRide(false);
@@ -513,7 +513,7 @@ export default function Dashboard({ userAuth }) {
       setAcceptDriverDetail(response);
       setRideStatus(3);
     } else if (
-      response.status === "TRUE" &&
+      response.status === true &&
       response.message === "Journey started"
     ) {
       setSelectRide(false);
@@ -535,7 +535,7 @@ export default function Dashboard({ userAuth }) {
       });
       setAcceptDriverDetail(response);
       setRideStatus(4);
-    } else if (response.status === "TRUE") {
+    } else if (response.status === true) {
       setShowReview(false);
       setLoading(false);
     } else {
@@ -581,9 +581,9 @@ export default function Dashboard({ userAuth }) {
       device_id: "fjsndfjdsfnsdkjfnskdfnsd",
       device_type: "ios",
     };
-    socket.emit("add_user", params);
+    //socket.emit("add_user", params);
     const handleTrackRide = (response) => {
-      if (response.status === "TRUE" && response.code === 2) {
+      if (response.status === true && response.code === 2) {
         setLoading(false);
         setAcceptDriverDetail(response.data);
         setRideStatus(response.data.ride_status);
@@ -600,15 +600,15 @@ export default function Dashboard({ userAuth }) {
         setSelectRide(true);
         toast.info(response.message);
         router.push("/uniride");
-      } else if (response.status === "TRUE" && response.code === 5) {
+      } else if (response.status === true && response.code === 5) {
         setAcceptDriverDetail(response.data);
         setRideStatus(response.data.ride_status);
         toast.info(response.message);
-      } else if (response.status === "TRUE" && response.code === 6) {
+      } else if (response.status === true && response.code === 6) {
         setRideStatus(response.data.ride_status);
         setAcceptDriverDetail(response.data);
         toast.info(response.message);
-      } else if (response.status === "TRUE" && response.code === 7) {
+      } else if (response.status === true && response.code === 7) {
         setShowReview(true);
         setEndRideData(response.data);
         toast.info(response.message);
@@ -649,17 +649,17 @@ export default function Dashboard({ userAuth }) {
       }
     };
     const handleUpdateDriverLocation = (responseLocation) => {};
-    socket.on("track_ride", handleTrackRide);
-    socket.on("driver_location", handleDriverLocation);
-    socket.on("update_driver_location", handleUpdateDriverLocation);
-    socket.on("driver_out_of_range", handleDriverOutOfRange);
+    // socket.on("track_ride", handleTrackRide);
+    // socket.on("driver_location", handleDriverLocation);
+    // socket.on("update_driver_location", handleUpdateDriverLocation);
+    // socket.on("driver_out_of_range", handleDriverOutOfRange);
 
-    return () => {
-      socket.off("track_ride", handleTrackRide);
-      socket.off("driver_location", handleDriverLocation);
-      socket.on("update_driver_location", handleUpdateDriverLocation);
-      socket.off("driver_out_of_range", handleDriverOutOfRange);
-    };
+    // return () => {
+    //   socket.off("track_ride", handleTrackRide);
+    //   socket.off("driver_location", handleDriverLocation);
+    //   socket.on("update_driver_location", handleUpdateDriverLocation);
+    //   socket.off("driver_out_of_range", handleDriverOutOfRange);
+    // };
   }, []);
   return (
     <ThemeProvider>

@@ -49,7 +49,7 @@ export default function ConfirmBooking({
         data: formData,
       });
 
-      if (response.status === "TRUE") {
+      if (response.status === true) {
         setLoading(false);
         setCodeStatus(true);
         toast.success(response.message);

@@ -227,8 +227,8 @@ const LocationPickerMap = ({
               <MarkerF
                 key={index}
                 position={{
-                  lat: parseFloat(driver.lat),
-                  lng: parseFloat(driver.lng),
+                  lat: parseFloat(driver.driver_lat),
+                  lng: parseFloat(driver.driver_lng),
                 }}
                 icon={{
                   url: "../carImage.png",

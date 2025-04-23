@@ -124,7 +124,7 @@ export default function Review({ endRideData, userAuth, acceptDriverDetail }) {
       data: formData,
     });
 
-    if (response.status === "TRUE") {
+    if (response.status === true) {
       setReviewLoading(false);
       setRideResponse(response);
       setTotalAmount(response.total_cost);
@@ -147,7 +147,7 @@ export default function Review({ endRideData, userAuth, acceptDriverDetail }) {
             images_icon={"../review.png"}
           ></PageTitle>
           {rideResponse?.discount_total &&
-            rideResponse?.discount_applied == "TRUE" && (
+            rideResponse?.discount_applied == true && (
               <DiscountLabel>
                 <img src="../couponIcon.png" />
 

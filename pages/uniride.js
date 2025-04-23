@@ -167,7 +167,7 @@ export default function Dashboard({ userAuth }) {
         data: formData,
       });
 
-      if (response.status === "TRUE") {
+      if (response.status === true) {
         toast.success(response.message);
       } else if (response.status === "FALSE" && (response.code === 2 || response.code === 4)) {
         toast.error(response.message);
@@ -225,7 +225,7 @@ export default function Dashboard({ userAuth }) {
           data: formData,
         });
 
-        if (response.status === "TRUE") {
+        if (response.status === true) {
           toast.success(response.message);
           setTimeout(() => {
             window.location.reload();
@@ -316,7 +316,7 @@ export default function Dashboard({ userAuth }) {
         data: formData,
       });
 
-      if (response.status === "TRUE") {
+      if (response.status === true) {
         setSelectRide(true);
         setComfirmBooking(false);
         setInRRoute(false);
@@ -618,14 +618,14 @@ export default function Dashboard({ userAuth }) {
     });
 
     if (
-      response.status === "TRUE" &&
+      response.status === true &&
       response.message === "Tip is not given for this ride"
     ) {
       setShowReview(true);
       setLoading(false);
       // /setCurrentRideResponse(response);
     } else if (
-      response.status === "TRUE" &&
+      response.status === true &&
       response.message === "Driver is not arrived"
     ) {
       setSelectRide(false);
@@ -649,7 +649,7 @@ export default function Dashboard({ userAuth }) {
       setRideStatus(2);
       setDriverId(response.driver_id);
     } else if (
-      response.status === "TRUE" &&
+      response.status === true &&
       response.message === "Driver arrived at the the pick up location"
     ) {
       setSelectRide(false);
@@ -673,7 +673,7 @@ export default function Dashboard({ userAuth }) {
       setRideStatus(3);
       setDriverId(response.driver_id);
     } else if (
-      response.status === "TRUE" &&
+      response.status === true &&
       response.message === "Journey started"
     ) {
       setSelectRide(false);
@@ -696,7 +696,7 @@ export default function Dashboard({ userAuth }) {
       setAcceptDriverDetail(response);
       setRideStatus(4);
       setDriverId(response.driver_id);
-    } else if (response.status === "TRUE") {
+    } else if (response.status === true) {
       setShowReview(false);
       setLoading(false);
     } else {
@@ -773,7 +773,7 @@ export default function Dashboard({ userAuth }) {
       socketHelpers.saveSocketInfo(socketInfo)
         .then(response => {
           console.log("Socket info saved:", response);
-          // if (response.status === "TRUE") {
+          // if (response.status === true) {
           //   console.log("Socket connection established successfully");
           // } else {
           //   console.error("Failed to save socket info:", response.message);

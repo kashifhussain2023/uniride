@@ -417,8 +417,7 @@ export async function getServerSideProps(context) {
 
   if (
     session &&
-    session.user.status === "TRUE" &&
-    session.user.profile_status === "3"
+    session.user.status === true
   ) {
     // Handle unauthenticated access
     return {
