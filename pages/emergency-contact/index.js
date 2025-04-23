@@ -54,7 +54,6 @@ export default function EmergencyContacts() {
   };
 
   const handleDelete = async (contactId) => {
-    //if (window.confirm("Are you sure you want to delete this contact?")) {
       try {
         setLoading(true);
         const response = await api({
@@ -64,7 +63,6 @@ export default function EmergencyContacts() {
 
         if (response.status === true) {
           toast.success("Emergency contact deleted successfully");
-          // Update local state by filtering out the deleted contact
           setOpen(false);
           setEmergencyList(prevContacts => prevContacts.filter(contact => contact.id !== contactId));
         } else {
@@ -76,7 +74,6 @@ export default function EmergencyContacts() {
       } finally {
         setLoading(false);
       }
-    //}
   };
 
   const handleOpen = (id) => {

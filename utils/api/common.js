@@ -32,7 +32,7 @@ export const api = async (options) => {
 			},
     };
 
-    if (["POST", "PUT"].includes(options.method)) {
+    if (["POST", "PUT", "DELETE"].includes(options.method)) {
       config["data"] = options.data;
     }
     // if (options.headers) {

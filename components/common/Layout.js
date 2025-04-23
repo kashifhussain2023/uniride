@@ -20,7 +20,7 @@ export default function Layout({ children }) {
   const handleDeleteAccount = async () => {
     if (!showPasswordField) {
       setShowPasswordField(true);
-      return; // Wait for user to enter password first
+      return;
     }
 
     if (!password) {
@@ -30,21 +30,13 @@ export default function Layout({ children }) {
 
     setLoading(true);
     const formData = new FormData();
-    formData.append("customer_id", session?.user.customer_id);
-    formData.append("token_code", session?.user.token_code);
     formData.append("password", password);
-    
-  const requestBody = {
-    password: password
-  }
-
+  
     const response = await api({
       url: "/customer/delete-account",
       method: "DELETE",
-      data: requestBody,
+      data: formData,
     });
-
-    console.log("response",response)
 
     if (response.status === true) {
       setLoading(false);

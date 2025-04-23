@@ -83,7 +83,7 @@ export default function SaveCards({ userAuth }) {
     ) {
       setLoading(false);
       toast.error(
-        "Your account has been logged in on another device.Please login again to continue."
+        "Your account has been logged in on another device. Please login again to continue."
       );
       await signOut({ redirect: false });
       router.push("/login");
@@ -156,7 +156,7 @@ export default function SaveCards({ userAuth }) {
                 title="Save"
                 subtitle="Cards"
                 images_icon={"../cards.png"}
-              ></PageTitle>
+              />
 
               <Button
                 variant="contained"
