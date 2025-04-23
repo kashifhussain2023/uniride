@@ -106,7 +106,7 @@ export default function TopBar({ setOpenDelete }) {
               >
                 <ListItemIcon>
                   <Image
-                    src={`${icon}`}
+                    src={`/${icon}`}
                     layout="responsive"
                     alt="logo"
                     width={30}

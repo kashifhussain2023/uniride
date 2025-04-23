@@ -65,9 +65,11 @@ export default function Dashboard({ userAuth }) {
   //handle all component data
   const scheduleMsg =
     "Another ride is only possible after scheduled ride complete or scheduled ride cancel";
+    
   const handleCarTypeId = (carId) => {
     setCarTypeId(carId);
   };
+
   const handleSelectRide = async (rideType) => {
     if (scheduleRideStatus) {
       setScheduleMessage(true);
@@ -129,6 +131,7 @@ export default function Dashboard({ userAuth }) {
       setOpenValueModel(true);
     }
   };
+
   const applyCoupon = async (promoCodeValue) => {
     if (!promoCodeValue || promoCodeValue.trim() === "") {
       setErrors("Please enter promo code");
@@ -157,16 +160,20 @@ export default function Dashboard({ userAuth }) {
       }
     }
   };
+
   const dropPickLocationType = (type) => {
     setLocationType(type);
     setOpenValueModel(true);
   };
+
   const handleComfirmBooking = () => {
     setGenderModelOpen(true);
   };
+
   const handleGenderClose = () => {
     setGenderModelOpen(close);
   };
+
   const proceedGenderModel = async (gender) => {
     if (selectedDate !== null && selectedTime !== null) {
       setLoading(true);
@@ -269,9 +276,11 @@ export default function Dashboard({ userAuth }) {
       }
     }
   };
+
   const handleInRoute = () => {
     setInRRoute(true);
   };
+  
   const handleRideCancelModel = async () => {
     setLoading(true);
     const formData = new FormData();
@@ -298,6 +307,7 @@ export default function Dashboard({ userAuth }) {
       toast.info(response.message);
     }
   };
+
   const handleCancelRunningRide = async () => {
     setLoading(true);
     const formData = new FormData();
@@ -343,12 +353,15 @@ export default function Dashboard({ userAuth }) {
       { shallow: true } // Use the 'shallow' option to preserve the URL
     );
   };
+
   const handleActionScheduleRide = () => {
     router.push("/schedule-ride");
   };
+
   const closeScheduleMessage = () => {
     setScheduleMessage(false);
   };
+  
   const getDropPickLocation = (location) => {
     if (locationType === "pickup") {
       getAllCarsList(location);

@@ -45,6 +45,7 @@ export default function AddPaymentInfo({ userAuth }) {
     year: "",
     card_type: "",
   });
+
   const [errors, setErrors] = useState({
     card_holder: "",
     // card_number: "",
@@ -53,6 +54,7 @@ export default function AddPaymentInfo({ userAuth }) {
     // expiration_month: "",
     // expiration_year: "",
   });
+
   const handleCardDetail = (event) => {
     var brandName = event.brand.toUpperCase();
     setInputs((inputs) => ({
@@ -60,6 +62,7 @@ export default function AddPaymentInfo({ userAuth }) {
       ["card_type"]: brandName,
     }));
   };
+
   const handleInputChange = ({ target }) => {
     setInputs((inputs) => ({
       ...inputs,
@@ -155,7 +158,7 @@ export default function AddPaymentInfo({ userAuth }) {
         
         setLoading(false);
         toast.success(response.message);
-        router.push("/saveCards");
+        router.push("/save-cards");
       } else if (
         response.status === "FALSE" &&
         response.message === "Invalid token code"

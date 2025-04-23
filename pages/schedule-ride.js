@@ -61,7 +61,7 @@ const favoriteDestination = ({ ScheduleRide, session }) => {
           method: "GET",
         });
 
-        if (response?.status === true && response?.data) {
+        if (response?.status === true) {
           setScheduleRideData(response.data);
         } else {
           toast.error(response.message || "Failed to load scheduled rides");

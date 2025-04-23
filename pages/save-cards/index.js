@@ -129,10 +129,12 @@ export default function SaveCards({ userAuth }) {
       toast.success(response.message);
     }
   };
+
   const handleAddCardClick = () => {
-    // Redirect to the desired page
-    router.push("/addPaymentInfo");
+    // router.push("/addPaymentInfo");
+    router.push("/save-cards/add");
   };
+
   useEffect(() => {
     getCustomerCardList();
   }, []);
@@ -175,12 +177,11 @@ export default function SaveCards({ userAuth }) {
     </ThemeProvider>
   );
 }
+
 export async function getServerSideProps(context) {
-  // You can access the session and user information here.
   const session = await getSession(context);
 
   if (!session) {
-    // Handle unauthenticated access
     return {
       redirect: {
         destination: "/login",
@@ -195,6 +196,7 @@ export async function getServerSideProps(context) {
     },
   };
 }
+
 const SaveCardsBox = styled.div`
   ${({ theme }) => `
     border-radius: 16px 0px 16px 16px;
