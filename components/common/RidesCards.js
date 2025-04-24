@@ -5,22 +5,26 @@ import { Link, Typography } from "@mui/material";
 import RidesFareDialog from "./RidesFareDialog";
 
 export default function RidesCards({
+  carsList,
   type,
   handleCarTypeId,
   carStatus,
   setAvgTime,
   setAvailableDriver,
+  distance,
+  duration,
 }) {
-  const { carsList } = useCarContext();
+  // const { carsList } = useCarContext();
 
-  let filterCarList;
-  if (type === "regular") {
-    filterCarList = carsList?.filter((item) => item.is_corporate === "0");
-  } else {
-    filterCarList = carsList?.filter((item) => item.is_corporate !== "0");
-  }
+  console.log({"carsList": carsList, "type": type});
+  
+  // Filter cars based on type
+  const filterCarList = type === "regular" 
+    ? carsList?.filter((item) => item.is_corporate === "0")
+    : carsList?.filter((item) => item.is_corporate !== "0");
 
-  var defaultActiveIndex = filterCarList?.findIndex(
+  // Find default active car index
+  const defaultActiveIndex = filterCarList?.findIndex(
     (car) => car.default_car === true
   );
 
@@ -29,7 +33,14 @@ export default function RidesCards({
   const [ridesFareData, setRidesFareData] = useState();
 
   const handleDoubleClick = (carFareData) => {
-    setRidesFareData(carFareData);
+    // Add distance and duration to the car fare data
+    const enhancedCarFareData = {
+      ...carFareData,
+      distance: distance || carFareData.distance || "6.8",
+      duration: duration || carFareData.duration || "22"
+    };
+    
+    setRidesFareData(enhancedCarFareData);
     setDoubleClickDialogOpen(true);
   };
 
@@ -48,85 +59,45 @@ export default function RidesCards({
     <>
       {carStatus ? (
         <>
-          {type === "regular" && carsList.length > 0 ? (
-            carsList
-              .filter((item) => item.is_corporate === "0")
-              .map((car, index) => (
-                <RideCars
-                  key={index}
-                  className={
-                    (activeIndex || activeIndex === 0
-                      ? activeIndex
-                      : defaultActiveIndex) === index
-                      ? "active"
-                      : ""
-                  }
-                  onClick={() =>
-                    handleCarClick(index, car.id, car.avg_time, car.drivers)
-                  }
-                  onDoubleClick={() => handleDoubleClick(car)}
-                >
-                  <Link>
-                    <Cars className={"cars" + index}>
-                      <img
-                        src={car.list_car_image}
-                        style={{ height: "60px", width: "60px" }}
-                        alt="car image"
-                      />
-                    </Cars>
-                    <CarsDescription>{car.name}</CarsDescription>
-                  </Link>
-                  <RidesFareDialog
-                    handleDoubleClick={handleDoubleClick}
-                    doubleClickDialogOpen={doubleClickDialogOpen}
-                    handleClose={handleClose}
-                    ridesFareData={ridesFareData}
-                  />
-                </RideCars>
-              ))
-          ) : type === "corporate" && carsList.length > 0 ? (
-            carsList
-              .filter((item) => item.is_corporate !== "0")
-              .map((car, index) => (
-                <RideCars
-                  key={index}
-                  className={
-                    (activeIndex || activeIndex === 0
-                      ? activeIndex
-                      : defaultActiveIndex) === index
-                      ? "active"
-                      : ""
-                  }
-                  onClick={() =>
-                    handleCarClick(index, car.id, car.avg_time, car.drivers)
-                  }
-                  onDoubleClick={() => handleDoubleClick(car)}
-                >
-                  <Link href="#">
-                    <Cars>
-                      <img
-                        src={car.list_car_image}
-                        style={{ height: "60px", width: "60px" }}
-                        alt="car image"
-                      />
-                    </Cars>
-                    <CarsDescription>{car.name}</CarsDescription>
-                  </Link>
-                  <RidesFareDialog
-                    handleDoubleClick={handleDoubleClick}
-                    doubleClickDialogOpen={doubleClickDialogOpen}
-                    handleClose={handleClose}
-                    ridesFareData={ridesFareData}
-                  />
-                </RideCars>
-              ))
+          {carsList.length > 0 ? (
+            carsList.map((car, index) => (
+              <RideCars
+                key={index}
+                className={
+                  (activeIndex || activeIndex === 0
+                    ? activeIndex
+                    : defaultActiveIndex) === index
+                    ? "active"
+                    : ""
+                }
+                onClick={() =>
+                  handleCarClick(index, car.id, car.avg_time, car.drivers)
+                }
+                onDoubleClick={() => handleDoubleClick(car)}
+              >
+                <Link>
+                  <Cars className={"cars" + index}>
+                    <img
+                      src={car.list_car_image}
+                      style={{ height: "60px", width: "60px" }}
+                      alt="car image"
+                    />
+                  </Cars>
+                  <CarsDescription>{car.name}</CarsDescription>
+                </Link>
+                <RidesFareDialog
+                  handleDoubleClick={handleDoubleClick}
+                  doubleClickDialogOpen={doubleClickDialogOpen}
+                  handleClose={handleClose}
+                  ridesFareData={ridesFareData}
+                />
+              </RideCars>
+            ))
           ) : (
-            <NoRecord>No records found</NoRecord>
+            <NoRecord>No car available</NoRecord>
           )}
         </>
-      ) : (
-        <NoRecord>No car available</NoRecord>
-      )}
+      ) : null}
     </>
   );
 }

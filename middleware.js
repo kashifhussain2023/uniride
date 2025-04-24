@@ -119,9 +119,25 @@ export async function middleware(request) {
                 pathname
             });
 
+            // Create response for redirect
+            const response = NextResponse.redirect(new URL(getLoginPath(), request.url));
+
+            // Clear all cookies
+            const cookies = request.cookies.getAll();
+            cookies.forEach(cookie => {
+                response.cookies.delete(cookie.name);
+            });
+
+            // Clear any session-related cookies
+            response.cookies.delete('next-auth.session-token');
+            response.cookies.delete('next-auth.callback-url');
+            response.cookies.delete('next-auth.csrf-token');
+            response.cookies.delete('registrationDetail');
+            response.cookies.delete('redirectAfterVerification');
+
             // If the error is related to an expired or invalid token, redirect to login
             if (error.message.includes('401') || error.message.includes('403')) {
-                return NextResponse.redirect(new URL(getLoginPath(), request.url));
+                return response;
             }
 
             // For other errors, redirect to error page

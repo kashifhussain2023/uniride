@@ -6,7 +6,7 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import { StandaloneSearchBox } from "@react-google-maps/api";
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { styled } from "@mui/material/styles";
 
 export default function LocationValueModel({
@@ -15,15 +15,64 @@ export default function LocationValueModel({
   actionFavorite,
   locationType,
   dropPickLocation,
+  currentLocation,
+  dropLocation,
 }) {
   const [searchBox, setSearchBox] = useState(null);
-  // const actionSearch = () =>{
-  //   setDisableSearch(false);
-  // }
+  const [distance, setDistance] = useState(null);
+  const [duration, setDuration] = useState(null);
+  const [isCalculating, setIsCalculating] = useState(false);
+  
+  // Reset distance and duration when dialog opens
+  useEffect(() => {
+    if (open) {
+      setDistance(null);
+      setDuration(null);
+      setIsCalculating(false);
+    }
+  }, [open]);
+
   const handleSearchBoxLoad = (ref) => {
     setSearchBox(ref);
   };
-  const handleLocation = () => {
+  
+  const calculateDistanceAndDuration = (origin, destination) => {
+    return new Promise((resolve) => {
+      if (!origin || !destination) {
+        resolve({ distance: null, duration: null });
+        return;
+      }
+      
+      const service = new window.google.maps.DistanceMatrixService();
+      
+      service.getDistanceMatrix(
+        {
+          origins: [new window.google.maps.LatLng(origin.lat, origin.lng)],
+          destinations: [new window.google.maps.LatLng(destination.lat, destination.lng)],
+          travelMode: window.google.maps.TravelMode.DRIVING,
+          unitSystem: window.google.maps.UnitSystem.METRIC,
+        },
+        (response, status) => {
+          if (status === "OK" && response.rows[0].elements[0].status === "OK") {
+            const distance = response.rows[0].elements[0].distance.text;
+            const duration = response.rows[0].elements[0].duration.text;
+            
+            // Extract numeric values
+            const distanceValue = parseFloat(distance.replace(" km", ""));
+            const durationValue = parseInt(duration.replace(" mins", ""));
+            
+            setDistance(distanceValue);
+            setDuration(durationValue);
+            resolve({ distance: distanceValue, duration: durationValue });
+          } else {
+            resolve({ distance: null, duration: null });
+          }
+        }
+      );
+    });
+  };
+  
+  const handleLocation = async () => {
     const places = searchBox.getPlaces();
 
     if (places.length > 0) {
@@ -32,10 +81,32 @@ export default function LocationValueModel({
       const newLocation = {
         lat: place.geometry.location.lat(),
         lng: place.geometry.location.lng(),
+        address: place.formatted_address,
       };
-      newLocation.address = place.formatted_address;
+      
+      setIsCalculating(true);
+      
+      // Calculate distance and duration if we have both locations
+      let distanceValue = null;
+      let durationValue = null;
+      
+      if (locationType === "drop" && currentLocation) {
+        const result = await calculateDistanceAndDuration(currentLocation, newLocation);
+        distanceValue = result.distance;
+        durationValue = result.duration;
+      } else if (locationType === "pickup" && dropLocation) {
+        const result = await calculateDistanceAndDuration(newLocation, dropLocation);
+        distanceValue = result.distance;
+        durationValue = result.duration;
+      }
+      
+      setIsCalculating(false);
+      
+      // Pass the location to parent component with the calculated values
+      
+      //console.log({"distanceValue":distanceValue,"durationValue":durationValue})
 
-      dropPickLocation(newLocation);
+      dropPickLocation(newLocation, distanceValue, durationValue);
       handleCloseModel();
     }
   };
@@ -62,6 +133,11 @@ export default function LocationValueModel({
                 autoFocus
               />
             </StandaloneSearchBox>
+            {isCalculating && (
+              <div style={{ textAlign: 'center', marginTop: '10px' }}>
+                Calculating distance and duration...
+              </div>
+            )}
           </DialogContentText>
         </DialogContent>
         <DialogActions>

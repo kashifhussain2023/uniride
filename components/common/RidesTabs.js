@@ -39,6 +39,7 @@ function a11yProps(index) {
 }
 
 export default function BasicTabs({
+  carsList,
   handleSelectRide,
   setCustomerRideType,
   handleCarTypeId,
@@ -48,6 +49,8 @@ export default function BasicTabs({
   setCarTypeId,
   setAvgTime,
   setAvailableDriver,
+  distance,
+  duration,
 }) {
   const [value, setValue] = React.useState(0);
 
@@ -73,6 +76,8 @@ export default function BasicTabs({
               carStatus={carStatus}
               setAvgTime={setAvgTime}
               setAvailableDriver={setAvailableDriver}
+              distance={distance}
+              duration={duration}
             />
             <Button
               variant="contained"
@@ -86,7 +91,7 @@ export default function BasicTabs({
         </>
       ) : (
         <>
-          <ChooseTab>
+          {/* <ChooseTab>
             <Box>
               <Tabs
                 value={value}
@@ -97,16 +102,19 @@ export default function BasicTabs({
                 <Tab label="Corporate" {...a11yProps(1)} />
               </Tabs>
             </Box>
-          </ChooseTab>
+          </ChooseTab> */}
           <RidesTabs value={value} index={0}>
             <RidesCards
               type="regular"
+              carsList={carsList}
               handleCarTypeId={handleCarTypeId}
               carStatus={carStatus}
               carTypeId={carTypeId}
               setCarTypeId={setCarTypeId}
               setAvgTime={setAvgTime}
               setAvailableDriver={setAvailableDriver}
+              distance={distance}
+              duration={duration}
             />
             <ButtonContainer>
               <Button
@@ -128,6 +136,8 @@ export default function BasicTabs({
               setCarTypeId={setCarTypeId}
               setAvgTime={setAvgTime}
               setAvailableDriver={setAvailableDriver}
+              distance={distance}
+              duration={duration}
             />
             <ButtonContainer>
               <Button

@@ -172,6 +172,8 @@ const LocationPickerMap = ({
     comfirmBooking,
     rideStatus,
   ]);
+
+  console.log({"distance":distance,"duration":duration })
   return (
     <LoadScript
       googleMapsApiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}

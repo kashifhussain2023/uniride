@@ -5,8 +5,11 @@ import { Button, List, ListItem, Typography, TextField } from "@mui/material";
 import SpinnerLoader from "./SpinnerLoader";
 import { api } from "@/utils/api/common";
 import { toast } from "react-toastify";
+import DiscountIcon from '@mui/icons-material/Discount';
+import RemoveIcon from '@mui/icons-material/Remove';
 
 export default function ConfirmBooking({
+  currentLocation,
   handleComfirmBooking,
   comfirmBookingData,
   applyCoupon,
@@ -23,6 +26,7 @@ export default function ConfirmBooking({
   const [codeStatus, setCodeStatus] = useState(false);
   const [loading, setLoading] = useState(false);
   const [couponData, setCouponData] = useState(null);
+  const [discountAmount, setDiscountAmount] = useState(0);
 
   const handlePromo = () => {
     setPromoCode(true);
@@ -39,14 +43,17 @@ export default function ConfirmBooking({
       setErrors("Please enter promo code");
     } else {
       setLoading(true);
-      const formData = new FormData();
-      formData.append("promo_code", promoCodeValue);
-      formData.append("customer_id", userAuth.customer_id);
-      formData.append("token_code", userAuth.token_code);
+      const couponData = {
+        "promo_code": promoCodeValue,
+        "estimate_amount": comfirmBookingData?.maximum_estimated_fare,
+        "pickup_lat": currentLocation.lat,
+        "pickup_lng": currentLocation.lng
+      }
+
       const response = await api({
-        url: "/customers/promo_code_validation",
+        url: "/customer/apply-promocode",
         method: "POST",
-        data: formData,
+        data: couponData,
       });
 
       if (response.status === true) {
@@ -54,10 +61,23 @@ export default function ConfirmBooking({
         setCodeStatus(true);
         toast.success(response.message);
         setCouponActive(true);
-        setCouponCode(response.promo_code);
-        setPromotionId(response.promotion_id);
+        setCouponCode(response.data.offer_code);
+        setPromotionId(response.data.id);
+        setCouponData(response.data);
+        
+        // Calculate discount amount based on discount type
+        if (response.data.discount_type === 1) {
+          // Fixed amount discount
+          setDiscountAmount(parseFloat(response.data.discount_amount));
+        } else if (response.data.discount_type === 2) {
+          // Percentage discount
+          const percentage = parseFloat(response.data.discount_amount);
+          const originalAmount = parseFloat(comfirmBookingData?.maximum_estimated_fare);
+          const calculatedDiscount = (originalAmount * percentage) / 100;
+          setDiscountAmount(calculatedDiscount);
+        }
       } else if (
-        response.status === "FALSE" &&
+        !response.status &&
         (response.code === 2 || response.code === 4)
       ) {
         toast.error(response.message);
@@ -75,7 +95,17 @@ export default function ConfirmBooking({
     setCodeStatus(false);
     setPromoCode(false);
     setPromoCodeValue("");
+    setDiscountAmount(0);
+    setCouponData(null);
     toast.error("Coupon code remove successfully.");
+  };
+
+  // Calculate final price after discount
+  const getFinalPrice = () => {
+    if (!comfirmBookingData?.maximum_estimated_fare) return 0;
+    
+    const originalAmount = parseFloat(comfirmBookingData.maximum_estimated_fare);
+    return (originalAmount - discountAmount).toFixed(2);
   };
 
   return (
@@ -93,11 +123,11 @@ export default function ConfirmBooking({
             <img src="../car.png" />
           </CarImg>
           <div>
-            <Typography variant="subtitle3">
+            {/* <Typography variant="subtitle3">
               {avgTime === "no cars"
                 ? "No car available"
                 : "Car is " + avgTime + " away from you"}{" "}
-            </Typography>
+            </Typography> */}
           </div>
         </BookingCarInfo>
         <BookingDtl>
@@ -105,11 +135,17 @@ export default function ConfirmBooking({
             <ListItem>
               <BookingLabel>Ride Estimate</BookingLabel>
               <Details>
-                <Price>{comfirmBookingData?.estimated_fare}</Price>
+                <Price>${getFinalPrice()}</Price>
+                {discountAmount > 0 && (
+                  <DiscountInfo>
+                    <DiscountIcon fontSize="small" color="success" />
+                    <span>${discountAmount.toFixed(2)} off</span>
+                  </DiscountInfo>
+                )}
               </Details>
             </ListItem>
             <ListItem>
-              <BookingLabel>Pay by</BookingLabel>
+              <BookingLabel>Payment Method</BookingLabel>
               <Details>Card</Details>
               <BookingIcon>
                 <img src="../cardIcon.png" />
@@ -131,13 +167,22 @@ export default function ConfirmBooking({
                 </>
               ) : codeStatus ? (
                 <>
-                  <BookingIcon>{promoCodeValue}</BookingIcon>
-                  <ApplyButton variant="text" onClick={removeCouponCode}>
-                    Remove
-                  </ApplyButton>
-                  <BookingIcon>
-                    <img src="../couponIcon.png" />
-                  </BookingIcon>
+                  <CouponDisplay>
+                    <DiscountIconWrapper>
+                      <DiscountIcon fontSize="small" style={{ color: '#FFA500' }} />
+                    </DiscountIconWrapper>
+                    <CouponCode>
+                      {promoCodeValue}
+                      <DiscountDetails>
+                        {couponData?.discount_type === 2 && (
+                          <span>{couponData.discount_amount}% off</span>
+                        )}
+                      </DiscountDetails>
+                    </CouponCode>
+                    <RemoveButton variant="text" onClick={removeCouponCode}>
+                      Remove
+                    </RemoveButton>
+                  </CouponDisplay>
                 </>
               ) : (
                 <>
@@ -160,12 +205,12 @@ export default function ConfirmBooking({
             </ListItem>
 
             <ListItem>
-              <BookingLabel>Passenger</BookingLabel>
+              <BookingLabel>Seating Capacity</BookingLabel>
 
               <Details>
                 {isAddDesignated
                   ? "Request for designated driver"
-                  : "1-" + comfirmBookingData?.total_passengers}
+                  : "1-" + (comfirmBookingData?.total_passengers || 3)}
               </Details>
               <BookingIcon>
                 <img src="../passenger.png" />
@@ -299,5 +344,75 @@ const ButtonBox = styled("div")`
     justify-content: space-between;
      padding: ${theme.spacing(2, 3)};
      gap: 15px;
+  `}
+`;
+
+const DiscountInfo = styled.div`
+  ${({ theme }) => `
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    color: ${theme.colors.palette.success};
+    margin-top: 5px;
+    
+    span {
+      margin-left: 5px;
+    }
+  `}
+`;
+
+const CouponDisplay = styled.div`
+  ${({ theme }) => `
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: 8px 0;
+    gap: 8px;
+  `}
+`;
+
+const DiscountIconWrapper = styled.div`
+  ${({ theme }) => `
+    display: flex;
+    align-items: center;
+  `}
+`;
+
+const CouponCode = styled.div`
+  ${({ theme }) => `
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+    color: ${theme.colors.palette.black};
+    
+    span {
+      color: ${theme.colors.palette.darkGrey};
+      font-size: 14px;
+    }
+  `}
+`;
+
+const RemoveButton = styled(Button)`
+  ${({ theme }) => `
+    margin-left: auto;
+    color: ${theme.colors.palette.blue};
+    text-transform: none;
+    padding: 0;
+    min-width: auto;
+
+    &:hover {
+      background: none;
+    }
+  `}
+`;
+
+const DiscountDetails = styled.div`
+  ${({ theme }) => `
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    color: ${theme.colors.palette.darkGrey};
+    margin-left: 4px;
   `}
 `;

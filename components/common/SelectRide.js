@@ -3,6 +3,7 @@ import PageTitle from "@/components/common/PageTitle";
 import RidesTabs from "./RidesTabs";
 
 export default function SelectRide({
+  carsList,
   handleSelectRide,
   setCustomerRideType,
   isAddDesignated,
@@ -13,6 +14,8 @@ export default function SelectRide({
   setCarTypeId,
   setAvgTime,
   setAvailableDriver,
+  distance,
+  duration,
 }) {
   return (
     <>
@@ -28,6 +31,7 @@ export default function SelectRide({
         </DesignatedBar>
       )}
       <RidesTabs
+        carsList={carsList}
         handleSelectRide={handleSelectRide}
         setCustomerRideType={setCustomerRideType}
         saveDateTime={saveDateTime}
@@ -38,6 +42,8 @@ export default function SelectRide({
         carStatus={carStatus}
         setAvgTime={setAvgTime}
         setAvailableDriver={setAvailableDriver}
+        distance={distance}
+        duration={duration}
       />
     </>
   );

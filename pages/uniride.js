@@ -73,6 +73,10 @@ export default function Dashboard({ userAuth }) {
   const [couponCode, setCouponCode] = useState(null);
   const [promotionId, setPromotionId] = useState(null);
   const [customerRideType, setCustomerRideType] = useState("regular");
+  const [distance, setDistance] = useState(null);
+  const [duration, setDuration] = useState(null);
+  const [isBookingInProgress, setIsBookingInProgress] = useState(false);
+  const [bookingRequestId, setBookingRequestId] = useState(null);
 
   const scheduleMsg =
     "Another ride is only possible after scheduled ride complete or scheduled ride cancel";
@@ -109,22 +113,26 @@ export default function Dashboard({ userAuth }) {
     if (currentLocation !== "" && dropLocation !== "") {
       try {
         setLoading(true);
-        setAvailableDriver([]);
-        const formData = new FormData();
-        formData.append("car_type", carTypeId);
-        formData.append("destination_Location_Name", dropLocation.address);
-        formData.append("destination_point_lat", dropLocation.lat);
-        formData.append("destination_point_long", dropLocation.lng);
-        formData.append("picking_Location_Name", currentLocation.address);
-        formData.append("picking_point_lat", currentLocation.lat);
-        formData.append("picking_point_long", currentLocation.lng);
-        formData.append("ride_type", customerRideType);
-        formData.append("customer_id", userAuth.customer_id);
+        //setAvailableDriver([]);
+
+        const rideNow = {
+          "pickup": String(currentLocation.address),
+          "pickup_lat": String(currentLocation.lat),
+          "pickup_lng": String(currentLocation.lng),
+          "dropoff": String(dropLocation.address),
+          "dropoff_lat": String(dropLocation.lat),
+          "dropoff_lng": String(dropLocation.lng),
+          "is_scheduled": false,
+          "distance": String(distance || "6.8"),
+          "time": String(duration || "22"),
+          "car_type_id": carTypeId
+        };
+
 
         const response = await api({
-          url: "/customers/request_information",
+          url: "/socket/estimation-price",
           method: "POST",
-          data: formData,
+          data: rideNow,
         });
 
         if (response.status === true) {
@@ -244,55 +252,135 @@ export default function Dashboard({ userAuth }) {
         setLoading(false);
       }
     } else {
+      // Check if a booking request is already in progress
+      if (isBookingInProgress) {
+        toast.info("A booking request is already in progress. Please wait...");
+        return;
+      }
+
       try {
         setLoading(true);
         setGenderModelOpen(false);
-        const formData = new FormData();
-        if (couponActive) {
-          formData.append("promo_code", couponCode);
-          formData.append("promotion_id", promotionId);
-        }
-        formData.append("car_type", carTypeId);
-        formData.append("destination_Location_Name", dropLocation.address);
-        formData.append("destination_point_lat", dropLocation.lat);
-        formData.append("destination_point_long", dropLocation.lng);
-        formData.append("picking_Location_Name", currentLocation.address);
-        formData.append("picking_point_lat", currentLocation.lat);
-        formData.append("picking_point_long", currentLocation.lng);
-        formData.append("ride_type", "regular");
-        formData.append("gender", gender);
-        formData.append("payment_type", 1);
-        formData.append("customer_id", userAuth.customer_id);
+        setIsBookingInProgress(true);
 
-        const response = await api({
-          url: "/customers/request_driver",
-          method: "POST",
-          data: formData,
-        });
+        const session = await getSession();
 
-        if (response.status === true && response.code === 200) {
-          // Success case handled by socket
-        } else if (response.status === false && response.code === 200) {
+        console.log("sesions", session.user.data.default_payment_method.payment_id);
+
+        const bookingPayload = {
+          pickup_lat: String(currentLocation.lat),
+          pickup_lng: String(currentLocation.lng),
+          pickup_name: String(currentLocation.address),
+          dropoff_lat: String(dropLocation.lat),
+          dropoff_lng: String(dropLocation.lng),
+          dropoff_name: String(dropLocation.address),
+          ride_type: customerRideType,
+          customer_id: userAuth.customer_id,
+          car_type: carTypeId,
+          gender: gender,
+          promotion_id: promotionId,
+          promo_code: couponCode,
+          city_name: currentLocation.city,
+          payment_method: session.user.data.default_payment_method.payment_id,
+          distance: distance,
+          time: duration
+        };
+
+        // Set up event listeners for booking responses
+        const requestSentHandler = (response) => {
+          console.log("Request sent successfully:", response);
           setComfirmBooking(false);
-          setSelectRide(true);
-          toast.error(response.message);
+          setSelectRide(false);
+          setInRRoute(true);
+          toast.success("Your ride request has been sent. Finding a driver...");
+          
+          // Store the request ID for future reference
+          if (response && response.id) {
+            setBookingRequestId(response.id);
+          }
+        };
+
+        const scheduleRequestSentHandler = (response) => {
+          console.log("Schedule request sent successfully:", response);
+          setComfirmBooking(false);
+          setSelectRide(false);
+          toast.success("Your scheduled ride request has been sent.");
           setTimeout(() => {
             window.location.reload();
           }, 3000);
-        } else if (response.status === false && response.code === 417) {
-          toast.error(response.message);
-          router.push("/addPaymentInfo");
-        } else {
-          toast.error(response.message || "Failed to request driver");
-          setTimeout(() => {
-            window.location.reload();
-          }, 3000);
-        }
+        };
+
+        const noDriverFoundHandler = (response) => {
+          console.log("No driver found:", response);
+          setComfirmBooking(true);
+          setSelectRide(false);
+          toast.error("No drivers found in your area. Please try again later.");
+          setIsBookingInProgress(false);
+        };
+
+        const errorHandler = (error) => {
+          console.error("Error in booking request:", error);
+          setComfirmBooking(true);
+          setSelectRide(false);
+          toast.error(error.message || "An error occurred while requesting a ride. Please try again.");
+          setIsBookingInProgress(false);
+        };
+
+        const driverAcceptedHandler = (response) => {
+          console.log("Driver accepted:", response);
+          setAcceptDriverDetail(response);
+          setDriverId(response.driver_id);
+          setRideStatus(2); // Driver is on the way
+          toast.success("A driver has accepted your ride request!");
+          setIsBookingInProgress(false);
+        };
+
+        const driverRejectedHandler = (response) => {
+          console.log("Driver rejected:", response);
+          toast.info("A driver declined your ride request. Finding another driver...");
+        };
+
+        // Register all event handlers
+        const unsubscribeRequestSent = socketService.on(socketEvents.REQUEST_SENT, requestSentHandler);
+        const unsubscribeScheduleRequestSent = socketService.on(socketEvents.SCHEDULE_REQUEST_SENT, scheduleRequestSentHandler);
+        const unsubscribeNoDriverFound = socketService.on(socketEvents.NO_DRIVER_FOUND, noDriverFoundHandler);
+        const unsubscribeError = socketService.on(socketEvents.ERROR, errorHandler);
+        const unsubscribeDriverAccepted = socketService.on(socketEvents.DRIVER_ACCEPTED, driverAcceptedHandler);
+        const unsubscribeDriverRejected = socketService.on(socketEvents.DRIVER_REJECTED, driverRejectedHandler);
+
+        // Set a timeout to clean up event listeners if no response is received
+        const cleanupTimeout = setTimeout(() => {
+          unsubscribeRequestSent();
+          unsubscribeScheduleRequestSent();
+          unsubscribeNoDriverFound();
+          unsubscribeError();
+          unsubscribeDriverAccepted();
+          unsubscribeDriverRejected();
+          setIsBookingInProgress(false);
+        }, 60000); // 1 minute timeout
+
+        // Emit the booking request
+        socketHelpers.requestSendBooking(bookingPayload)
+          .then(response => {
+            console.log("Booking request sent:", response);
+            clearTimeout(cleanupTimeout);
+          })
+          .catch(error => {
+            console.error("Error sending booking request:", error);
+            clearTimeout(cleanupTimeout);
+            setComfirmBooking(true);
+            setSelectRide(false);
+            toast.error("Failed to send booking request. Please try again.");
+            setIsBookingInProgress(false);
+          })
+          .finally(() => {
+            setLoading(false);
+          });
       } catch (error) {
         console.error("Error in proceedGenderModel:", error);
         toast.error("An error occurred while requesting a driver. Please try again.");
-      } finally {
         setLoading(false);
+        setIsBookingInProgress(false);
       }
     }
   };
@@ -400,7 +488,10 @@ export default function Dashboard({ userAuth }) {
     setScheduleMessage(false);
   };
 
-  const getDropPickLocation = (location) => {
+  const getDropPickLocation = (location, distanceValue, durationValue) => {
+    
+    console.log({"distanceValue":distanceValue,"durationValue":durationValue,"locationType":locationType})
+
     if (locationType === "pickup") {
       getAllCarsList(location);
       setCurrentLocation(location);
@@ -416,6 +507,15 @@ export default function Dashboard({ userAuth }) {
       setCenterMapLocation(location);
       setMapLocationLabel("Pickup");
     }
+    
+    // Update distance and duration if provided
+    if (distanceValue !== undefined) {
+      setDistance(distanceValue);
+    }
+    
+    if (durationValue !== undefined) {
+      setDuration(durationValue);
+    }
   };
 
   const closeValueModel = () => {
@@ -424,95 +524,113 @@ export default function Dashboard({ userAuth }) {
 
   const getAllCarsList = async (location) => {
 
-    const carsList = [
-      {
-          "is_corporate": "0",
-          "id": "5",
-          "name": "Sedan",
-          "no_of_seats": "4",
-          "map_car_image": "https://www.unirideus.com/staging/uploads/managers/images/1498112898.png",
-          "list_car_image": "https://www.unirideus.com/staging/uploads/managers/images/1568266092.png",
-          "base_fare": "20.00",
-          "allow_basefare": "1",
-          "cancelation_fee": "30.00",
-          "per_mile_fare": "10.00",
-          "per_minute_fare": "10.00",
-          "minimum_fare": "35.00",
-          "default_car": false,
-          "avg_time": "no cars",
-          "drivers": []
-      },
-      {
-          "is_corporate": "0",
-          "id": "6",
-          "name": "SUV",
-          "no_of_seats": "6",
-          "map_car_image": "https://www.unirideus.com/staging/uploads/managers/images/1568195848.png",
-          "list_car_image": "https://www.unirideus.com/staging/uploads/managers/images/1568266034.png",
-          "base_fare": "25.00",
-          "allow_basefare": "1",
-          "cancelation_fee": "30.00",
-          "per_mile_fare": "8.00",
-          "per_minute_fare": "1.50",
-          "minimum_fare": "40.00",
-          "default_car": true,
-          "avg_time": "no cars",
-          "drivers": []
-      },
-      {
-          "is_corporate": "0",
-          "id": "3",
-          "name": "Lux",
-          "no_of_seats": "4",
-          "map_car_image": "https://www.unirideus.com/staging/uploads/managers/images/1498112920.png",
-          "list_car_image": "https://www.unirideus.com/staging/uploads/managers/images/1568266147.png",
-          "base_fare": "25.00",
-          "allow_basefare": "1",
-          "cancelation_fee": "30.00",
-          "per_mile_fare": "25.00",
-          "per_minute_fare": "25.00",
-          "minimum_fare": "50.00",
-          "default_car": false,
-          "avg_time": "no cars",
-          "drivers": []
-      },
-      {
-          "is_corporate": "0",
-          "id": "2",
-          "name": "Mini Van",
-          "no_of_seats": "8",
-          "map_car_image": "https://www.unirideus.com/staging/uploads/managers/images/1498112909.png",
-          "list_car_image": "https://www.unirideus.com/staging/uploads/managers/images/1568266130.png",
-          "base_fare": "20.00",
-          "allow_basefare": "1",
-          "cancelation_fee": "30.00",
-          "per_mile_fare": "6.00",
-          "per_minute_fare": "6.00",
-          "minimum_fare": "10.00",
-          "default_car": false,
-          "avg_time": "no cars",
-          "drivers": []
+    setLoading(true);
+
+    const response = await api({
+      url: "/customer/car-types",
+      method: "GET",
+      headers: {
+        "x-login-method": `jwt`
       }
-  ]
+    });
 
-  const defaultCars = carsList.filter((car) => {
-    return (
-      car.default_car === true &&
-      car.is_corporate === (customerRideType === "regular" ? "0" : "1")
-    );
-  });
+    setLoading(false);
 
-  setCarsList(carsList);
-  setCarStatus(true);
-  if (defaultCars.length > 0) {
-    setCarTypeId(defaultCars[0].id);
-    setAvgTime(defaultCars[0].avg_time);
-    setAvailableDriver(defaultCars[0].drivers);
-  } else {
-    setCarTypeId(null);
-    setAvailableDriver([]);
-  }
-  setLoading(false);
+    if (response.status === true) {
+      setCarsList(response.data);
+      setCarStatus(true);
+    }
+
+
+  //   const carsList = [
+  //     {
+  //         "is_corporate": "0",
+  //         "id": "5",
+  //         "name": "Sedan",
+  //         "no_of_seats": "4",
+  //         "map_car_image": "https://www.unirideus.com/staging/uploads/managers/images/1498112898.png",
+  //         "list_car_image": "https://www.unirideus.com/staging/uploads/managers/images/1568266092.png",
+  //         "base_fare": "20.00",
+  //         "allow_basefare": "1",
+  //         "cancelation_fee": "30.00",
+  //         "per_mile_fare": "10.00",
+  //         "per_minute_fare": "10.00",
+  //         "minimum_fare": "35.00",
+  //         "default_car": false,
+  //         "avg_time": "no cars",
+  //         "drivers": []
+  //     },
+  //     {
+  //         "is_corporate": "0",
+  //         "id": "6",
+  //         "name": "SUV",
+  //         "no_of_seats": "6",
+  //         "map_car_image": "https://www.unirideus.com/staging/uploads/managers/images/1568195848.png",
+  //         "list_car_image": "https://www.unirideus.com/staging/uploads/managers/images/1568266034.png",
+  //         "base_fare": "25.00",
+  //         "allow_basefare": "1",
+  //         "cancelation_fee": "30.00",
+  //         "per_mile_fare": "8.00",
+  //         "per_minute_fare": "1.50",
+  //         "minimum_fare": "40.00",
+  //         "default_car": true,
+  //         "avg_time": "no cars",
+  //         "drivers": []
+  //     },
+  //     {
+  //         "is_corporate": "0",
+  //         "id": "3",
+  //         "name": "Lux",
+  //         "no_of_seats": "4",
+  //         "map_car_image": "https://www.unirideus.com/staging/uploads/managers/images/1498112920.png",
+  //         "list_car_image": "https://www.unirideus.com/staging/uploads/managers/images/1568266147.png",
+  //         "base_fare": "25.00",
+  //         "allow_basefare": "1",
+  //         "cancelation_fee": "30.00",
+  //         "per_mile_fare": "25.00",
+  //         "per_minute_fare": "25.00",
+  //         "minimum_fare": "50.00",
+  //         "default_car": false,
+  //         "avg_time": "no cars",
+  //         "drivers": []
+  //     },
+  //     {
+  //         "is_corporate": "0",
+  //         "id": "2",
+  //         "name": "Mini Van",
+  //         "no_of_seats": "8",
+  //         "map_car_image": "https://www.unirideus.com/staging/uploads/managers/images/1498112909.png",
+  //         "list_car_image": "https://www.unirideus.com/staging/uploads/managers/images/1568266130.png",
+  //         "base_fare": "20.00",
+  //         "allow_basefare": "1",
+  //         "cancelation_fee": "30.00",
+  //         "per_mile_fare": "6.00",
+  //         "per_minute_fare": "6.00",
+  //         "minimum_fare": "10.00",
+  //         "default_car": false,
+  //         "avg_time": "no cars",
+  //         "drivers": []
+  //     }
+  // ]
+
+  // const defaultCars = carsList.filter((car) => {
+  //   return (
+  //     car.default_car === true &&
+  //     car.is_corporate === (customerRideType === "regular" ? "0" : "1")
+  //   );
+  // });
+
+  // setCarsList(carsList);
+  // setCarStatus(true);
+  // if (defaultCars.length > 0) {
+  //   setCarTypeId(defaultCars[0].id);
+  //   setAvgTime(defaultCars[0].avg_time);
+  //   setAvailableDriver(defaultCars[0].drivers);
+  // } else {
+  //   setCarTypeId(null);
+  //   setAvailableDriver([]);
+  // }
+  // setLoading(false);
 
 
 
@@ -558,7 +676,6 @@ export default function Dashboard({ userAuth }) {
     // } else if (response.message == "Invalid token code") {
     //   setLoading(false);
     //   // await signOut({ redirect: false });
-    //   // router.push("/login");
     // } else {
     //   setLoading(false);
     //   setCarStatus(false);
@@ -792,9 +909,11 @@ export default function Dashboard({ userAuth }) {
         setAvailableDriver(prevDrivers => {
           // Create a map of existing drivers for quick lookup
           const driverMap = new Map();
-          prevDrivers.forEach(driver => {
-            driverMap.set(driver.driver_id, driver);
-          });
+          if(prevDrivers && prevDrivers.length > 0){
+            prevDrivers.forEach(driver => {
+              driverMap.set(driver.driver_id, driver);
+            });
+          }
           
           // Update or add new driver locations
           response.forEach(location => {
@@ -868,6 +987,35 @@ export default function Dashboard({ userAuth }) {
     getUserCurrentLoacation();
   }, [customerRideType]);
 
+  // Add a function to cancel an ongoing booking request
+  const cancelBookingRequest = () => {
+    if (bookingRequestId) {
+      console.log("Canceling booking request:", bookingRequestId);
+      socketHelpers.cancel_ride({
+        request_id: bookingRequestId,
+        customer_id: userAuth.customer_id,
+        user_type: "customer"
+      });
+      setIsBookingInProgress(false);
+      setBookingRequestId(null);
+      toast.info("Booking request canceled");
+    }
+  };
+
+  // Add a useEffect to clean up booking state when component unmounts
+  useEffect(() => {
+    return () => {
+      if (isBookingInProgress && bookingRequestId) {
+        console.log("Cleaning up booking request on unmount:", bookingRequestId);
+        socketHelpers.cancel_ride({
+          request_id: bookingRequestId,
+          customer_id: userAuth.customer_id,
+          user_type: "customer"
+        });
+      }
+    };
+  }, [isBookingInProgress, bookingRequestId, userAuth.customer_id]);
+
   return (
     <ThemeProvider>
       <Head>
@@ -888,6 +1036,7 @@ export default function Dashboard({ userAuth }) {
           <InnerContent>
             <PannelSection>
               <RiderInfo
+                carsList={carsList}
                 handleSelectRide={handleSelectRide}
                 setCustomerRideType={setCustomerRideType}
                 handleComfirmBooking={handleComfirmBooking}
@@ -922,6 +1071,9 @@ export default function Dashboard({ userAuth }) {
                 setPromotionId={setPromotionId}
                 setCouponCode={setCouponCode}
                 setCouponActive={setCouponActive}
+                distance={distance}
+                duration={duration}
+                currentLocation={currentLocation}
               />
               <LocationValueModel
                 open={openValueModel}
@@ -929,6 +1081,8 @@ export default function Dashboard({ userAuth }) {
                 actionFavorite={handleFavoriteModelValue}
                 locationType={locationType}
                 dropPickLocation={getDropPickLocation}
+                currentLocation={currentLocation}
+                dropLocation={dropLocation}
               />
               <RightPannel>
                 <LocationPickerMap

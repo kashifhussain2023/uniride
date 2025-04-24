@@ -6,6 +6,8 @@ import SelectGender from "./model/SelectGender";
 import AddDesignated from "./AddDesignated";
 
 export default function RiderInfo({
+  carsList,
+  currentLocation,
   handleSelectRide,
   setCustomerRideType,
   handleComfirmBooking,
@@ -41,6 +43,8 @@ export default function RiderInfo({
   setCouponActive,
   setCouponCode,
   setPromotionId,
+  distance,
+  duration,
 }) {
   return (
     <LeftPannel>
@@ -55,6 +59,7 @@ export default function RiderInfo({
       />
       {selectRide ? (
         <SelectRide
+          carsList={carsList}
           handleSelectRide={handleSelectRide}
           setCustomerRideType={setCustomerRideType}
           handleCarTypeId={handleCarTypeId}
@@ -64,10 +69,13 @@ export default function RiderInfo({
           carStatus={carStatus}
           setAvgTime={setAvgTime}
           setAvailableDriver={setAvailableDriver}
+          distance={distance}
+          duration={duration}
         />
       ) : comfirmBooking ? (
         <>
           <ConfirmBooking
+            currentLocation={currentLocation}
             handleComfirmBooking={handleComfirmBooking}
             comfirmBookingData={comfirmBookingData}
             applyCoupon={applyCoupon}

@@ -199,6 +199,35 @@ class SocketService {
       }
     });
 
+    // Booking related events
+    this.socket.on(socketEvents.REQUEST_SENT, (data) => {
+      debugLog("Request sent event received", data);
+    });
+
+    this.socket.on(socketEvents.SCHEDULE_REQUEST_SENT, (data) => {
+      debugLog("Schedule request sent event received", data);
+    });
+
+    this.socket.on(socketEvents.NO_DRIVER_FOUND, (data) => {
+      debugLog("No driver found event received", data);
+    });
+
+    this.socket.on(socketEvents.NEW_RIDE_REQUEST, (data) => {
+      debugLog("New ride request event received", data);
+    });
+
+    this.socket.on(socketEvents.REQUEST_TIMEOUT, (data) => {
+      debugLog("Request timeout event received", data);
+    });
+
+    this.socket.on(socketEvents.DRIVER_ACCEPTED, (data) => {
+      debugLog("Driver accepted event received", data);
+    });
+
+    this.socket.on(socketEvents.DRIVER_REJECTED, (data) => {
+      debugLog("Driver rejected event received", data);
+    });
+
     this.socket.io.on("reconnect_attempt", (attemptNumber) => {
       debugLog(`Reconnection attempt #${attemptNumber}`);
       this.connectionAttempts = attemptNumber;
@@ -443,6 +472,11 @@ const socketEvents = {
   REQUEST_RIDE_COMPLETENESS: "requestRideCompleteness",
   REQUEST_SCHEDULE_RIDE_DETAILS: "requestScheduleRideDetails",
   REQUEST_CAR_AVAILABILITY: "requestCarAvailability",
+  REQUEST_BOOKING: "sendBookingRequest",
+  CANCEL_RIDE: "cancel_ride",
+  CHANGE_REQUEST_STATUS: "changeRequestStatus",
+  DRIVER_ACCEPTED: "driverAccepted",
+  DRIVER_REJECTED: "driverRejected",
 
   // Response events
   SOCKET_SAVED: "socketSaved",
@@ -450,6 +484,12 @@ const socketEvents = {
   RIDE_COMPLETENESS_RESPONSE: "rideCompletenessResponse",
   SCHEDULE_RIDE_DETAILS_RESPONSE: "scheduleRideDetailsResponse",
   CAR_AVAILABILITY_RESPONSE: "carAvailabilityResponse",
+  REQUEST_SENT: "requestSent",
+  SCHEDULE_REQUEST_SENT: "scheduleRequestSent",
+  NO_DRIVER_FOUND: "noDriverFound",
+  ERROR: "error",
+  NEW_RIDE_REQUEST: "newRideRequest",
+  REQUEST_TIMEOUT: "requestTimeOut",
 };
 
 // Socket helper functions
@@ -483,6 +523,91 @@ const socketHelpers = {
         token_code: tokenCode,
         // authorization token will be added automatically by the emit method
       });
+    });
+  },
+
+  requestSendBooking: (payload) => {
+    debugLog("Requesting booking", payload);
+    
+    return new Promise((resolve, reject) => {
+      let resolved = false;
+      
+      // Set up handlers for different response events
+      const requestSentHandler = (response) => {
+        debugLog("Request sent successfully", response);
+        if (!resolved) {
+          resolved = true;
+          resolve(response);
+        }
+      };
+      
+      // const scheduleRequestSentHandler = (response) => {
+      //   debugLog("Schedule request sent successfully", response);
+      //   if (!resolved) {
+      //     resolved = true;
+      //     resolve(response);
+      //   }
+      // };
+      
+      // const noDriverFoundHandler = (response) => {
+      //   debugLog("No driver found", response);
+      //   if (!resolved) {
+      //     resolved = true;
+      //     reject(new Error("No driver found"));
+      //   }
+      // };
+      
+      // const errorHandler = (error) => {
+      //   debugLog("Error in booking request", error);
+      //   if (!resolved) {
+      //     resolved = true;
+      //     reject(error);
+      //   }
+      // };
+      
+      // // Register all event handlers
+       socketService.on(socketEvents.REQUEST_SENT, requestSentHandler);
+      // socketService.on(socketEvents.SCHEDULE_REQUEST_SENT, scheduleRequestSentHandler);
+      // socketService.on(socketEvents.NO_DRIVER_FOUND, noDriverFoundHandler);
+      // socketService.on(socketEvents.ERROR, errorHandler);
+      
+      // // Set a timeout for the request
+      const timeoutId = setTimeout(() => {
+        if (!resolved) {
+          debugLog("Booking request timed out");
+          // Clean up event listeners
+          socketService.off(socketEvents.REQUEST_SENT, requestSentHandler);
+          // socketService.off(socketEvents.SCHEDULE_REQUEST_SENT, scheduleRequestSentHandler);
+          // socketService.off(socketEvents.NO_DRIVER_FOUND, noDriverFoundHandler);
+          // socketService.off(socketEvents.ERROR, errorHandler);
+          reject(new Error("Request timed out"));
+        }
+      }, 30000); // 30 seconds timeout to match server timeout
+      
+      // Emit the booking request
+      socketService.emit(socketEvents.REQUEST_BOOKING, payload);
+      
+      // Clean up function to be called when the promise is resolved or rejected
+      // const cleanup = () => {
+      //   clearTimeout(timeoutId);
+      //   socketService.off(socketEvents.REQUEST_SENT, requestSentHandler);
+      //   socketService.off(socketEvents.SCHEDULE_REQUEST_SENT, scheduleRequestSentHandler);
+      //   socketService.off(socketEvents.NO_DRIVER_FOUND, noDriverFoundHandler);
+      //   socketService.off(socketEvents.ERROR, errorHandler);
+      // };
+      
+      // // Add cleanup to both resolve and reject
+      // const originalResolve = resolve;
+      // resolve = (value) => {
+      //   cleanup();
+      //   originalResolve(value);
+      // };
+      
+      // const originalReject = reject;
+      // reject = (reason) => {
+      //   cleanup();
+      //   originalReject(reason);
+      // };
     });
   },
   
@@ -593,6 +718,39 @@ const socketHelpers = {
   // Get connection status
   getConnectionStatus: () => {
     return socketService.getConnectionStatus();
+  },
+  
+  // Handle driver's response to a ride request
+  changeRequestStatus: (requestId, status) => {
+    debugLog("Changing request status", { requestId, status });
+    socketService.emit(socketEvents.CHANGE_REQUEST_STATUS, { 
+      request_id: requestId, 
+      status: status 
+    });
+  },
+  
+  // Listen for new ride requests (for drivers)
+  onNewRideRequest: (handler) => {
+    debugLog("Registering handler for new ride requests");
+    return socketService.on(socketEvents.NEW_RIDE_REQUEST, handler);
+  },
+  
+  // Listen for request timeout (for drivers)
+  onRequestTimeout: (handler) => {
+    debugLog("Registering handler for request timeout");
+    return socketService.on(socketEvents.REQUEST_TIMEOUT, handler);
+  },
+  
+  // Listen for driver accepted (for customers)
+  onDriverAccepted: (handler) => {
+    debugLog("Registering handler for driver accepted");
+    return socketService.on(socketEvents.DRIVER_ACCEPTED, handler);
+  },
+  
+  // Listen for driver rejected (for customers)
+  onDriverRejected: (handler) => {
+    debugLog("Registering handler for driver rejected");
+    return socketService.on(socketEvents.DRIVER_REJECTED, handler);
   },
 };
 
