@@ -95,7 +95,7 @@ class SocketService {
     }
 
     // Socket configuration
-    const SOCKET_URL = `${process.env.NEXT_SOCKET_URL}/connect-socket`;
+    const SOCKET_URL = `https://uniridesocket.24livehost.com/connect-socket`;
     debugLog("Connecting to socket URL", SOCKET_URL);
 
     try {
