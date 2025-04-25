@@ -1,19 +1,9 @@
-import React, { useState } from "react";
-import styled from "@emotion/styled";
-import {
-  Button,
-  Dialog,
-  IconButton,
-  TextField,
-  Typography,
-} from "@mui/material";
-import AddIcon from "@mui/icons-material/Add";
-import dayjs from "dayjs";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
-import { DatePicker, TimePicker } from "@mui/x-date-pickers";
-import { format } from "date-fns";
-import Image from "next/image";
+import styled from '@emotion/styled';
+import { Button, Dialog, IconButton, Typography } from '@mui/material';
+import { format } from 'date-fns';
+import Image from 'next/image';
+import { useState } from 'react';
+import { DatePickerWrapper, TimePickerWrapper } from './DatePickerWrapper';
 
 const AddDesignated = ({
   saveDateTime,
@@ -25,19 +15,16 @@ const AddDesignated = ({
   scheduleRideStatus,
 }) => {
   const currentDate = new Date();
-  const hoursAfterAdding = currentDate.getHours();
   const newDate = new Date(currentDate);
   const minutesToAdd = 15;
 
   // Add 10 minutes to the current time
   newDate.setMinutes(currentDate.getMinutes() + minutesToAdd);
-
   const [open, setOpen] = useState(false);
   const [openScheduleMsg, setOpenScheduleMsg] = useState(false);
   const [tempDate, setTempDate] = useState();
   const [tempTime, setTempTime] = useState();
   const [timeError, setTimeError] = useState(false);
-
   const handleOpen = () => {
     if (scheduleRideStatus) {
       setOpenScheduleMsg(true);
@@ -60,26 +47,21 @@ const AddDesignated = ({
     //   setSaveDateTime(true);
     // }
   };
-
   const handleCancel = () => {
     setOpen(false), setSaveDateTime(false);
     setSelectedDate(null);
     setSelectedTime(null);
   };
-
-  const handleTimeChange = (time) => {
+  const handleTimeChange = time => {
     setTempTime(time);
     setTimeError(false);
   };
-
-  const handleDateChange = (date) => {
+  const handleDateChange = date => {
     setTempDate(date);
     //set
   };
-
-  const isTimeDisabled = (time) => {
+  const isTimeDisabled = time => {
     const currentTime = new Date();
-
     if (selectedDate || tempDate) {
       let selectedDateWithoutTime;
       if (tempDate) {
@@ -87,30 +69,34 @@ const AddDesignated = ({
           tempDate.getFullYear(),
           tempDate.getMonth(),
           tempDate.getDate(),
-          0, // Set hours to 0
-          0, // Set minutes to 0
-          0 // Set seconds to 0
-        );
+          0,
+          // Set hours to 0
+          0,
+          // Set minutes to 0
+          0
+        ); // Set seconds to 0
       } else {
         selectedDateWithoutTime = new Date(
           selectedDate.getFullYear(),
           selectedDate.getMonth(),
           selectedDate.getDate(),
-          0, // Set hours to 0
-          0, // Set minutes to 0
-          0 // Set seconds to 0
-        );
+          0,
+          // Set hours to 0
+          0,
+          // Set minutes to 0
+          0
+        ); // Set seconds to 0
       }
-
       const currentTimeWithoutTime = new Date(
         currentTime.getFullYear(),
         currentTime.getMonth(),
         currentTime.getDate(),
-        0, // Set hours to 0
-        0, // Set minutes to 0
-        0 // Set seconds to 0
-      );
-
+        0,
+        // Set hours to 0
+        0,
+        // Set minutes to 0
+        0
+      ); // Set seconds to 0
       // const futureTime = new Date(selectedDateWithoutTime);
       // futureTime.setHours(time.getHours());
       // futureTime.setMinutes(time.getMinutes());
@@ -132,7 +118,6 @@ const AddDesignated = ({
       const currentTimeCopy = new Date(currentTime);
       currentTimeCopy.setHours(time.getHours());
       currentTimeCopy.setMinutes(time.getMinutes());
-
       return currentTimeCopy < currentTime;
     }
   };
@@ -152,13 +137,8 @@ const AddDesignated = ({
         </>
       ) : (
         <SelectedDateTime onClick={handleOpen}>
-          <Typography>
-            {format(new Date(selectedDate || newDate), "EEE MMM dd yyyy")}
-          </Typography>
-          <Typography>
-            {" "}
-            {format(new Date(selectedTime || newDate), "hh:mm a")}
-          </Typography>
+          <Typography>{format(new Date(selectedDate || newDate), 'EEE MMM dd yyyy')}</Typography>
+          <Typography> {format(new Date(selectedTime || newDate), 'hh:mm a')}</Typography>
         </SelectedDateTime>
       )}
       <Dialog open={open} onClose={handleClose}>
@@ -166,30 +146,22 @@ const AddDesignated = ({
           <FormContent>
             <InputBox>
               <DateBox>
-                <LocalizationProvider dateAdapter={AdapterDateFns}>
-                  <DatePicker
-                    label="Select Date"
-                    value={tempDate || newDate}
-                    onChange={handleDateChange}
-                    renderInput={(props) => <TextField {...props} />}
-                    minDate={new Date()}
-                    maxDate={
-                      new Date(new Date().getTime() + 24 * 60 * 60 * 1000)
-                    }
-                    format="MM/dd/yyyy"
-                  />
-                </LocalizationProvider>
-              </DateBox>
-              <LocalizationProvider dateAdapter={AdapterDateFns}>
-                <TimePicker
-                  label="Select Time"
-                  value={tempTime || newDate}
-                  onChange={handleTimeChange}
-                  renderInput={(props) => <TextField {...props} />}
-                  shouldDisableTime={isTimeDisabled}
-                  onError={(err) => setTimeError(true)}
+                <DatePickerWrapper
+                  label="Select Date"
+                  value={tempDate || newDate}
+                  onChange={handleDateChange}
+                  minDate={new Date()}
+                  maxDate={new Date(new Date().getTime() + 24 * 60 * 60 * 1000)}
+                  format="MM/dd/yyyy"
                 />
-              </LocalizationProvider>
+              </DateBox>
+              <TimePickerWrapper
+                label="Select Time"
+                value={tempTime || newDate}
+                onChange={handleTimeChange}
+                shouldDisableTime={isTimeDisabled}
+                onError={_err => setTimeError(true)}
+              />
             </InputBox>
           </FormContent>
           <ButtonBox>
@@ -208,9 +180,7 @@ const AddDesignated = ({
       </Dialog>
       <Dialog open={openScheduleMsg} size="sm" onClose={handleMessageClose}>
         <Body>
-          <Typography variant="h3">
-            You have already booked a scheduled ride.
-          </Typography>
+          <Typography variant="h3">You have already booked a scheduled ride.</Typography>
         </Body>
         <ButtonBoxMessage>
           <Button variant="contained" onClick={handleMessageClose}>
@@ -241,7 +211,6 @@ const Container = styled.div`
     }
   `}
 `;
-
 const PopupBox = styled.div`
   width: 530px;
 `;
@@ -261,30 +230,24 @@ const ButtonBox = styled.div`
     padding: ${theme.spacing(2, 3)};
   `}
 `;
-
 const ResetButton = styled.div`
   width: 300px;
 `;
-
 const OkButton = styled.div`
   width: 300px;
   text-align: right;
 `;
-
 const FormContent = styled.div`
   padding: 15px;
 `;
-
 const InputBox = styled.div`
   display: flex;
   padding: 5px;
 `;
-
 const DateBox = styled.div`
   display: flex;
   width: 250px;
 `;
-
 const SelectedDateTime = styled.div`
   cursor: pointer;
 `;

@@ -3,7 +3,9 @@ import ConfirmBooking from "./ConfirmBooking";
 import InRoute from "./InRoute";
 import SelectRide from "./SelectRide";
 import SelectGender from "./model/SelectGender";
-import AddDesignated from "./AddDesignated";
+import dynamic from 'next/dynamic';
+// Dynamically import AddDesignated to avoid SSR issues
+const AddDesignated = dynamic(() => import('./AddDesignated'), { ssr: false });
 
 export default function RiderInfo({
   carsList,
