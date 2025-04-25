@@ -158,7 +158,7 @@ export default function AddPaymentInfo({ userAuth }) {
         
         setLoading(false);
         toast.success(response.message);
-        router.push("/save-cards");
+        router.push("/cards");
       } else if (
         response.status === "FALSE" &&
         response.message === "Invalid token code"

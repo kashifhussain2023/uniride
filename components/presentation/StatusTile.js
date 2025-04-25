@@ -1,8 +1,8 @@
-import * as React from "react";
-import Image from "next/image";
-import styled from "@emotion/styled";
-import { IconButton, Typography } from "@mui/material";
-import curveLine from "../../public/curve-line.png";
+import * as React from 'react';
+import Image from 'next/image';
+import styled from '@emotion/styled';
+import { IconButton, Typography } from '@mui/material';
+import curveLine from '../../public/curve-line.png';
 
 export default function StatusTile({ bgColor, number, statusType, icon }) {
   return (

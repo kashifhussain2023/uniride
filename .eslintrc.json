@@ -1,0 +1,43 @@
+{
+  "extends": ["next/core-web-vitals", "eslint:recommended", "prettier"],
+  "plugins": ["sort-keys", "prettier"],
+  "rules": {
+    "sort-keys": [
+      "error",
+      "asc",
+      {
+        "caseSensitive": true,
+        "natural": true,
+        "minKeys": 1,
+        "shorthand": "ignore"
+      }
+    ],
+    "no-unused-vars": "warn",
+    "no-console": "warn",
+    "prefer-const": "error",
+    "no-var": "error",
+    "eqeqeq": "error",
+    "prettier/prettier": [
+      "error",
+      {
+        "singleQuote": true,
+        "semi": true,
+        "tabWidth": 2,
+        "trailingComma": "es5",
+        "printWidth": 100,
+        "bracketSpacing": true,
+        "arrowParens": "avoid",
+        "endOfLine": "auto"
+      }
+    ]
+  },
+  "parserOptions": {
+    "ecmaVersion": 2020,
+    "sourceType": "module"
+  },
+  "env": {
+    "browser": true,
+    "node": true,
+    "es6": true
+  }
+}

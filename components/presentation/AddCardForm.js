@@ -27,7 +27,7 @@ const Item = styled(Paper)(({ theme }) => ({
   color: theme.palette.text.secondary,
 }));
 
-export default function AddCardForm({ userAuth }) {
+export default function AddCardForm() {
   const router = useRouter();
   const stripe = useStripe();
   const elements = useElements();
@@ -124,7 +124,7 @@ export default function AddCardForm({ userAuth }) {
           card_cvv: "",
           card_expire: paymentMethod.card.exp_month + "/" + paymentMethod.card.exp_year,
           card_type: paymentMethod.card.brand.toUpperCase()
-          // customer_id: userAuth
+       
         }
 
         const response = await api({

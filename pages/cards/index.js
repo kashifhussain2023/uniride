@@ -132,7 +132,7 @@ export default function SaveCards({ userAuth }) {
 
   const handleAddCardClick = () => {
     // router.push("/addPaymentInfo");
-    router.push("/save-cards/add");
+    router.push("/cards/add");
   };
 
   useEffect(() => {

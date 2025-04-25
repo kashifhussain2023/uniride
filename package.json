@@ -40,6 +40,9 @@
     "cross-env": "^7.0.3",
     "eslint": "^8.51.0",
     "eslint-config-next": "latest",
-    "prettier": "^2.8.8"
+    "eslint-config-prettier": "^10.1.2",
+    "eslint-plugin-prettier": "^5.2.6",
+    "eslint-plugin-sort-keys": "^2.3.5",
+    "prettier": "^3.5.3"
   }
 }
