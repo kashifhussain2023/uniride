@@ -1139,9 +1139,9 @@ export default function Dashboard({ userAuth }) {
 export async function getServerSideProps(context) {
   try {
     const session = await getSession(context);
-    console.log("getServerSideProps session", session);
 
     if (!session || !session.user) {
+      console.error("Session is missing or invalid:", session);
       return {
         redirect: {
           destination: "/login",
@@ -1150,51 +1150,8 @@ export async function getServerSideProps(context) {
       };
     }
 
-    // Check if user data exists
-    if (!session.user.data) {
-      console.error("No user data in session:", session.user);
-      return {
-        redirect: {
-          destination: "/login",
-          permanent: false,
-        },
-      };
-    }
-
-    // Check profile status - convert to string for comparison
-    //const profileStatus = String(session.user.data.profile_status);
-
-    // if (profileStatus !== "3") {
-    //   // If profile status is 1, redirect to add-card
-    //   if (profileStatus === "1") {
-    //     return {
-    //       redirect: {
-    //         destination: "/add-card",
-    //         permanent: false,
-    //       },
-    //     };
-    //   }
-    //   // If profile status is 2 or anything else, redirect to verification
-    //   if (profileStatus === "2") {
-    //     return {
-    //       redirect: {
-    //         destination: "/verification",
-    //         permanent: false,
-    //       },
-    //     };
-    //   }
-    //   // For any other status, redirect to login
-    //   return {
-    //     redirect: {
-    //       destination: "/login",
-    //       permanent: false,
-    //     },
-    //   };
-    // }
-
-    // Ensure all required user data is present
-    if (!session.user.data.customer_id || !session.user.data.token_code) {
-      console.error("Missing required user data in session:", session.user);
+    if (!session.user.data || !session.user.data.customer_id || !session.user.data.token_code) {
+      console.error("Required user data is missing:", session.user);
       return {
         redirect: {
           destination: "/login",
@@ -1211,8 +1168,8 @@ export async function getServerSideProps(context) {
           name: session.user.data.name || "",
           mobile_number: session.user.data.mobile_number || "",
           email: session.user.data.email || "",
-          profile_status: session.user.data.profile_status || ""
-        }
+          profile_status: session.user.data.profile_status || "",
+        },
       },
     };
   } catch (error) {
