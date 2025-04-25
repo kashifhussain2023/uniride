@@ -80,7 +80,7 @@ export function validateProfileRequirements(profileData) {
   if (!profileData.data.default_payment_method) {
     return {
       isValid: false,
-      redirectUrl: '/add-card',
+      redirectUrl: '/cards/add',
       reason: 'No default payment method'
     };
   }

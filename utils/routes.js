@@ -5,7 +5,7 @@
 // Routes that require authentication
 export const authRoutes = {
     uniride: '/uniride',
-    addCard: '/add-card',
+    addCard: '/cards/add',
     profile: '/profile',
     rides: '/rides',
     settings: '/settings',

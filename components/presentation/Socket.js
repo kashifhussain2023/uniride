@@ -199,34 +199,6 @@ class SocketService {
       }
     });
 
-    // Booking related events
-    this.socket.on(socketEvents.REQUEST_SENT, (data) => {
-      debugLog("Request sent event received", data);
-    });
-
-    this.socket.on(socketEvents.SCHEDULE_REQUEST_SENT, (data) => {
-      debugLog("Schedule request sent event received", data);
-    });
-
-    this.socket.on(socketEvents.NO_DRIVER_FOUND, (data) => {
-      debugLog("No driver found event received", data);
-    });
-
-    this.socket.on(socketEvents.NEW_RIDE_REQUEST, (data) => {
-      debugLog("New ride request event received", data);
-    });
-
-    this.socket.on(socketEvents.REQUEST_TIMEOUT, (data) => {
-      debugLog("Request timeout event received", data);
-    });
-
-    this.socket.on(socketEvents.DRIVER_ACCEPTED, (data) => {
-      debugLog("Driver accepted event received", data);
-    });
-
-    this.socket.on(socketEvents.DRIVER_REJECTED, (data) => {
-      debugLog("Driver rejected event received", data);
-    });
 
     this.socket.io.on("reconnect_attempt", (attemptNumber) => {
       debugLog(`Reconnection attempt #${attemptNumber}`);

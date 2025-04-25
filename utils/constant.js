@@ -24,7 +24,7 @@ export const menuIcons = [
     path: "/emergency-contact",
     icon: "../icon/emergencyContactIcon.png",
   },
-  { label: "Payment", path: "/save-cards", icon: "../icon/paymentIcon.png" },
+  { label: "Payment", path: "/cards", icon: "../icon/paymentIcon.png" },
   {
     label: "Rider History",
     path: "riderHistory",

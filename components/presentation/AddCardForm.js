@@ -137,27 +137,37 @@ export default function AddCardForm({ userAuth }) {
           toast.success(response.message || "Card added successfully");
           
           // Fetch updated profile data to get the latest default_payment_method status
-          const profileResponse = await api({
-            url: "/customer/get-profile-details",
-            method: "GET",
-          });
+         
           
-          if (profileResponse.status === true) {
-            // Update session with new payment method status
-            if (session) {
-              await sessionUpdate({
-                user: {
-                  ...session?.user,
-                  data: {
-                    ...session?.user?.data,
-                    default_payment_method: profileResponse.data.default_payment_method
-                  }
-                },
-              });
+          // if (profileResponse.status === true) {
+          //   // Update session with new payment method status
+          //   if (session) {
+          //     await sessionUpdate({
+          //       user: {
+          //         ...session?.user,
+          //         data: {
+          //           ...session?.user?.data,
+          //           default_payment_method: profileResponse.data.default_payment_method
+          //         }
+          //       },
+          //     });
+          //   }
+          // }
+
+         
+          setTimeout(async () => {
+            const profileResponse = await api({
+              url: "/customer/get-profile-details",
+              method: "GET",
+            });
+            
+            if (profileResponse.status === true) {
+              localStorage.setItem('lastAddedCard', JSON.stringify(profileResponse.data.default_payment_method));
             }
-          }
+            
+            router.push("/uniride");
+          }, 3000);
           
-          router.push("/uniride");
         } else if (response.status === false && response.message === "Invalid token code") {
           toast.error("Your session has expired. Please login again.");
           await signOut({ redirect: false });

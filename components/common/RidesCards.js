@@ -59,7 +59,7 @@ export default function RidesCards({
     <>
       {carStatus ? (
         <>
-          {carsList.length > 0 ? (
+          {carsList && carsList.length > 0 ? (
             carsList.map((car, index) => (
               <RideCars
                 key={index}

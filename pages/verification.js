@@ -100,6 +100,9 @@ export default function Verification({ userAuth }) {
 
         if (profileResponse.status === true) {
           // Sign in the user using NextAuth
+
+          setTimeout(async () => {
+
           const signInResult = await signIn("credentials", {
             phone: userAuth.mobile_number,
             password: userAuth.password,
@@ -146,12 +149,15 @@ export default function Verification({ userAuth }) {
               }
             );
             toast.success("Please add your payment details to continue.");
-            router.push("/add-card");
+            router.push("/cards/add");
           } else {
             // User has payment method, redirect to main app
             toast.success("Verification successful");
             router.push("/uniride");
           }
+
+        },2000);
+        
         } else {
           throw new Error(profileResponse.message || "Failed to get profile details");
         }

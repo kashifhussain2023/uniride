@@ -308,7 +308,7 @@ export async function getServerSideProps(context) {
         case 1:
           return {
             redirect: {
-              destination: '/add-card',
+              destination: '/cards/add',
               permanent: false,
             },
           };

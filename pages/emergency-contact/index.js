@@ -109,7 +109,7 @@ export default function EmergencyContacts() {
               <Button
                 variant="contained"
                 color="primary"
-                onClick={() => router.push("/emergency-contact-add")}
+                onClick={() => router.push("/emergency-contact/add")}
               >
                 Add Contact
               </Button>

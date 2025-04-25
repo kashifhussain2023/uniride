@@ -87,7 +87,7 @@ export default function EmergencyContactAdd() {
       if (response.status === true) {
         setLoading(false);
         toast.success(response.message);
-        router.push("emergency-contact");
+        router.push("/emergency-contact");
       } else if (response.status === false) {
         setLoading(false);
         toast.error(response.message);

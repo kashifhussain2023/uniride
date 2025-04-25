@@ -105,7 +105,7 @@ export default function Dashboard({ userAuth }) {
       return;
     }
 
-    if (availableDriver.length <= 0) {
+    if (availableDriver && availableDriver.length <= 0) {
       toast.error("No cars available.");
       return;
     }
@@ -264,8 +264,27 @@ export default function Dashboard({ userAuth }) {
         setIsBookingInProgress(true);
 
         const session = await getSession();
+        let paymentMethodId;
 
-        console.log("sesions", session.user.data.default_payment_method.payment_id);
+        // Try to get payment method from session first
+        if (session?.user?.data?.default_payment_method?.payment_id) {
+          paymentMethodId = session.user.data.default_payment_method.payment_id;
+        } else {
+          // If not in session, try to get from localStorage
+          const lastAddedCard = localStorage.getItem('lastAddedCard');
+          if (lastAddedCard) {
+            const cardInfo = JSON.parse(lastAddedCard);
+            paymentMethodId = cardInfo.payment_id;
+          }
+        }
+
+        console.log("paymentMethodId", paymentMethodId);
+
+        if (!paymentMethodId) {
+          toast.error("No payment method found. Please add a payment method first.");
+          router.push("/save-cards/add");
+          return;
+        }
 
         const bookingPayload = {
           pickup_lat: String(currentLocation.lat),
@@ -281,10 +300,12 @@ export default function Dashboard({ userAuth }) {
           promotion_id: promotionId,
           promo_code: couponCode,
           city_name: currentLocation.city,
-          payment_method: session.user.data.default_payment_method.payment_id,
+          payment_method: paymentMethodId,
           distance: distance,
           time: duration
         };
+
+        console.log("bookingPayload", bookingPayload);
 
         // Set up event listeners for booking responses
         const requestSentHandler = (response) => {
@@ -342,20 +363,20 @@ export default function Dashboard({ userAuth }) {
 
         // Register all event handlers
         const unsubscribeRequestSent = socketService.on(socketEvents.REQUEST_SENT, requestSentHandler);
-        const unsubscribeScheduleRequestSent = socketService.on(socketEvents.SCHEDULE_REQUEST_SENT, scheduleRequestSentHandler);
-        const unsubscribeNoDriverFound = socketService.on(socketEvents.NO_DRIVER_FOUND, noDriverFoundHandler);
-        const unsubscribeError = socketService.on(socketEvents.ERROR, errorHandler);
-        const unsubscribeDriverAccepted = socketService.on(socketEvents.DRIVER_ACCEPTED, driverAcceptedHandler);
-        const unsubscribeDriverRejected = socketService.on(socketEvents.DRIVER_REJECTED, driverRejectedHandler);
+        // const unsubscribeScheduleRequestSent = socketService.on(socketEvents.SCHEDULE_REQUEST_SENT, scheduleRequestSentHandler);
+        // const unsubscribeNoDriverFound = socketService.on(socketEvents.NO_DRIVER_FOUND, noDriverFoundHandler);
+        // const unsubscribeError = socketService.on(socketEvents.ERROR, errorHandler);
+        // const unsubscribeDriverAccepted = socketService.on(socketEvents.DRIVER_ACCEPTED, driverAcceptedHandler);
+        // const unsubscribeDriverRejected = socketService.on(socketEvents.DRIVER_REJECTED, driverRejectedHandler);
 
         // Set a timeout to clean up event listeners if no response is received
         const cleanupTimeout = setTimeout(() => {
           unsubscribeRequestSent();
-          unsubscribeScheduleRequestSent();
-          unsubscribeNoDriverFound();
-          unsubscribeError();
-          unsubscribeDriverAccepted();
-          unsubscribeDriverRejected();
+          // unsubscribeScheduleRequestSent();
+          // unsubscribeNoDriverFound();
+          // unsubscribeError();
+          // unsubscribeDriverAccepted();
+          // unsubscribeDriverRejected();
           setIsBookingInProgress(false);
         }, 60000); // 1 minute timeout
 
@@ -1003,18 +1024,18 @@ export default function Dashboard({ userAuth }) {
   };
 
   // Add a useEffect to clean up booking state when component unmounts
-  useEffect(() => {
-    return () => {
-      if (isBookingInProgress && bookingRequestId) {
-        console.log("Cleaning up booking request on unmount:", bookingRequestId);
-        socketHelpers.cancel_ride({
-          request_id: bookingRequestId,
-          customer_id: userAuth.customer_id,
-          user_type: "customer"
-        });
-      }
-    };
-  }, [isBookingInProgress, bookingRequestId, userAuth.customer_id]);
+  // useEffect(() => {
+  //   return () => {
+  //     if (isBookingInProgress && bookingRequestId) {
+  //       console.log("Cleaning up booking request on unmount:", bookingRequestId);
+  //       socketHelpers.cancel_ride({
+  //         request_id: bookingRequestId,
+  //         customer_id: userAuth.customer_id,
+  //         user_type: "customer"
+  //       });
+  //     }
+  //   };
+  // }, [isBookingInProgress, bookingRequestId, userAuth.customer_id]);
 
   return (
     <ThemeProvider>

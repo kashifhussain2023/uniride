@@ -93,14 +93,14 @@ export async function middleware(request) {
             }
 
             // Handle specific route requirements
-            if (pathname === '/uniride') {
-                console.log("profileData", profileData);
-                // Check if user needs to add payment method
-                if (!profileData.data.default_payment_method) {
-                    console.log('Redirecting to add-card: No default payment method');
-                    return NextResponse.redirect(new URL('/add-card', request.url));
-                }
-            }
+            // if (pathname === '/uniride') {
+            //     console.log("profileData", profileData);
+            //     // Check if user needs to add payment method
+            //     if (!profileData.data.default_payment_method) {
+            //         console.log('Redirecting to add-card: No default payment method');
+            //         return NextResponse.redirect(new URL('/cards/add', request.url));
+            //     }
+            // }
 
             // Store profile data in request headers for use in the page
             const requestHeaders = new Headers(request.headers);
