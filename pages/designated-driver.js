@@ -767,9 +767,26 @@ export default function Dashboard({ userAuth }) {
 }
 
 export async function getServerSideProps(context) {
-  const session = await getSession(context);
+  try {
+    const session = await getSession(context);
 
-  if (!session) {
+    if (!session || !session.user) {
+      console.error("Session is missing or invalid:", session);
+      return {
+        redirect: {
+          destination: "/login",
+          permanent: false,
+        },
+      };
+    }
+
+    return {
+      props: {
+        userAuth: session.user || null,
+      },
+    };
+  } catch (error) {
+    console.error("Error in getServerSideProps:", error);
     return {
       redirect: {
         destination: "/login",
@@ -777,12 +794,6 @@ export async function getServerSideProps(context) {
       },
     };
   }
-
-  return {
-    props: {
-      userAuth: session.user || null,
-    },
-  };
 }
 
 const PannelSection = styled.div`
