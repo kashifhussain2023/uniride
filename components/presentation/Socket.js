@@ -95,7 +95,7 @@ class SocketService {
     }
 
     // Socket configuration
-    const SOCKET_URL = "https://localhost:5103/connect-socket";
+    const SOCKET_URL = `${process.env.NEXT_SOCKET_URL}/connect-socket`;
     debugLog("Connecting to socket URL", SOCKET_URL);
 
     try {
