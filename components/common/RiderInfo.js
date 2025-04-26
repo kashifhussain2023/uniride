@@ -1,9 +1,12 @@
-import styled from "@emotion/styled";
-import ConfirmBooking from "./ConfirmBooking";
-import InRoute from "./InRoute";
-import SelectRide from "./SelectRide";
-import SelectGender from "./model/SelectGender";
-import AddDesignated from "./AddDesignated";
+import styled from '@emotion/styled';
+import dynamic from 'next/dynamic';
+import ConfirmBooking from './ConfirmBooking';
+import InRoute from './InRoute';
+import SelectRide from './SelectRide';
+import SelectGender from './model/SelectGender';
+
+// Dynamically import AddDesignated to avoid SSR issues
+const AddDesignated = dynamic(() => import('./AddDesignated'), { ssr: false });
 
 export default function RiderInfo({
   carsList,
@@ -12,7 +15,7 @@ export default function RiderInfo({
   setCustomerRideType,
   handleComfirmBooking,
   proceedGenderModel,
-  handleInRoute,
+  _handleInRoute,
   selectRide,
   comfirmBooking,
   inRoute,
@@ -102,12 +105,11 @@ export default function RiderInfo({
           rideStatus={rideStatus}
         />
       ) : (
-        ""
+        ''
       )}
     </LeftPannel>
   );
 }
-
 const LeftPannel = styled.div`
   ${({ theme }) => `
     background-color: ${theme.colors.palette.white};

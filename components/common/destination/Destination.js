@@ -1,15 +1,14 @@
-import { useState } from "react";
-import styled from "@emotion/styled";
-import { signOut } from "next-auth/react";
-import { useRouter } from "next/router";
-import { api } from "@/utils/api/common";
-import { toast } from "react-toastify";
-import { Grid, IconButton, Typography } from "@mui/material";
-import DeleteIcon from "@mui/icons-material/Delete";
-import { GoogleMap, MarkerF } from "@react-google-maps/api";
-import MessageModel from "../model/MessageModel";
-import SpinnerLoader from "../SpinnerLoader";
-
+import { api } from '@/utils/api/common';
+import styled from '@emotion/styled';
+import DeleteIcon from '@mui/icons-material/Delete';
+import { Grid, IconButton, Typography } from '@mui/material';
+import { GoogleMap, MarkerF } from '@react-google-maps/api';
+import { signOut } from 'next-auth/react';
+import { useRouter } from 'next/router';
+import { useState } from 'react';
+import { toast } from 'react-toastify';
+import MessageModel from '../model/MessageModel';
+import SpinnerLoader from '../SpinnerLoader';
 export default function DestinationList({
   favoritelist,
   type,
@@ -21,58 +20,52 @@ export default function DestinationList({
   const [open, setOpen] = useState(false);
   const [locationId, setLocationId] = useState(null);
   const [loading, setLoading] = useState(false);
-
   const mapContainerStyle = {
-    width: "100%",
-    height: "150px", 
+    height: '150px',
+    width: '100%',
   };
-
-  const handleOpen = (id) => {
+  const handleOpen = id => {
     setOpen(true);
     setLocationId(id);
   };
-
   const handleClose = () => setOpen(false);
-
   const handleDeleteAction = async () => {
     const formData = new FormData();
-    formData.append("location_id", locationId);
-    formData.append("token_code", userAuth.token_code);
+    formData.append('location_id', locationId);
+    formData.append('token_code', userAuth.token_code);
     setOpen(false);
     setLoading(true);
     const response = await api({
-      url: `/customer/address/remove/${locationId}`,
-      method: "POST",
       data: formData,
+      method: 'POST',
+      url: `/customer/address/remove/${locationId}`,
     });
     if (response.status === true) {
       toast.success(response.message);
       getFavoriteList();
       setLoading(false);
-    } else if (
-      response.status === false &&
-      response.message === "Invalid token code"
-    ) {
+    } else if (response.status === false && response.message === 'Invalid token code') {
       setLoading(false);
       toast.error(
-        "Your account has been logged in on another device.Please login again to continue."
+        'Your account has been logged in on another device.Please login again to continue.'
       );
-      await signOut({ redirect: false });
-      router.push("/login");
+      await signOut({
+        redirect: false,
+      });
+      router.push('/login');
     } else {
       setLoading(false);
       toast.success(response.message);
     }
   };
-
   const handleLocation = (fav_lat, fav_long, address) => {
     router.push({
       pathname: `/${redirectPage}`,
       query: {
-        type: type,
+        address: address,
         lat: fav_lat,
         lng: fav_long,
-        address: address,
+        type: type,
       },
     });
   };
@@ -85,7 +78,7 @@ export default function DestinationList({
         handleAction={() => handleDeleteAction()}
         message="Do you want to delete this location ?"
       />
-      {favoritelist != undefined && favoritelist ? (
+      {favoritelist !== undefined && favoritelist ? (
         favoritelist.map((favorite, index) => (
           <Grid item xs={12} sm={6} md={4} key={index}>
             <Destination>
@@ -98,10 +91,10 @@ export default function DestinationList({
                   }}
                   zoom={5}
                   options={{
-                    zoomControl: false,
-                    streetViewControl: false,
-                    mapTypeControl: false,
                     fullscreenControl: false,
+                    mapTypeControl: false,
+                    streetViewControl: false,
+                    zoomControl: false,
                   }}
                 >
                   <MarkerF
@@ -122,11 +115,7 @@ export default function DestinationList({
               </HistoryImage>
               <Detail
                 onClick={() =>
-                  handleLocation(
-                    favorite.fav_lat,
-                    favorite.fav_long,
-                    favorite.address
-                  )
+                  handleLocation(favorite.fav_lat, favorite.fav_long, favorite.address)
                 }
               >
                 <img src="../mapIcon.png" alt="map icon" />
@@ -146,7 +135,6 @@ export default function DestinationList({
     </>
   );
 }
-
 const Destination = styled.div`
   ${({ theme }) => `
     border: 1px solid ${theme.colors.palette.grey};
@@ -155,7 +143,6 @@ const Destination = styled.div`
     height: 100%;
   `}
 `;
-
 const HistoryImage = styled.div`
   ${({ theme }) => `
     width: 100%;
@@ -172,7 +159,6 @@ const HistoryImage = styled.div`
     }
   `}
 `;
-
 const Detail = styled.div`
   margin-top: 30px;
   position: relative;
@@ -195,7 +181,6 @@ const Detail = styled.div`
     line-height: 22px;
   }
 `;
-
 const NoRecord = styled(Typography)`
   ${({ theme }) => `
     padding-bottom: ${theme.spacing(3)};
@@ -205,14 +190,12 @@ const NoRecord = styled(Typography)`
     font-weight: 500;
   `}
 `;
-
 const NoRecordGrid = styled(Grid)`
   &.MuiGrid-item {
     flex: 0 0 100%;
     max-width: 100%;
   }
 `;
-
 const MuiIconButton = styled(IconButton)`
   &.MuiIconButton-root {
     position: absolute;

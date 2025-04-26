@@ -1,0 +1,57 @@
+{
+  "extends": [
+    "next/core-web-vitals",
+    "eslint:recommended",
+    "prettier"
+  ],
+  "plugins": [
+    "sort-keys-fix",
+    "prettier"
+  ],
+  "rules": {
+    "sort-keys-fix/sort-keys-fix": [
+      "warn",
+      "asc",
+      {
+        "caseSensitive": true,
+        "natural": true
+      }
+    ],
+    "no-unused-vars": [
+      "warn",
+      {
+        "vars": "all",
+        "args": "after-used",
+        "ignoreRestSiblings": true,
+        "argsIgnorePattern": "^_",
+        "varsIgnorePattern": "^_"
+      }
+    ],
+    "no-console": "warn",
+    "prefer-const": "error",
+    "no-var": "error",
+    "eqeqeq": "error",
+    "prettier/prettier": [
+      "error",
+      {
+        "singleQuote": true,
+        "semi": true,
+        "tabWidth": 2,
+        "trailingComma": "es5",
+        "printWidth": 100,
+        "bracketSpacing": true,
+        "arrowParens": "avoid",
+        "endOfLine": "auto"
+      }
+    ]
+  },
+  "parserOptions": {
+    "ecmaVersion": 2020,
+    "sourceType": "module"
+  },
+  "env": {
+    "browser": true,
+    "node": true,
+    "es6": true
+  }
+}

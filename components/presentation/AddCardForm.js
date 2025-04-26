@@ -1,73 +1,57 @@
-import Layout from "@/components/common/Layout";
-import PageTitle from "@/components/common/PageTitle";
-import SmallContent from "@/components/presentation/SmallContent";
-import CustomFormControl from "@/theme/CustomFormControl";
-import CustomSelect from "@/theme/CustomSelect";
-import ThemeProvider from "@/theme/ThemeProvider";
-import { cardValidation } from "@/utils/payment-card";
-import styled from "@emotion/styled";
-import { Button, Typography } from "@mui/material";
-import InputLabel from "@mui/material/InputLabel";
-import Paper from "@mui/material/Paper";
-import Grid from "@mui/material/Unstable_Grid2";
-import { CardElement, useElements, useStripe } from "@stripe/react-stripe-js";
-import { signOut, useSession } from "next-auth/react";
-import Head from "next/head";
-import { useState } from "react";
-import { api } from "@/utils/api/common";
-import { toast } from "react-toastify";
-import { useRouter } from "next/router";
-import SpinnerLoader from "../common/SpinnerLoader";
-import { setCookie } from "nookies";
-const Item = styled(Paper)(({ theme }) => ({
-  backgroundColor: theme.palette.mode === "dark" ? "#1A2027" : "#fff",
-  ...theme.typography.body2,
-  padding: theme.spacing(1),
-  textAlign: "center",
-  color: theme.palette.text.secondary,
-}));
-
-export default function AddCardForm({ userAuth }) {
+import Layout from '@/components/common/Layout';
+import PageTitle from '@/components/common/PageTitle';
+import SmallContent from '@/components/presentation/SmallContent';
+import CustomFormControl from '@/theme/CustomFormControl';
+import ThemeProvider from '@/theme/ThemeProvider';
+import { api } from '@/utils/api/common';
+import { cardValidation } from '@/utils/payment-card';
+import styled from '@emotion/styled';
+import { Button, Typography } from '@mui/material';
+import InputLabel from '@mui/material/InputLabel';
+import Grid from '@mui/material/Unstable_Grid2';
+import { CardElement, useElements, useStripe } from '@stripe/react-stripe-js';
+import { signOut, useSession } from 'next-auth/react';
+import Head from 'next/head';
+import { useRouter } from 'next/router';
+import { useState } from 'react';
+import { toast } from 'react-toastify';
+import SpinnerLoader from '../common/SpinnerLoader';
+export default function AddCardForm() {
   const router = useRouter();
   const stripe = useStripe();
   const elements = useElements();
-  const { data: session, update: sessionUpdate } = useSession();
+  useSession();
   const [loading, setLoading] = useState(false);
-  const [age, setAge] = useState("");
-  const [responseError, setResponseError] = useState("");
   const [removeErrors, setRemoveErrors] = useState(false);
-  const [cardError, setCardError] = useState("");
+  const [cardError, setCardError] = useState('');
   const [inputs, setInputs] = useState({
-    card_number: "",
-    card_holder: "",
-    cvv: "",
-    month: "",
-    year: "",
-    card_type: "",
+    card_holder: '',
+    card_number: '',
+    card_type: '',
+    cvv: '',
+    month: '',
+    year: '',
   });
-
   const [errors, setErrors] = useState({
-    card_holder: "",
+    card_holder: '',
     // card_number: "",
     // card_type: "",
     // cvv: "",
     // expiration_month: "",
     // expiration_year: "",
   });
-
-  const handleCardDetail = (event) => {
-    var brandName = event.brand.toUpperCase();
-    setInputs((inputs) => ({
+  const handleCardDetail = event => {
+    const brandName = event.brand.toUpperCase();
+    setInputs(inputs => ({
       ...inputs,
-      ["card_type"]: brandName,
+      ['card_type']: brandName,
     }));
   };
   const handleInputChange = ({ target }) => {
-    setInputs((inputs) => ({
+    setInputs(inputs => ({
       ...inputs,
       [target.name]: target.value,
     }));
-
     if (removeErrors) {
       setErrors({
         ...cardValidation({
@@ -76,41 +60,33 @@ export default function AddCardForm({ userAuth }) {
       });
     }
   };
-
-  const handleSubmit = async (e) => {
-
-    setResponseError("");
+  const handleSubmit = async e => {
     e.preventDefault();
-
-    let inputForValidation = {
+    const inputForValidation = {
       card_holder: inputs.card_holder,
     };
-
     const validationErrors = cardValidation(inputForValidation);
     const noErrors = Object.keys(validationErrors).length === 0;
     setRemoveErrors(true);
-
     if (noErrors) {
       try {
         setLoading(true);
         const cardElement = elements.getElement(CardElement);
-
         if (!stripe || !elements || !cardElement) {
-          toast.error("Payment system is not ready. Please try again.");
+          toast.error('Payment system is not ready. Please try again.');
           return;
         }
 
         // Create payment method with Stripe
         const { paymentMethod, error: paymentError } = await stripe.createPaymentMethod({
-          type: 'card',
-          card: cardElement,
           billing_details: {
             name: inputs.card_holder,
           },
+          card: cardElement,
+          type: 'card',
         });
-
         if (paymentError) {
-          console.error("Stripe payment method error:", paymentError);
+          console.error('Stripe payment method error:', paymentError);
           setCardError(paymentError.message);
           toast.error(paymentError.message);
           return;
@@ -118,27 +94,24 @@ export default function AddCardForm({ userAuth }) {
 
         // Send payment method to server
         const requestBody = {
-          payment_method_id: paymentMethod.id,
+          card_cvv: '',
+          card_expire: paymentMethod.card.exp_month + '/' + paymentMethod.card.exp_year,
           card_holder: inputs.card_holder,
-          card_number: "000000000000" + paymentMethod.card.last4,
-          card_cvv: "",
-          card_expire: paymentMethod.card.exp_month + "/" + paymentMethod.card.exp_year,
-          card_type: paymentMethod.card.brand.toUpperCase()
+          card_number: '000000000000' + paymentMethod.card.last4,
+          card_type: paymentMethod.card.brand.toUpperCase(),
+          payment_method_id: paymentMethod.id,
           // customer_id: userAuth
-        }
-
+        };
         const response = await api({
-          url: "/customer/payments/add-card",
-          method: "POST",
           data: requestBody,
+          method: 'POST',
+          url: '/customer/payments/add-card',
         });
-
         if (response.status === true) {
-          toast.success(response.message || "Card added successfully");
-          
+          toast.success(response.message || 'Card added successfully');
+
           // Fetch updated profile data to get the latest default_payment_method status
-         
-          
+
           // if (profileResponse.status === true) {
           //   // Update session with new payment method status
           //   if (session) {
@@ -154,30 +127,31 @@ export default function AddCardForm({ userAuth }) {
           //   }
           // }
 
-         
           setTimeout(async () => {
             const profileResponse = await api({
-              url: "/customer/get-profile-details",
-              method: "GET",
+              method: 'GET',
+              url: '/customer/get-profile-details',
             });
-            
             if (profileResponse.status === true) {
-              localStorage.setItem('lastAddedCard', JSON.stringify(profileResponse.data.default_payment_method));
+              localStorage.setItem(
+                'lastAddedCard',
+                JSON.stringify(profileResponse.data.default_payment_method)
+              );
             }
-            
-            router.push("/uniride");
+            router.push('/uniride');
           }, 3000);
-          
-        } else if (response.status === false && response.message === "Invalid token code") {
-          toast.error("Your session has expired. Please login again.");
-          await signOut({ redirect: false });
-          router.push("/login");
+        } else if (response.status === false && response.message === 'Invalid token code') {
+          toast.error('Your session has expired. Please login again.');
+          await signOut({
+            redirect: false,
+          });
+          router.push('/login');
         } else {
-          toast.error(response.message || "Failed to add card");
+          toast.error(response.message || 'Failed to add card');
         }
       } catch (error) {
-        console.error("Add card error:", error);
-        toast.error("An error occurred while adding your card. Please try again.");
+        console.error('Add card error:', error);
+        toast.error('An error occurred while adding your card. Please try again.');
       } finally {
         setLoading(false);
       }
@@ -185,7 +159,6 @@ export default function AddCardForm({ userAuth }) {
       setErrors(validationErrors);
     }
   };
-
   return (
     <ThemeProvider>
       <Head>
@@ -198,15 +171,26 @@ export default function AddCardForm({ userAuth }) {
       <Layout>
         <SmallContent>
           <AddpaymentInfo>
-            <Grid container spacing={2} sx={{ mt: 2 }}>
+            <Grid
+              container
+              spacing={2}
+              sx={{
+                mt: 2,
+              }}
+            >
               <Grid lg={6} md={6} sm={12} xs={12}>
                 <PageTitle
                   title="Add"
                   subtitle="Payment Info"
-                  images_icon={"../payment.png"}
+                  images_icon={'../payment.png'}
                 ></PageTitle>
 
-                <Typography variant="h3" sx={{ mb: 1 }}>
+                <Typography
+                  variant="h3"
+                  sx={{
+                    mb: 1,
+                  }}
+                >
                   Credit/Debit Card
                 </Typography>
 
@@ -216,13 +200,11 @@ export default function AddCardForm({ userAuth }) {
                     fullWidth
                     type="text"
                     placeholder="Enter Card Holder Name"
-                    value={inputs.card_holder || ""}
+                    value={inputs.card_holder || ''}
                     name="card_holder"
                     onChange={handleInputChange}
                   />
-                  <span className="text-danger">
-                    {errors && errors.card_holder}
-                  </span>
+                  <span className="text-danger">{errors && errors.card_holder}</span>
                 </FormControl>
 
                 <FormControl>
@@ -238,7 +220,7 @@ export default function AddCardForm({ userAuth }) {
                     fullWidth
                     type="text"
                     placeholder="Card Type"
-                    value={inputs.card_type || ""}
+                    value={inputs.card_type || ''}
                     name="card_type"
                     onChange={handleInputChange}
                     disabled={true}
@@ -263,7 +245,6 @@ export default function AddCardForm({ userAuth }) {
     </ThemeProvider>
   );
 }
-
 const AddpaymentInfo = styled.div`
   ${({ theme }) => `
     border-radius: 16px 0px 16px 16px;
@@ -281,7 +262,6 @@ const AddpaymentInfo = styled.div`
     }
   `}
 `;
-
 const FormControl = styled.div`
   ${({ theme }) => `
     margin-bottom: 20px;
@@ -302,22 +282,6 @@ const FormControl = styled.div`
     }
   `}
 `;
-const CardImg = styled.div`
-  ${({ theme }) => `
-    margin-left: 10px;
-  `}
-`;
-
-const Expiration = styled.div`
-  ${({ theme }) => `
-    .MuiTypography-root {
-      font-size: 16px;
-      color: ${theme.colors.palette.darkGrey};
-      margin-bottom: 4px;
-    }
-  `}
-`;
-
 const ButtonArea = styled.div`
   ${({ theme }) => `
     width: 170px;
@@ -328,7 +292,6 @@ const ButtonArea = styled.div`
     }
   `}
 `;
-
 const AddPaymentImg = styled.div`
   ${({ theme }) => ` 
   display:none;

@@ -1,130 +1,122 @@
-import colors from "./colors";
+import colors from './colors';
 const fontFamily = "'Encode Sans', sans-serif";
-
 const typography = {
-  htmlFontSize: 16,
-  fontFamily,
-  fontSize: 16,
-  fontWeightLight: 300,
-  fontWeightRegular: 400,
-  fontWeightMedium: 500,
-  fontWeightBold: 700,
-  h1: {
-    fontFamily,
-    fontSize: "48px",
-    fontWeight: 700,
-    lineHeight: "52px",
-    color: colors.palette.black
-    
-  },
-  h2: {
-    fontFamily,
-    fontSize: "24px",
-    fontWeight: 400,
-    lineHeight: "1.1",
-    color: colors.palette.black
-  },
-  h3: {
-    fontFamily,
-    fontSize: "18px",
-    fontWeight: 600,
-    lineHeight: "32px",
-    color: colors.palette.black
-  },
-  h4: {
-    fontFamily,
-    fontSize: "16px",
-    fontWeight: 700,
-    lineHeight: "24px",
-    color: colors.palette.black
-  },
-  h5: {
-    fontFamily,
-    fontWeight: 400,
-    fontSize: "1.5rem",
-    lineHeight: 1.334,
-    color: colors.palette.black
-  },
-  h6: {
-    fontFamily,
-    fontWeight: 400,
-    fontSize: "0.875rem",
-    lineHeight: 1.6,
-    color: colors.palette.black
-  },
-  subtitle1: {
-    fontFamily,
-    fontWeight: 400,
-    fontSize: "1rem",
-    lineHeight: 1.75,
-    color: colors.palette.darkGrey
-  },
-  subtitle2: {
-    fontFamily,
-    fontWeight: 400,
-    fontSize: "1rem",
-    lineHeight: 1.57,
-    color: colors.palette.black
-  },
-  subtitle3: {
-    fontFamily,
-    fontWeight: 400,
-    fontSize: "0.875rem",
-    lineHeight: 1.57,
-    color: colors.palette.black
-  },
   body1: {
+    color: colors.palette.black,
     fontFamily,
+    fontSize: '1rem',
     fontWeight: 400,
-    fontSize: "1rem",
     lineHeight: 1.5,
-    color: colors.palette.black
   },
   body2: {
+    color: colors.palette.black,
     fontFamily,
+    fontSize: '1rem',
     fontWeight: 400,
-    fontSize: "1rem",
     lineHeight: 1.5,
-    color: colors.palette.black
   },
   button: {
     fontFamily,
+    fontSize: '0.875rem',
     fontWeight: 400,
-    fontSize: "0.875rem",
-    lineHeight: 1.75
+    lineHeight: 1.75,
+  },
+  cancel: {
+    color: colors.palette.red,
+    fontFamily,
+    fontSize: '16px',
+    fontWeight: 600,
+    lineHeight: 1,
   },
   caption: {
     fontFamily,
+    fontSize: '0.75rem',
     fontWeight: 400,
-    fontSize: "0.75rem",
-    lineHeight: 1.66
+    lineHeight: 1.66,
   },
+  fontFamily,
+  fontSize: 16,
+  fontWeightBold: 700,
+  fontWeightLight: 300,
+  fontWeightMedium: 500,
+  fontWeightRegular: 400,
+  h1: {
+    color: colors.palette.black,
+    fontFamily,
+    fontSize: '48px',
+    fontWeight: 700,
+    lineHeight: '52px',
+  },
+  h2: {
+    color: colors.palette.black,
+    fontFamily,
+    fontSize: '36px',
+    fontWeight: 700,
+    lineHeight: '40px',
+  },
+  h3: {
+    color: colors.palette.black,
+    fontFamily,
+    fontSize: '24px',
+    fontWeight: 700,
+    lineHeight: '32px',
+  },
+  h4: {
+    color: colors.palette.black,
+    fontFamily,
+    fontSize: '20px',
+    fontWeight: 700,
+    lineHeight: '28px',
+  },
+  h5: {
+    color: colors.palette.black,
+    fontFamily,
+    fontSize: '18px',
+    fontWeight: 700,
+    lineHeight: '24px',
+  },
+  h6: {
+    color: colors.palette.black,
+    fontFamily,
+    fontSize: '16px',
+    fontWeight: 700,
+    lineHeight: '24px',
+  },
+  htmlFontSize: 16,
   overline: {
     fontFamily,
+    fontSize: '0.75rem',
     fontWeight: 400,
-    fontSize: "0.75rem",
     lineHeight: 2.66,
-    textTransform: "uppercase"
+    textTransform: 'uppercase',
   },
-
+  subtitle1: {
+    color: colors.palette.black,
+    fontFamily,
+    fontSize: '1rem',
+    fontWeight: 400,
+    lineHeight: 1.75,
+  },
+  subtitle2: {
+    color: colors.palette.black,
+    fontFamily,
+    fontSize: '0.875rem',
+    fontWeight: 500,
+    lineHeight: 1.57,
+  },
+  subtitle3: {
+    color: colors.palette.black,
+    fontFamily,
+    fontSize: '0.875rem',
+    fontWeight: 400,
+    lineHeight: 1.57,
+  },
   success: {
+    color: colors.palette.green,
     fontFamily,
+    fontSize: '16px',
     fontWeight: 600,
-    fontSize: "16px",
     lineHeight: 1,
-    color: colors.palette.green
   },
-
-  cancel: {
-    fontFamily,
-    fontWeight: 600,
-    fontSize: "16px",
-    lineHeight: 1,
-    color: colors.palette.red
-  }
-
-
-
 };
-
 export default typography;

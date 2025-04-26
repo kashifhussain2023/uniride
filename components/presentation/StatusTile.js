@@ -1,9 +1,7 @@
-import * as React from "react";
-import Image from "next/image";
-import styled from "@emotion/styled";
-import { IconButton, Typography } from "@mui/material";
-import curveLine from "../../public/curve-line.png";
-
+import styled from '@emotion/styled';
+import { IconButton, Typography } from '@mui/material';
+import Image from 'next/image';
+import curveLine from '../../public/curve-line.png';
 export default function StatusTile({ bgColor, number, statusType, icon }) {
   return (
     <Container bgColor={bgColor}>
@@ -22,7 +20,6 @@ export default function StatusTile({ bgColor, number, statusType, icon }) {
     </Container>
   );
 }
-
 const Container = styled.div`
   ${({ theme, bgColor }) => `
     padding: ${theme.spacing(4, 3)};
@@ -45,14 +42,12 @@ const Container = styled.div`
     }
   `}
 `;
-
 const CurveLine = styled.div`
   position: absolute;
   left: 0;
   right: 0;
   bottom: 15px;
 `;
-
 const Status = styled.div`
   ${({ theme }) => `
      .MuiTypography-root {
@@ -64,7 +59,6 @@ const Status = styled.div`
      }
   `}
 `;
-
 const MuiIconButton = styled(IconButton)`
   ${({ theme }) => `
     &.MuiIconButton-root {

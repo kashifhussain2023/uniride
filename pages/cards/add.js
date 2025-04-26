@@ -1,11 +1,9 @@
-import React from "react";
-import { loadStripe } from "@stripe/stripe-js";
-import { Elements } from "@stripe/react-stripe-js";
-import AddCardForm from "@/components/presentation/AddCardForm";
-import { parseCookies } from "nookies";
+import { loadStripe } from '@stripe/stripe-js';
+import { Elements } from '@stripe/react-stripe-js';
+import { AddCardForm } from '@/utils/dynamicImports';
+import { parseCookies } from 'nookies';
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY);
-
 const AddPaymentForm = ({ userAuth }) => {
   return (
     <Elements stripe={stripePromise}>
@@ -13,44 +11,38 @@ const AddPaymentForm = ({ userAuth }) => {
     </Elements>
   );
 };
-
 export default AddPaymentForm;
-
 export async function getServerSideProps(context) {
   try {
     const cookies = parseCookies(context);
     const newUserRegistration = cookies?.newUserRegistration;
-
     if (!newUserRegistration) {
       return {
         redirect: {
-          destination: "/login",
+          destination: '/login',
           permanent: false,
         },
       };
     }
-
     const userAuthData = JSON.parse(newUserRegistration);
-
     if (!userAuthData || Object.keys(userAuthData).length === 0) {
       return {
         redirect: {
-          destination: "/login",
+          destination: '/login',
           permanent: false,
         },
       };
     }
-
     return {
       props: {
         userAuth: userAuthData,
       },
     };
   } catch (error) {
-    console.error("Error in getServerSideProps:", error);
+    console.error('Error in getServerSideProps:', error);
     return {
       redirect: {
-        destination: "/login",
+        destination: '/login',
         permanent: false,
       },
     };

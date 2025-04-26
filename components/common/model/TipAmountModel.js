@@ -1,47 +1,37 @@
-import React, { useState } from "react";
-import Button from "@mui/material/Button";
-import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import { styled } from "@mui/material/styles";
-import CustomFormControl from "@/theme/CustomFormControl";
-import DialogContent from "@mui/material/DialogContent";
-import DialogTitle  from "@mui/material/DialogTitle";
-
-import InputAdornment from "@mui/material/InputAdornment";
-import TextField from "@mui/material/TextField";
-import Typography from "@mui/material/Typography";
-import { AttachMoney } from "@mui/icons-material";
-
-export default function TipAmountModel({
-  open,
-  handleClose,
-  handleGetCustomTip,
-}) {
-  const [tipAmount, setTipAmount] = useState("");
-  const [tipAmountError, setTipAmountError] = useState("");
-  const [noError, setNoError] = useState(true);
-  const handleInputChange = (event) => {
+import React, { useState } from 'react';
+import Button from '@mui/material/Button';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import { styled } from '@mui/material/styles';
+import DialogContent from '@mui/material/DialogContent';
+import DialogTitle from '@mui/material/DialogTitle';
+import InputAdornment from '@mui/material/InputAdornment';
+import TextField from '@mui/material/TextField';
+import { AttachMoney } from '@mui/icons-material';
+export default function TipAmountModel({ open, handleClose, handleGetCustomTip }) {
+  const [tipAmount, setTipAmount] = useState('');
+  const [tipAmountError, setTipAmountError] = useState('');
+  const handleInputChange = event => {
     const value = event.target.value;
 
     // Numeric validation
     if (!/^\d+(\.\d{1,2})?$/.test(value)) {
-      setTipAmountError("Please enter a valid tip amount.");
+      setTipAmountError('Please enter a valid tip amount.');
     } else {
-      setTipAmountError("");
+      setTipAmountError('');
     }
-
     setTipAmount(value);
   };
   const sendTipAmount = () => {
-    if (!tipAmount || tipAmount.trim() === "") {
-      setTipAmountError("Please enter tip amount.");
+    if (!tipAmount || tipAmount.trim() === '') {
+      setTipAmountError('Please enter tip amount.');
     } else if (!/^\d+(\.\d{1,2})?$/.test(tipAmount)) {
-      setTipAmountError("Please enter a valid tip amount.");
+      setTipAmountError('Please enter a valid tip amount.');
     } else {
-      setTipAmountError("");
+      setTipAmountError('');
       handleClose();
       handleGetCustomTip(tipAmount);
-      setTipAmount("");
+      setTipAmount('');
     }
   };
   return (
@@ -66,12 +56,17 @@ export default function TipAmountModel({
                 <InputAdornment position="start">
                   <AttachMoney />
                 </InputAdornment>
-              )   
-              
+              ),
             }}
           />
           {tipAmountError && (
-            <span style={{ color: "red" }}>{tipAmountError}</span>
+            <span
+              style={{
+                color: 'red',
+              }}
+            >
+              {tipAmountError}
+            </span>
           )}
         </FormControl>
       </DialogContent>
@@ -79,27 +74,20 @@ export default function TipAmountModel({
         <Button onClick={handleClose} variant="contained">
           Cancel
         </Button>
-        <Button
-          onClick={sendTipAmount}
-          autoFocus
-          variant="contained"
-          color="error"
-        >
+        <Button onClick={sendTipAmount} autoFocus variant="contained" color="error">
           Ok
         </Button>
       </DialogActions>
     </AmountDialog>
   );
 }
-
 const AmountDialog = styled(Dialog)`
   .MuiDialog-paper {
     max-width: 400px;
     width: 100%;
   }
 `;
-
-const FormControl = styled("div")`
+const FormControl = styled('div')`
   ${({ theme }) => `
     margin-bottom: 10px;
 

@@ -1,126 +1,125 @@
-import React, { useState } from "react";
-import { getSession } from "next-auth/react";
-import Head from "next/head";
-import ThemeProvider from "@/theme/ThemeProvider";
-import Layout from "@/components/common/Layout";
-import styled from "@emotion/styled";
-import { useRouter } from "next/router";
-import CustomFormControl from "@/theme/CustomFormControl";
-import { Typography } from "@mui/material";
-import Grid from "@mui/material/Grid";
-import Button from "@mui/material/Button";
-import Checkbox from "@mui/material/Checkbox";
-import validatorInstance from "@/utils/ValidatorSingleton";
-import { api } from "./api/auth/register";
-import CountrySelect from "@/components/common/CountrySelect";
-import { toast } from "react-toastify";
-import SpinnerLoader from "@/components/common/SpinnerLoader";
-import { setCookie } from "nookies";
+import React, { useState } from 'react';
+import { getSession } from 'next-auth/react';
+import Head from 'next/head';
+import ThemeProvider from '@/theme/ThemeProvider';
+import Layout from '@/components/common/Layout';
+import styled from '@emotion/styled';
+import { useRouter } from 'next/router';
+import CustomFormControl from '@/theme/CustomFormControl';
+import { Typography } from '@mui/material';
+import Grid from '@mui/material/Grid';
+import Button from '@mui/material/Button';
+import Checkbox from '@mui/material/Checkbox';
+import validatorInstance from '@/utils/ValidatorSingleton';
+import { api } from './api/auth/register';
+import CountrySelect from '@/components/common/CountrySelect';
+import { toast } from 'react-toastify';
+import SpinnerLoader from '@/components/common/SpinnerLoader';
+import { setCookie } from 'nookies';
 export default function Login() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const [countrycode, setCountryCode] = useState("+1");
+  const [countrycode, setCountryCode] = useState('+1');
   const [errors, setErrors] = useState({
-    first_name: "",
-    last_name: "",
-    email: "",
-    mobile: "",
-    password: "",
-    cpassword: "",
-    gender: "",
-    profile_picture: "",
-    terms_condition: "",
+    cpassword: '',
+    email: '',
+    first_name: '',
+    gender: '',
+    last_name: '',
+    mobile: '',
+    password: '',
+    profile_picture: '',
+    terms_condition: '',
   });
   const [termsCondition, setTermsCondition] = useState(true);
   const [inputs, setInputs] = useState({
-    first_name: "",
-    middle_name: "",
-    last_name: "",
-    email: "",
-    mobile: "",
-    password: "",
-    cpassword: "",
-    gender: "",
-    profile_picture: "",
+    cpassword: '',
+    email: '',
+    first_name: '',
+    gender: '',
+    last_name: '',
+    middle_name: '',
+    mobile: '',
+    password: '',
+    profile_picture: '',
   });
-  const [responseError, setResponseError] = useState("");
   const [removeErrors, setRemoveErrors] = useState(false);
-  const [base64Image, setBase64Image] = useState("");
-
+  const [base64Image, setBase64Image] = useState('');
   const handleInputChange = ({ target }) => {
-    if (target.type === "file") {
+    if (target.type === 'file') {
       const file = target.files[0];
       if (target.files.length > 0) {
         const imageUrl = URL.createObjectURL(file);
-        document.getElementById("preview").src = imageUrl;
-        setInputs((inputs) => ({
+        document.getElementById('preview').src = imageUrl;
+        setInputs(inputs => ({
           ...inputs,
           [target.name]: file,
         }));
         const reader = new FileReader();
-
         reader.onloadend = () => {
-          setBase64Image(reader.result.replace("data:image/jpeg;base64", ""));
+          setBase64Image(reader.result.replace('data:image/jpeg;base64', ''));
         };
-
         reader.readAsDataURL(file);
       } else {
         // No file selected, set imageUrl to null
-        document.getElementById("preview").src = "../avatar-photo.png";
-        setInputs((inputs) => ({
+        document.getElementById('preview').src = '../avatar-photo.png';
+        setInputs(inputs => ({
           ...inputs,
           [target.name]: null,
         }));
-        setBase64Image("");
+        setBase64Image('');
       }
     } else {
       // Handle other input types
-      setInputs((inputs) => ({
+      setInputs(inputs => ({
         ...inputs,
         [target.name]: target.value,
       }));
     }
-
     if (removeErrors) {
-      if (target.type === "file") {
-        var data = { ...inputs, [target.name]: target.files[0], terms_condition: termsCondition };
+      let data;
+      if (target.type === 'file') {
+        data = {
+          ...inputs,
+          terms_condition: termsCondition,
+          [target.name]: target.files[0],
+        };
       } else {
-        var data = { ...inputs, [target.name]: target.value, terms_condition: termsCondition };
+        data = {
+          ...inputs,
+          terms_condition: termsCondition,
+          [target.name]: target.value,
+        };
       }
-
       setErrors({
         ...validatorInstance.validateRegisterCustomer(data),
       });
     }
   };
-  const handleCountryCode = (value) => {
-    setCountryCode("+" + value);
+  const handleCountryCode = value => {
+    setCountryCode('+' + value);
   };
-
-  const handleTermsChange = (event) => {
+  const handleTermsChange = event => {
     setTermsCondition(event.target.checked);
     if (removeErrors) {
       const validationErrors = validatorInstance.validateRegisterCustomer({
         ...inputs,
-        terms_condition: event.target.checked
+        terms_condition: event.target.checked,
       });
       setErrors(validationErrors);
     }
   };
-
-  const handleSubmit = async (e) => {
-    setResponseError("");
+  const handleSubmit = async e => {
     e.preventDefault();
-    let inputForValidation = {
+    const inputForValidation = {
+      cpassword: inputs.cpassword,
+      email: inputs.email,
       first_name: inputs.first_name,
       last_name: inputs.last_name,
-      email: inputs.email,
-      password: inputs.password,
-      cpassword: inputs.cpassword,
       mobile: inputs.mobile,
-      terms_condition: termsCondition
+      password: inputs.password,
+      terms_condition: termsCondition,
     };
-
     const validationErrors = validatorInstance.validateRegisterCustomer(inputForValidation);
     const noErrors = Object.keys(validationErrors).length === 0;
     setRemoveErrors(true);
@@ -128,49 +127,44 @@ export default function Login() {
 
     //set All data to form data
     const formData = new FormData();
-    formData.append("version", 1);
+    formData.append('version', 1);
     formData.append(
-      "device_id",
-      "8091fd16cfaf9978ba777dbdbb7e92c7684da353d9d7f42b6aad6e5f17947829"
+      'device_id',
+      '8091fd16cfaf9978ba777dbdbb7e92c7684da353d9d7f42b6aad6e5f17947829'
     );
-
-    formData.append("os", 2);
-    formData.append("phone_code", countrycode);
-    formData.append("name", inputs.first_name + inputs.last_name);
-    formData.append("phone", inputs.mobile);
-    formData.append("first_name", inputs.first_name);
-    formData.append("middle_name", inputs.middle_name);
-    formData.append("last_name", inputs.last_name);
-    formData.append("gender", inputs.gender);
-    formData.append("email", inputs.email);
-    formData.append("password", inputs.password);
-    formData.append("confirm_password", inputs.cpassword);
-    formData.append("profile_picture", base64Image);
-
+    formData.append('os', 2);
+    formData.append('phone_code', countrycode);
+    formData.append('name', inputs.first_name + inputs.last_name);
+    formData.append('phone', inputs.mobile);
+    formData.append('first_name', inputs.first_name);
+    formData.append('middle_name', inputs.middle_name);
+    formData.append('last_name', inputs.last_name);
+    formData.append('gender', inputs.gender);
+    formData.append('email', inputs.email);
+    formData.append('password', inputs.password);
+    formData.append('confirm_password', inputs.cpassword);
+    formData.append('profile_picture', base64Image);
     const requestBody = {
-      version: "1",
-      device_id: "8091fd16cfaf9978ba777dbdbb7e92c7684da353d9d7f42b6aad6e5f17947829",
-      os: "2",
-      first_name: inputs.first_name,
-      middle_name: inputs.middle_name,
-      last_name: inputs.last_name,
+      confirm_password: inputs.cpassword,
+      device_id: '8091fd16cfaf9978ba777dbdbb7e92c7684da353d9d7f42b6aad6e5f17947829',
       email: inputs.email,
-      phone_code: countrycode,
-      phone: inputs.mobile,
+      first_name: inputs.first_name,
+      last_name: inputs.last_name,
+      middle_name: inputs.middle_name,
+      os: '2',
       password: inputs.password,
-      confirm_password: inputs.cpassword
+      phone: inputs.mobile,
+      phone_code: countrycode,
+      version: '1',
     };
-
     if (noErrors) {
       setLoading(true);
       const response = await api({
-        url: "/customer/register",
-        method: "POST",
         data: requestBody,
+        method: 'POST',
+        url: '/customer/register',
       });
-
-      console.log("response", response);
-
+      console.log('response', response);
       if (response.status === true) {
         setLoading(false);
 
@@ -179,61 +173,60 @@ export default function Login() {
           // User needs to verify OTP
           setCookie(
             null,
-            "registrationDetail",
+            'registrationDetail',
             JSON.stringify({
-              name: inputs.first_name + " " + inputs.last_name,
-              mobile_number: inputs.mobile,
-              password: inputs.password,
-              phone_code:countrycode,
               customer_id: response.data.id,
-              email: inputs.email
+              email: inputs.email,
+              mobile_number: inputs.mobile,
+              name: inputs.first_name + ' ' + inputs.last_name,
+              password: inputs.password,
+              phone_code: countrycode,
             }),
             {
-              maxAge: 5 * 60, // 5 minutes
-              path: "/",
+              maxAge: 5 * 60,
+              // 5 minutes
+              path: '/',
             }
           );
           toast.success(
-            "OTP has been sent to your registered mobile number. Please verify your account."
+            'OTP has been sent to your registered mobile number. Please verify your account.'
           );
-          router.push("/verification");
+          router.push('/verification');
         }
         // If OTP is verified, check profile status
         else if (response.data.profile_status === 1) {
           setCookie(
             null,
-            "newUserRegistration",
+            'newUserRegistration',
             JSON.stringify({
               customer_id: response.data.id,
-              name: inputs.first_name + " " + inputs.last_name,
               mobile_number: inputs.mobile,
+              name: inputs.first_name + ' ' + inputs.last_name,
               password: inputs.password,
-              customer_id: response.data.customer_id,
-              token_code: response.data.token_code // Store token if provided
+              token_code: response.data.token_code, // Store token if provided
             }),
             {
-              path: "/",
+              path: '/',
             }
           );
-          toast.success("Please add your card detail.");
-          router.push("/add-card");
+          toast.success('Please add your card detail.');
+          router.push('/add-card');
         } else {
           // If both OTP verified and profile complete, redirect to login
-          toast.success("Registration successful. Please login to continue.");
-          router.push("/login");
+          toast.success('Registration successful. Please login to continue.');
+          router.push('/login');
         }
       } else if (response.status === false) {
         setLoading(false);
         toast.error(response.message);
       } else {
         setLoading(false);
-        toast.error("Internal Server Error");
+        toast.error('Internal Server Error');
       }
     } else {
       setErrors(validationErrors);
     }
   };
-
   return (
     <ThemeProvider>
       <Head>
@@ -248,19 +241,29 @@ export default function Login() {
           <Box>
             <SignUpLeft>
               <span>
-                {" "}
+                {' '}
                 <img src="../taxiimg.png" />
               </span>
             </SignUpLeft>
             <SignUpRight>
               <span>
-                {" "}
+                {' '}
                 <img src="../loginIcon.png" />
               </span>
-              <Typography variant="h1" sx={{ mt: 1, mb: 1 }}>
+              <Typography
+                variant="h1"
+                sx={{
+                  mb: 1,
+                  mt: 1,
+                }}
+              >
                 Sign Up
               </Typography>
-              <SignupForm sx={{ flexGrow: 1 }}>
+              <SignupForm
+                sx={{
+                  flexGrow: 1,
+                }}
+              >
                 <Grid container spacing={2}>
                   <Grid item md={6} sm={12} xs={12}>
                     <label>First Name</label>
@@ -273,9 +276,7 @@ export default function Login() {
                       onChange={handleInputChange}
                       helperText={errors && errors.first_name}
                     />
-                    <span className="text-danger">
-                      {errors && errors.first_name}
-                    </span>
+                    <span className="text-danger">{errors && errors.first_name}</span>
                   </Grid>
                   <Grid item md={6} sm={12} xs={12}>
                     <label>Last Name</label>
@@ -288,9 +289,7 @@ export default function Login() {
                       onChange={handleInputChange}
                       helperText={errors && errors.last_name}
                     />
-                    <span className="text-danger">
-                      {errors && errors.last_name}
-                    </span>
+                    <span className="text-danger">{errors && errors.last_name}</span>
                   </Grid>
                   <Grid item md={6} sm={12} xs={12}>
                     <label>Email</label>
@@ -304,30 +303,23 @@ export default function Login() {
                       helperText={errors && errors.email}
                       autoComplete="email"
                     />
-                    <span className="text-danger">
-                      {errors && errors.email}
-                    </span>
+                    <span className="text-danger">{errors && errors.email}</span>
                   </Grid>
                   <Grid item md={6} sm={12} xs={12}>
                     <label>Mobile Number</label>
                     <CountryMobile>
-                      <CountrySelect
-                        onCountryCode={handleCountryCode}
-                        countrycode={countrycode}
-                      />
+                      <CountrySelect onCountryCode={handleCountryCode} countrycode={countrycode} />
                       <CustomFormControl
                         fullWidth
                         type="text"
                         placeholder="9999999999"
                         name="mobile"
-                        value={inputs.mobile || ""}
+                        value={inputs.mobile || ''}
                         onChange={handleInputChange}
                         autoComplete="off"
                       />
                     </CountryMobile>
-                    <span className="text-danger">
-                      {errors && errors.mobile}
-                    </span>
+                    <span className="text-danger">{errors && errors.mobile}</span>
                   </Grid>
 
                   <Grid item md={6} sm={12} xs={12}>
@@ -337,12 +329,10 @@ export default function Login() {
                       type="password"
                       placeholder="**********"
                       name="password"
-                      value={inputs.password || ""}
+                      value={inputs.password || ''}
                       onChange={handleInputChange}
                     />
-                    <span className="text-danger">
-                      {errors && errors.password}
-                    </span>
+                    <span className="text-danger">{errors && errors.password}</span>
                   </Grid>
                   <Grid item md={6} sm={12} xs={12}>
                     <label>Confirm Password</label>
@@ -354,9 +344,7 @@ export default function Login() {
                       value={inputs.cpassword}
                       onChange={handleInputChange}
                     />
-                    <span className="text-danger">
-                      {errors && errors.cpassword}
-                    </span>
+                    <span className="text-danger">{errors && errors.cpassword}</span>
                   </Grid>
                   <Grid item md={12}>
                     <ByClicking>
@@ -364,9 +352,8 @@ export default function Login() {
                         checked={termsCondition}
                         name="terms_condition"
                         onChange={handleTermsChange}
-                      />{" "}
-                      By clicking register, you agree to our Terms & Conditions
-                      & Privacy Policy
+                      />{' '}
+                      By clicking register, you agree to our Terms & Conditions & Privacy Policy
                       {errors.terms_condition && (
                         <span className="text-danger">
                           <br />
@@ -378,16 +365,12 @@ export default function Login() {
                 </Grid>
 
                 <SignUpFt>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={handleSubmit}
-                  >
+                  <Button variant="contained" color="primary" onClick={handleSubmit}>
                     Sign Up
                   </Button>
                   <Register>
                     <span>Already Registered</span>
-                    <Button type="text" onClick={() => router.push("/login")}>
+                    <Button type="text" onClick={() => router.push('/login')}>
                       Sign In
                     </Button>
                   </Register>
@@ -397,13 +380,12 @@ export default function Login() {
 
             <div>
               {/* <h1>Custom Form Control Example</h1>
-      <CustomFormControl
-        type="text"
-        value={inputValue}
-        onChange={handleChange}
-        placeholder="Enter first  name"
-        
-      /> */}
+               <CustomFormControl
+               type="text"
+               value={inputValue}
+               onChange={handleChange}
+               placeholder="Enter first  name"
+                /> */}
             </div>
           </Box>
         </LoginContainer>
@@ -414,15 +396,11 @@ export default function Login() {
 export async function getServerSideProps(context) {
   // You can access the session and user information here.
   const session = await getSession(context);
-
-  if (
-    session &&
-    session.user.status === true
-  ) {
+  if (session && session.user.status === true) {
     // Handle unauthenticated access
     return {
       redirect: {
-        destination: "/uniride",
+        destination: '/uniride',
         permanent: false,
       },
     };
@@ -446,7 +424,6 @@ const LoginContainer = styled.div`
     }
   `}
 `;
-
 const Box = styled.div`
   ${({ theme }) => `
     background-color: ${theme.colors.palette.white};
@@ -463,7 +440,6 @@ const Box = styled.div`
     }
   `}
 `;
-
 const SignUpLeft = styled.div`
   ${({ theme }) => `
     display: none;
@@ -500,7 +476,6 @@ const SignUpLeft = styled.div`
     }
   `}
 `;
-
 const SignUpRight = styled.div`
   ${({ theme }) => `
     width: 100%;
@@ -557,7 +532,6 @@ const SignUpRight = styled.div`
     }
   `}
 `;
-
 const SignupForm = styled.div`
   ${({ theme }) => `
     margin-top: 15px;
@@ -574,38 +548,6 @@ const SignupForm = styled.div`
     }
   `}
 `;
-const UploadArea = styled.div`
-  ${({ theme }) => `
-    display: flex;
-    align-items: center;
-    width: 163px;
-    .MuiButtonBase-root {
-      padding: 0px;
-
-      &:first-child {
-        pointer-events: none;
-        max-width: inherit;
-        min-width: inherit;
-        flex: 1;
-      }
-    }
-    .MuiTouchRipple-root {
-      display: none;
-    }
-
-    .upload-image {
-      margin-right: 0px;
-    }
-
-    .MuiButton-root {
-      input[type="file"] {
-        overflow: hidden;
-        width: 108px;
-      }
-    }
-  `}
-`;
-
 const ByClicking = styled.div`
   ${({ theme }) => `
     margin-bottom: 20px;
@@ -659,7 +601,6 @@ const Register = styled.div`
     }
   `}
 `;
-
 const CountryMobile = styled.div`
   ${({ theme }) => `
     display: flex;

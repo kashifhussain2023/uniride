@@ -1,36 +1,24 @@
-import React, { useState } from "react";
-import Image from "next/image";
-import styled from "@emotion/styled";
-import { List, ListItem, Typography } from "@mui/material";
-
+import styled from '@emotion/styled';
+import { List, ListItem, Typography } from '@mui/material';
+import Image from 'next/image';
+import { useState } from 'react';
 export default function ChartCard({ chart, title }) {
   const [selectedIndex, setSelectedIndex] = useState(0);
-
   const handleClick = (event, index) => {
     setSelectedIndex(index);
   };
-
   return (
     <Container>
       <Header>
         <Typography variant="h2">{title}</Typography>
         <List variant="inline">
-          <ListItem
-            selected={selectedIndex === 0}
-            onClick={(event) => handleClick(event, 0)}
-          >
+          <ListItem selected={selectedIndex === 0} onClick={event => handleClick(event, 0)}>
             Month by Month
           </ListItem>
-          <ListItem
-            selected={selectedIndex === 1}
-            onClick={(event) => handleClick(event, 1)}
-          >
+          <ListItem selected={selectedIndex === 1} onClick={event => handleClick(event, 1)}>
             YTD
           </ListItem>
-          <ListItem
-            selected={selectedIndex === 2}
-            onClick={(event) => handleClick(event, 2)}
-          >
+          <ListItem selected={selectedIndex === 2} onClick={event => handleClick(event, 2)}>
             Over the past 4 years
           </ListItem>
         </List>
@@ -39,7 +27,6 @@ export default function ChartCard({ chart, title }) {
     </Container>
   );
 }
-
 const Container = styled.div`
   ${({ theme }) => `
     padding: ${theme.spacing(2)};
@@ -65,7 +52,6 @@ const Container = styled.div`
     }
   `}
 `;
-
 const Header = styled.div`
   ${({ theme }) => `
     display: flex;

@@ -1,49 +1,45 @@
-import React, { useState, useEffect } from "react";
-import { getSession } from "next-auth/react";
-import Head from "next/head";
-import ThemeProvider from "@/theme/ThemeProvider";
-import Layout from "@/components/common/Layout";
-import styled from "@emotion/styled";
-import PageTitle from "@/components/common/PageTitle";
-import { Button, Typography } from "@mui/material";
-import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
-import ListItemText from "@mui/material/ListItemText";
-import ListItemAvatar from "@mui/material/ListItemAvatar";
-import Avatar from "@mui/material/Avatar";
-import StarIcon from "@mui/icons-material/Star";
-import StarBorderIcon from "@mui/icons-material/StarBorder";
-import StarHalfIcon from "@mui/icons-material/StarHalf";
-import TextareaAutosize from "@mui/material/TextareaAutosize";
-import InnerContent from "@/components/presentation/InnerContent";
-
-import theme from "@/theme";
-
-export default function Review({ userAuth }) {
-  const [reviewPageDetail, setReviewPageDetail] = useState();
-  const getReviewPageDetail = async (ride_type) => {
-    const formData = new FormData();
-    formData.append("user_type", "rider");
-    formData.append("ride_type", ride_type);
-    formData.append("customer_id", userAuth.customer_id);
-    formData.append("token_code", userAuth.token_code);
-    const response = await api({
-      url: "/common/get_rating_questions",
-      method: "POST",
-      data: formData,
-    });
-    if (response.status === "1") {
-      setReviewPageDetail(response.data);
-    }
-  };
+import React, { useEffect } from 'react';
+import { getSession } from 'next-auth/react';
+import Head from 'next/head';
+import ThemeProvider from '@/theme/ThemeProvider';
+import Layout from '@/components/common/Layout';
+import styled from '@emotion/styled';
+import PageTitle from '@/components/common/PageTitle';
+import { Button, Typography } from '@mui/material';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemText from '@mui/material/ListItemText';
+import ListItemAvatar from '@mui/material/ListItemAvatar';
+import Avatar from '@mui/material/Avatar';
+import StarIcon from '@mui/icons-material/Star';
+import StarBorderIcon from '@mui/icons-material/StarBorder';
+import StarHalfIcon from '@mui/icons-material/StarHalf';
+import TextareaAutosize from '@mui/material/TextareaAutosize';
+import InnerContent from '@/components/presentation/InnerContent';
+export default function Review() {
+  // const [reviewPageDetail, setReviewPageDetail] = useState();
+  // const getReviewPageDetail = async ride_type => {
+  //   const formData = new FormData();
+  //   formData.append('user_type', 'rider');
+  //   formData.append('ride_type', ride_type);
+  //   formData.append('customer_id', userAuth.customer_id);
+  //   formData.append('token_code', userAuth.token_code);
+  //   const response = await api({
+  //     data: formData,
+  //     method: 'POST',
+  //     url: '/common/get_rating_questions',
+  //   });
+  //   if (response.status === '1') {
+  //     setReviewPageDetail(response.data);
+  //   }
+  // };
   useEffect(() => {
-    socket.on("track_ride", (response) => {
-      if (response.status === true && response.code === 7) {
-        getReviewPageDetail(response.data.ride_type);
-      }
-    });
+    // socket.on('track_ride', response => {
+    //   if (response.status === true && response.code === 7) {
+    //     getReviewPageDetail(response.data.ride_type);
+    //   }
+    // });
   }, []);
-
   return (
     <ThemeProvider>
       <Head>
@@ -59,7 +55,7 @@ export default function Review({ userAuth }) {
               <PageTitle
                 title="Customer"
                 subtitle="Review"
-                images_icon={"../review.png"}
+                images_icon={'../review.png'}
               ></PageTitle>
 
               <RouteDetail>
@@ -77,23 +73,22 @@ export default function Review({ userAuth }) {
                 <ActiveLocation>
                   <Typography variant="h4">Apparel Park Industrial</Typography>
                   <Typography variant="subtitle3" component="p">
-                    Area, CP4-228/229, Mahal Road, Jagatpura, Jaipur, Shri
-                    Kishanpura, Rajasthan 302017
+                    Area, CP4-228/229, Mahal Road, Jagatpura, Jaipur, Shri Kishanpura, Rajasthan
+                    302017
                   </Typography>
                 </ActiveLocation>
                 <PreviousLocation>
                   <Typography variant="h4">Apparel Park Industrial</Typography>
                   <Typography variant="subtitle3" component="p">
-                    Area, CP4-228/229, Mahal Road, Jagatpura, Jaipur, Shri
-                    Kishanpura, Rajasthan 302017
+                    Area, CP4-228/229, Mahal Road, Jagatpura, Jaipur, Shri Kishanpura, Rajasthan
+                    302017
                   </Typography>
                 </PreviousLocation>
               </RouteDetail>
               <TipYourDriver>
                 <Typography variant="h4">Tip Your Driver</Typography>
                 <Typography variant="subtitle3" component="p">
-                  Thank your driver by leaving them a Tip. 100% of the Tip will
-                  go to your driver.
+                  Thank your driver by leaving them a Tip. 100% of the Tip will go to your driver.
                 </Typography>
                 <List>
                   <ListItem>
@@ -171,10 +166,7 @@ export default function Review({ userAuth }) {
 
                   <ListItem alignItems="flex-start">
                     <ListItemAvatar>
-                      <Avatar
-                        alt="Cleanliness and Hygiene"
-                        src="/Hygiene.png"
-                      />
+                      <Avatar alt="Cleanliness and Hygiene" src="/Hygiene.png" />
                     </ListItemAvatar>
                     <ListItemText
                       primary="Cleanliness and Hygiene"
@@ -207,19 +199,33 @@ export default function Review({ userAuth }) {
               </Rating>
               <ReviewArea>
                 <ReviewComment>
-                  <Typography variant="h4" sx={{ mb: 2 }}>
+                  <Typography
+                    variant="h4"
+                    sx={{
+                      mb: 2,
+                    }}
+                  >
                     Comments
                   </Typography>
                   <TextareaAutosize
                     aria-label="empty textarea"
                     placeholder="Start typing..."
-                    style={{ width: "100%", height: "290px" }}
+                    style={{
+                      height: '290px',
+                      width: '100%',
+                    }}
                   />
                 </ReviewComment>
               </ReviewArea>
 
               <CommentFooter>
-                <Button variant="contained" color="primary" sx={{ mt: 2 }}>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  sx={{
+                    mt: 2,
+                  }}
+                >
                   Submit
                 </Button>
               </CommentFooter>
@@ -230,20 +236,6 @@ export default function Review({ userAuth }) {
     </ThemeProvider>
   );
 }
-
-const ReviewBox = styled.div`
-  ${({ theme }) => `
-  border-radius: 16px 0px 16px 16px; box-shadow: 0px 0px 15px -1px rgba(0,0,0,0.10); background-color:${theme.colors.palette.white}; padding:24px;  margin-top:60px;
-
- img{ max-width:100%;}
-
- button{margin-left: auto; display: flex; justify-content: center; }
-
-
-    
-  `}
-`;
-
 const ReviewArea = styled.div`
   ${({ theme }) => `
  display:flex; justify-content:space-between; flex-wrap:wrap; 
@@ -255,7 +247,6 @@ const ReviewArea = styled.div`
     
   `}
 `;
-
 const Rating = styled.div`
   ${({ theme }) => `
   width:100%;
@@ -265,7 +256,6 @@ const Rating = styled.div`
 
   `}
 `;
-
 const ReviewComment = styled.div`
   ${({ theme }) => `
 width:100%;
@@ -275,7 +265,6 @@ textarea{ padding:20px; border:1px solid ${theme.colors.palette.grey}; border-ra
 
   `}
 `;
-
 const PannelSection = styled.div`
   ${({ theme }) => `
     display: flex;
@@ -289,7 +278,6 @@ const PannelSection = styled.div`
     
   `}
 `;
-
 const LeftPannel = styled.div`
   ${({ theme }) => `
 
@@ -315,7 +303,6 @@ const LeftPannel = styled.div`
 
   `}
 `;
-
 const RightPannel = styled.div`
   ${({ theme }) => `
   position:relative;
@@ -369,13 +356,12 @@ const RightPannel = styled.div`
   `}
 `;
 const RouteDetail = styled.div`
-  ${({ theme }) => `
+  ${() => `
     border:1px solid #e9e9e9;
     border-radius:6px;
     padding:20px 15px; margin-bottom:24px;
   `}
 `;
-
 const ReviewHead = styled.div`
   ${({ theme }) => `
     display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid ${theme.colors.palette.grey}; padding-bottom:15px; margin-bottom:20px;
@@ -386,22 +372,19 @@ const BookingLabel = styled.div`
     font-size:14px; color:${theme.colors.palette.darkGrey}; width:100px; flex:0 0 100px;
   `}
 `;
-
 const Details = styled.div`
   ${({ theme }) => `
     width:100%; font-weight:700;  color:${theme.colors.palette.dGray}; text-align:right;
 
   `}
 `;
-
 const Price = styled.div`
   ${({ theme }) => `
     font-size:24px; color:${theme.colors.palette.orange}; font-weight:700;
   `}
 `;
-
 const ActiveLocation = styled.div`
-  ${({ theme }) => `
+  ${() => `
   background-color:#f0fbf5; border-radius:6px; padding:10px 10px 10px 30px; margin-bottom:15px;
   .MuiTypography-h4{ position:relative;
   &:before{ background-color:#00ba00; border-radius:100%; content:'';    width: 8px;
@@ -414,7 +397,7 @@ const ActiveLocation = styled.div`
   `}
 `;
 const PreviousLocation = styled.div`
-  ${({ theme }) => `
+  ${() => `
   background-color:#fcfcfc; border-radius:6px; padding:10px 10px 10px 30px; 
   .MuiTypography-h4{ position:relative;
     &:before{ background-color:#ef3c49; border-radius:100%; content:'';    width: 8px;
@@ -426,7 +409,6 @@ const PreviousLocation = styled.div`
     }
   `}
 `;
-
 const TipYourDriver = styled.div`
   ${({ theme }) => `
  .MuiList-root{ padding:0px; margin:10px 0px 15px 0px;
@@ -440,7 +422,6 @@ button{ padding:4px 14px; margin:0px 10px 0px 0px;min-width:inherit; width:inher
 }
   `}
 `;
-
 const RideInfo = styled.div`
   ${({ theme }) => `
     .MuiList-root {
@@ -461,26 +442,23 @@ const RideInfo = styled.div`
     }
   `}
 `;
-
 const CommentFooter = styled.div`
-  ${({ theme }) => `
+  ${() => `
     text-align: right;
   `}
 `;
 export async function getServerSideProps(context) {
   // You can access the session and user information here.
   const session = await getSession(context);
-
   if (!session) {
     // Handle unauthenticated access
     return {
       redirect: {
-        destination: "/login",
+        destination: '/login',
         permanent: false,
       },
     };
   }
-
   return {
     props: {
       userAuth: session.user || null,

@@ -1,8 +1,5 @@
-import * as React from "react";
-import CircularProgress from "@mui/material/CircularProgress";
-import Box from "@mui/material/Box";
-import styled from "@emotion/styled";
-
+import * as React from 'react';
+import styled from '@emotion/styled';
 export default function SpinnerLoader({ loading }) {
   return loading ? (
     <>
@@ -11,10 +8,9 @@ export default function SpinnerLoader({ loading }) {
       </Container>
     </>
   ) : (
-    ""
+    ''
   );
 }
-
 const Container = styled.div`
   display: flex;
   position: fixed;
@@ -27,9 +23,8 @@ const Container = styled.div`
   justify-content: center;
   z-index: 999;
 `;
-
 const LoaderSpiring = styled.div`
-  ${({ theme }) => `
+  ${() => `
     position: relative;
     width: 100px;
     height: 100px;

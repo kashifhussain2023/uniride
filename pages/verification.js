@@ -1,30 +1,24 @@
-import { useState } from "react";
-import { getSession, useSession, signIn } from "next-auth/react";
-import Head from "next/head";
-import ThemeProvider from "@/theme/ThemeProvider";
-import Layout from "@/components/common/Layout";
-import styled from "@emotion/styled";
-import CustomFormControl from "@/theme/CustomFormControl";
-import { useRouter } from "next/router";
-import SpinnerLoader from "@/components/common/SpinnerLoader";
-import {
-  Button,
-  FormControl as MuiFormControl,
-  Typography,
-} from "@mui/material";
-import { api } from "@/utils/api/common";
-import { toast } from "react-toastify";
-import { parseCookies } from "nookies";
-import { setCookie } from "nookies";
-
+import { useState, useRef } from 'react';
+import { useSession, signIn } from 'next-auth/react';
+import Head from 'next/head';
+import ThemeProvider from '@/theme/ThemeProvider';
+import Layout from '@/components/common/Layout';
+import styled from '@emotion/styled';
+import CustomFormControl from '@/theme/CustomFormControl';
+import { useRouter } from 'next/router';
+import SpinnerLoader from '@/components/common/SpinnerLoader';
+import { Button, Typography } from '@mui/material';
+import { api } from '@/utils/api/common';
+import { toast } from 'react-toastify';
+import { parseCookies } from 'nookies';
+import { setCookie } from 'nookies';
 export default function Verification({ userAuth }) {
   const router = useRouter();
   const { data: session, update: sessionUpdate } = useSession();
   const [loading, setLoading] = useState(false);
-  const [otpError, setOtpError] = useState("");
-  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
-  const [removeErrors, setRemoveErrors] = useState(false);
-
+  const [otpError, setOtpError] = useState('');
+  const [otp, setOtp] = useState(['', '', '', '', '', '']);
+  const otpBoxReference = useRef([]);
   const handleChange = (e, index) => {
     const value = e.target.value;
 
@@ -43,130 +37,118 @@ export default function Verification({ userAuth }) {
       }
     }
   };
-  const handlePaste = (e) => {
+  const handlePaste = e => {
     e.preventDefault();
-    const pastedData = e.clipboardData.getData("text/plain").split("");
+    const pastedData = e.clipboardData.getData('text/plain').split('');
     const newOtp = [];
 
-    // Allow only numeric input and limit the length to 1
     pastedData.forEach((digit, index) => {
       if (/^\d*$/.test(digit) && index < otp.length) {
         newOtp[index] = digit;
       }
     });
-
     setOtp(newOtp);
 
-    // Focus on the first empty input field
-    const firstEmptyIndex = newOtp.findIndex((digit) => digit === "");
+    const firstEmptyIndex = newOtp.findIndex(digit => digit === '');
     if (firstEmptyIndex !== -1) {
-      inputRefs.current[firstEmptyIndex].focus();
+      otpBoxReference.current[firstEmptyIndex].focus();
     }
   };
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault();
-    setOtpError("");
-
-    const isOtpValid = otp.every((digit) => digit !== "");
+    setOtpError('');
+    const isOtpValid = otp.every(digit => digit !== '');
     if (!isOtpValid) {
-      setOtpError("Please enter the complete OTP");
+      setOtpError('Please enter the complete OTP');
       return;
     }
-
     try {
       setLoading(true);
-      const enteredOtp = otp.join("");
-
+      const enteredOtp = otp.join('');
       const requestBody = {
         customer_id: userAuth.customer_id,
-        otp: enteredOtp
-      }
-
+        otp: enteredOtp,
+      };
       const response = await api({
-        url: "/customer/verify-otp",
-        method: "POST",
         data: requestBody,
+        method: 'POST',
+        url: '/customer/verify-otp',
       });
-
       if (response.status === true) {
         // Get profile details to check payment method status
         const profileResponse = await api({
-          url: "/customer/get-profile-details",
-          method: "GET",
           headers: {
-            "Authorization": `Bearer ${response.data.token_code}`
-          }
+            Authorization: `Bearer ${response.data.token_code}`,
+          },
+          method: 'GET',
+          url: '/customer/get-profile-details',
         });
-
         if (profileResponse.status === true) {
           // Sign in the user using NextAuth
 
           setTimeout(async () => {
-
-          const signInResult = await signIn("credentials", {
-            phone: userAuth.mobile_number,
-            password: userAuth.password,
-            phone_code:userAuth.phone_code,
-            redirect: false,
-          });
-
-          if (signInResult?.error) {
-            throw new Error(signInResult.error);
-          }
-
-          // Update session with new token and profile status
-          if (session) {
-            await sessionUpdate({
-              user: {
-                ...session?.user,
-                token_code: response.data.token_code,
-                profile_status: "3",
-                data: {
-                  ...session?.user?.data,
-                  token_code: response.data.token_code,
-                  profile_status: "3"
-                }
-              },
+            const signInResult = await signIn('credentials', {
+              password: userAuth.password,
+              phone: userAuth.mobile_number,
+              phone_code: userAuth.phone_code,
+              redirect: false,
             });
-          }
+            if (signInResult?.error) {
+              throw new Error(signInResult.error);
+            }
 
-          // Check if user needs to add payment method
-          if (!profileResponse.data.default_payment_method) {
-            // Store registration data in cookie for add-card page
-            setCookie(
-              null,
-              "newUserRegistration",
-              JSON.stringify({
-                name: userAuth.name,
-                mobile_number: userAuth.mobile_number,
-                customer_id: userAuth.customer_id,
-                token_code: response.data.token_code
-              }),
-              {
-                path: "/",
-                maxAge: 30 * 60, // 30 minutes
-                secure: true
-              }
-            );
-            toast.success("Please add your payment details to continue.");
-            router.push("/cards/add");
-          } else {
-            // User has payment method, redirect to main app
-            toast.success("Verification successful");
-            router.push("/uniride");
-          }
+            // Update session with new token and profile status
+            if (session) {
+              await sessionUpdate({
+                user: {
+                  ...session?.user,
+                  data: {
+                    ...session?.user?.data,
+                    profile_status: '3',
+                    token_code: response.data.token_code,
+                  },
+                  profile_status: '3',
+                  token_code: response.data.token_code,
+                },
+              });
+            }
 
-        },2000);
-        
+            // Check if user needs to add payment method
+            if (!profileResponse.data.default_payment_method) {
+              // Store registration data in cookie for add-card page
+              setCookie(
+                null,
+                'newUserRegistration',
+                JSON.stringify({
+                  customer_id: userAuth.customer_id,
+                  mobile_number: userAuth.mobile_number,
+                  name: userAuth.name,
+                  token_code: response.data.token_code,
+                }),
+                {
+                  maxAge: 30 * 60,
+                  path: '/',
+                  // 30 minutes
+                  secure: true,
+                }
+              );
+              toast.success('Please add your payment details to continue.');
+              router.push('/cards/add');
+            } else {
+              // User has payment method, redirect to main app
+              toast.success('Verification successful');
+              router.push('/uniride');
+            }
+          }, 2000);
         } else {
-          throw new Error(profileResponse.message || "Failed to get profile details");
+          throw new Error(profileResponse.message || 'Failed to get profile details');
         }
       } else {
-        toast.error(response.message || "Invalid OTP");
+        toast.error(response.message || 'Invalid OTP');
       }
     } catch (error) {
-      console.error("Verification error:", error);
-      toast.error(error.message || "An error occurred during verification. Please try again.");
+      console.error('Verification error:', error);
+      toast.error(error.message || 'An error occurred during verification. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -175,29 +157,25 @@ export default function Verification({ userAuth }) {
     try {
       setLoading(true);
       const requestBody = {
-        customer_id: userAuth.customer_id
-      }
-
+        customer_id: userAuth.customer_id,
+      };
       const response = await api({
-        url: "/customer/resend-otp",
-        method: "POST",
         data: requestBody,
+        method: 'POST',
+        url: '/customer/resend-otp',
       });
-
       if (response.status === true) {
-        toast.success(response.message || "OTP resent successfully");
+        toast.success(response.message || 'OTP resent successfully');
       } else {
-        toast.error(response.message || "Failed to resend OTP");
+        toast.error(response.message || 'Failed to resend OTP');
       }
     } catch (error) {
-      console.error("Resend OTP error:", error);
-      toast.error("An error occurred while resending OTP. Please try again.");
+      console.error('Resend OTP error:', error);
+      toast.error('An error occurred while resending OTP. Please try again.');
     } finally {
       setLoading(false);
     }
   };
-  const noErrors = 1;
-
   return (
     <ThemeProvider>
       <Head>
@@ -216,30 +194,44 @@ export default function Verification({ userAuth }) {
                 <Welcome>Welcome to</Welcome>
                 <img src="../logo1.png" />
                 <Typography variant="h4">
-                  Our professionally trained drivers will make sure that the
-                  customers enjoy a safe and reliable ride.
+                  Our professionally trained drivers will make sure that the customers enjoy a safe
+                  and reliable ride.
                 </Typography>
               </LoginDesc>
               <MobilePhone>
-                {" "}
+                {' '}
                 <img src="../mobile.png" />
               </MobilePhone>
             </LeftSide>
             <RightSide>
               <SignInHead>
                 <img src="../loginIcon.png" />
-                <Typography variant="h1" sx={{ mb: 3 }}>
+                <Typography
+                  variant="h1"
+                  sx={{
+                    mb: 3,
+                  }}
+                >
                   Verification
                 </Typography>
               </SignInHead>
 
-              <Typography variant="h3" sx={{ mb: 1 }}>
-                Hello, {userAuth.name || ""}
+              <Typography
+                variant="h3"
+                sx={{
+                  mb: 1,
+                }}
+              >
+                Hello, {userAuth.name || ''}
               </Typography>
-              <Typography variant="subtitle1" sx={{ mb: 3 }}>
-                We have sent a text with your verification code to{" "}
-                {userAuth.mobile_number || ""}, please enter it to complete your
-                registration
+              <Typography
+                variant="subtitle1"
+                sx={{
+                  mb: 3,
+                }}
+              >
+                We have sent a text with your verification code to {userAuth.mobile_number || ''},
+                please enter it to complete your registration
               </Typography>
               <OtpArea>
                 <div>
@@ -252,11 +244,9 @@ export default function Verification({ userAuth }) {
                         type="text"
                         placeholder=""
                         value={digit}
-                        onChange={(e) => handleChange(e, index)}
+                        onChange={e => handleChange(e, index)}
                         onPaste={handlePaste}
-                        ref={(reference) =>
-                          (otpBoxReference.current[index] = reference)
-                        }
+                        ref={reference => (otpBoxReference.current[index] = reference)}
                       />
                     );
                   })}
@@ -265,21 +255,24 @@ export default function Verification({ userAuth }) {
               <Typography component="span" className="text-danger">
                 {otpError}
               </Typography>
-              <ResendText variant="subtitle1" sx={{ mb: 3 }}>
-                I haven't received the code, please{" "}
-                <ResendButton
-                  onClick={handleResendOtp}
-                  color="primary"
-                  variant="text"
-                >
+              <ResendText
+                variant="subtitle1"
+                sx={{
+                  mb: 3,
+                }}
+              >
+                I haven&apos;t received the code, please{' '}
+                <ResendButton onClick={handleResendOtp} color="primary" variant="text">
                   <strong>re-send</strong>
-                </ResendButton>{" "}
+                </ResendButton>{' '}
                 it
               </ResendText>
               <div align="center">
                 <Button
                   variant="contained"
-                  sx={{ mb: 5 }}
+                  sx={{
+                    mb: 5,
+                  }}
                   onClick={handleSubmit}
                 >
                   Next
@@ -296,19 +289,14 @@ export async function getServerSideProps(context) {
   const cookies = parseCookies(context);
   const registrationCookie = cookies?.registrationDetail || false;
   const registrationCookieParsed = JSON.parse(registrationCookie);
-
-  if (
-    !registrationCookieParsed &&
-    Object.keys(registrationCookieParsed).length === 0
-  ) {
+  if (!registrationCookieParsed && Object.keys(registrationCookieParsed).length === 0) {
     return {
       redirect: {
-        destination: "/login",
+        destination: '/login',
         permanent: false,
       },
     };
   }
-
   return {
     props: {
       userAuth: registrationCookieParsed || null,
@@ -325,7 +313,6 @@ const LoginContainer = styled.div`
     }
   `}
 `;
-
 const Box = styled.div`
   ${({ theme }) => `
     background-color: ${theme.colors.palette.white};
@@ -343,7 +330,6 @@ const Box = styled.div`
     }
   `}
 `;
-
 const LeftSide = styled.div`
   ${({ theme }) => `
 width:50%;
@@ -375,7 +361,6 @@ img{ width:100%; height:100%; }
     
   `}
 `;
-
 const MobilePhone = styled.div`
   ${({ theme }) => `
 position:absolute; right:-120px; top:50px; display:none;
@@ -400,7 +385,6 @@ img{ width:100%; height:100%;
 
   `}
 `;
-
 const LoginDesc = styled.div`
   ${({ theme }) => `
 position:absolute;
@@ -420,13 +404,11 @@ h4{ font-weight:300}
 
   `}
 `;
-
 const Welcome = styled.div`
   ${({ theme }) => `
 font-size:24px; font-weight:300; color:${theme.colors.palette.black}; margin-bottom:10px;
   `}
 `;
-
 const RightSide = styled.div`
   ${({ theme }) => `
     width: 100%;
@@ -470,11 +452,9 @@ const RightSide = styled.div`
     }
   `}
 `;
-
 const SignInHead = styled.div`
   text-align: center;
 `;
-
 const OtpArea = styled.div`
   display: flex;
   justify-content: center;
@@ -489,12 +469,10 @@ const OtpArea = styled.div`
     font-size: 24px;
   }
 `;
-
 const ResendText = styled(Typography)`
   display: flex;
   flex-wrap: wrap;
 `;
-
 const ResendButton = styled(Button)`
   &.MuiButton-text {
     min-width: inherit;

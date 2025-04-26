@@ -1,7 +1,6 @@
-import * as React from "react";
-import styled from "@emotion/styled";
-import { Typography } from "@mui/material";
-
+import * as React from 'react';
+import styled from '@emotion/styled';
+import { Typography } from '@mui/material';
 const PageTitle = ({ subtitle, title, images_icon }) => {
   return (
     <Container>
@@ -17,9 +16,7 @@ const PageTitle = ({ subtitle, title, images_icon }) => {
     </Container>
   );
 };
-
 export default PageTitle;
-
 const Container = styled.div`
   ${({ theme }) => `
     padding: 0;
@@ -32,7 +29,6 @@ const Container = styled.div`
     }
   `}
 `;
-
 const Right = styled.div`
   ${({ theme }) => `
     width: 100%;
@@ -58,7 +54,6 @@ const Right = styled.div`
     }
   `}
 `;
-
 const Logo = styled.div`
   position: relative;
   top: 5px;
@@ -67,7 +62,6 @@ const Logo = styled.div`
     width: 100%;
   }
 `;
-
 const Left = styled.div`
   ${({ theme }) => `
     width: 40px;

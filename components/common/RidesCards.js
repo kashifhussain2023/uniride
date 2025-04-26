@@ -1,9 +1,7 @@
-import { useState } from "react";
-import { useCarContext } from "@/pages/context/CarListContext";
-import styled from "@emotion/styled";
-import { Link, Typography } from "@mui/material";
-import RidesFareDialog from "./RidesFareDialog";
-
+import { useState } from 'react';
+import styled from '@emotion/styled';
+import { Link, Typography } from '@mui/material';
+import RidesFareDialog from './RidesFareDialog';
 export default function RidesCards({
   carsList,
   type,
@@ -16,45 +14,41 @@ export default function RidesCards({
 }) {
   // const { carsList } = useCarContext();
 
-  console.log({"carsList": carsList, "type": type});
-  
+  console.log({
+    carsList: carsList,
+    type: type,
+  });
+
   // Filter cars based on type
-  const filterCarList = type === "regular" 
-    ? carsList?.filter((item) => item.is_corporate === "0")
-    : carsList?.filter((item) => item.is_corporate !== "0");
+  const filterCarList =
+    type === 'regular'
+      ? carsList?.filter(item => item.is_corporate === '0')
+      : carsList?.filter(item => item.is_corporate !== '0');
 
   // Find default active car index
-  const defaultActiveIndex = filterCarList?.findIndex(
-    (car) => car.default_car === true
-  );
-
+  const defaultActiveIndex = filterCarList?.findIndex(car => car.default_car === true);
   const [activeIndex, setActiveIndex] = useState();
   const [doubleClickDialogOpen, setDoubleClickDialogOpen] = useState(false);
   const [ridesFareData, setRidesFareData] = useState();
-
-  const handleDoubleClick = (carFareData) => {
+  const handleDoubleClick = carFareData => {
     // Add distance and duration to the car fare data
     const enhancedCarFareData = {
       ...carFareData,
-      distance: distance || carFareData.distance || "6.8",
-      duration: duration || carFareData.duration || "22"
+      distance: distance || carFareData.distance || '6.8',
+      duration: duration || carFareData.duration || '22',
     };
-    
     setRidesFareData(enhancedCarFareData);
     setDoubleClickDialogOpen(true);
   };
-
   const handleClose = () => {
     setDoubleClickDialogOpen(false);
   };
-
   const handleCarClick = (index, id, avgTime, drivers) => {
     setActiveIndex(index);
     handleCarTypeId(id);
     setAvgTime(avgTime);
     setAvailableDriver(drivers);
   };
-
   return (
     <>
       {carStatus ? (
@@ -64,22 +58,21 @@ export default function RidesCards({
               <RideCars
                 key={index}
                 className={
-                  (activeIndex || activeIndex === 0
-                    ? activeIndex
-                    : defaultActiveIndex) === index
-                    ? "active"
-                    : ""
+                  (activeIndex || activeIndex === 0 ? activeIndex : defaultActiveIndex) === index
+                    ? 'active'
+                    : ''
                 }
-                onClick={() =>
-                  handleCarClick(index, car.id, car.avg_time, car.drivers)
-                }
+                onClick={() => handleCarClick(index, car.id, car.avg_time, car.drivers)}
                 onDoubleClick={() => handleDoubleClick(car)}
               >
                 <Link>
-                  <Cars className={"cars" + index}>
+                  <Cars className={'cars' + index}>
                     <img
                       src={car.list_car_image}
-                      style={{ height: "60px", width: "60px" }}
+                      style={{
+                        height: '60px',
+                        width: '60px',
+                      }}
                       alt="car image"
                     />
                   </Cars>
@@ -101,12 +94,10 @@ export default function RidesCards({
     </>
   );
 }
-
 const Cars = styled.div`
   width: 107px;
   margin-right: 10px;
 `;
-
 const CarsDescription = styled.div`
   ${({ theme }) => `
     width: 100%;
@@ -122,7 +113,6 @@ const CarsDescription = styled.div`
     }
   `}
 `;
-
 const RideCars = styled.div`
   ${({ theme }) => `
     a {
@@ -158,7 +148,6 @@ const RideCars = styled.div`
     }
   `}
 `;
-
 const NoRecord = styled(Typography)`
   ${({ theme }) => `
     padding-bottom: ${theme.spacing(3)};

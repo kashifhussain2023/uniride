@@ -1,8 +1,8 @@
-import React, { Fragment, useState } from "react";
-import { useRouter } from "next/router";
-import Image from "next/image";
-import Link from "next/link";
-import styled from "@emotion/styled";
+import React, { Fragment, useState } from 'react';
+import { useRouter } from 'next/router';
+import Image from 'next/image';
+import Link from 'next/link';
+import styled from '@emotion/styled';
 import {
   Collapse,
   IconButton,
@@ -10,7 +10,7 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
-} from "@mui/material";
+} from '@mui/material';
 import {
   DashboardOutlined,
   EastOutlined,
@@ -22,27 +22,24 @@ import {
   ReceiptLongOutlined,
   SendTimeExtensionOutlined,
   SettingsOutlined,
-} from "@mui/icons-material";
-import logo from "../../public/logo.png";
-import menuIcon from "../../public/menu-icon.png";
-import { mainMenuItems } from "@/utils/constant";
-
+} from '@mui/icons-material';
+import logo from '../../public/logo.png';
+import menuIcon from '../../public/menu-icon.png';
+import { mainMenuItems } from '@/utils/constant';
 export const icons = {
   DashboardOutlined,
-  ReceiptLongOutlined,
   InventoryOutlined,
   PersonOutlineOutlined,
+  ReceiptLongOutlined,
   SendTimeExtensionOutlined,
   SettingsOutlined,
 };
-
 export default function SideBar() {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [openSubMenu, setOpenSubMenu] = useState(false);
   const [shrink, setShrink] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
-
   const handleListItemClick = (event, index, path) => {
     setOpenSubMenu(true);
     setSelectedIndex(index);
@@ -50,12 +47,10 @@ export default function SideBar() {
       router.push(path);
     }
   };
-
   const handleClickOpen = () => {
     setShrink(!shrink);
     setOpen(false);
   };
-
   const handleClick = (event, index, path) => {
     setOpen(true);
     setSelectedIndex(index);
@@ -63,7 +58,6 @@ export default function SideBar() {
       router.push(path);
     }
   };
-
   return (
     <Container shrink={shrink}>
       <LogoContainer shrink={shrink}>
@@ -72,11 +66,7 @@ export default function SideBar() {
         </Link>
       </LogoContainer>
       <MuiIconButton onClick={handleClickOpen} shrink={shrink}>
-        {shrink ? (
-          <EastOutlined />
-        ) : (
-          <Image src={menuIcon} alt="menu button" priority />
-        )}
+        {shrink ? <EastOutlined /> : <Image src={menuIcon} alt="menu button" priority />}
       </MuiIconButton>
       <List component="nav" aria-labelledby="nested-list-subheader">
         {mainMenuItems.map(({ label, path, icon, subMenu }, index) => {
@@ -85,7 +75,7 @@ export default function SideBar() {
             <Fragment key={`menu-${index}`}>
               <ListItem
                 selected={path === router.asPath}
-                onClick={(event) => {
+                onClick={event => {
                   event.stopPropagation();
                   handleClick(event, index, path);
                 }}
@@ -96,46 +86,30 @@ export default function SideBar() {
                   <Icon />
                 </ListItemIcon>
                 <ListItemText primary={label} />
-                {subMenu &&
-                  (selectedIndex === index && open ? (
-                    <ExpandLess />
-                  ) : (
-                    <ExpandMore />
-                  ))}
+                {subMenu && (selectedIndex === index && open ? <ExpandLess /> : <ExpandMore />)}
               </ListItem>
               {subMenu && (
-                <Collapse
-                  in={selectedIndex === index && open}
-                  timeout="auto"
-                  unmountOnExit
-                >
+                <Collapse in={selectedIndex === index && open} timeout="auto" unmountOnExit>
                   <List component="div" disablePadding>
                     {subMenu.map(({ title, path, subSubMenu }, index) => {
                       return (
                         <Fragment key={`sub-submenu-${index}`}>
                           <ListItemButton
                             selected={path === router.asPath}
-                            onClick={(event) => {
+                            onClick={event => {
                               event.stopPropagation();
-                              handleListItemClick(
-                                event,
-                                index,
-                                path,
-                                selectedIndex
-                              );
+                              handleListItemClick(event, index, path, selectedIndex);
                             }}
-                            sx={{ pl: 5 }}
+                            sx={{
+                              pl: 5,
+                            }}
                           >
                             <ListItemIcon>
                               <RadioButtonUnchecked fontSize="small" />
                             </ListItemIcon>
                             <ListItemText primary={title} />
                             {subSubMenu &&
-                              (selectedIndex === index && open ? (
-                                <ExpandLess />
-                              ) : (
-                                <ExpandMore />
-                              ))}
+                              (selectedIndex === index && open ? <ExpandLess /> : <ExpandMore />)}
                           </ListItemButton>
                           {subSubMenu && (
                             <Collapse
@@ -148,16 +122,13 @@ export default function SideBar() {
                                   return (
                                     <ListItemButton
                                       selected={path === router.asPath}
-                                      onClick={(event) => {
+                                      onClick={event => {
                                         event.stopPropagation();
-                                        handleListItemClick(
-                                          event,
-                                          index,
-                                          path,
-                                          selectedIndex
-                                        );
+                                        handleListItemClick(event, index, path, selectedIndex);
                                       }}
-                                      sx={{ pl: 5 }}
+                                      sx={{
+                                        pl: 5,
+                                      }}
                                       key={`submenu-${index}`}
                                     >
                                       <ListItemIcon>
@@ -183,14 +154,13 @@ export default function SideBar() {
     </Container>
   );
 }
-
 const Container = styled.div`
   ${({ theme, shrink }) => `
     padding: ${shrink ? theme.spacing(3, 2, 2) : theme.spacing(3)};
     border-right: 1px solid ${theme.colors.palette.lightGrey};
     transition: 0.3s ease all;
     flex: 0 0 300px;
-    transform: ${!shrink ? "translate(-100%)" : "translate(0)"};
+    transform: ${!shrink ? 'translate(-100%)' : 'translate(0)'};
     max-width: calc(100vw - 50px);
     width: 300px;
     background: ${theme.colors.palette.white};
@@ -205,12 +175,12 @@ const Container = styled.div`
     @media (min-width: ${theme.breakpoints.values.md}px) {
       position: relative;
       transform: translate(0);
-      flex: ${shrink ? "0 0 75px" : "0 0 300px"};
+      flex: ${shrink ? '0 0 75px' : '0 0 300px'};
       max-width: 300px;
 
       .MuiListItemButton-root {
         > .MuiListItemText-root {
-          display: ${shrink ? "none" : "block"};
+          display: ${shrink ? 'none' : 'block'};
         }
       }
 
@@ -265,7 +235,7 @@ const Container = styled.div`
     }
 
     @media (min-width: ${theme.breakpoints.values.lg}px) {
-      flex: ${shrink ? "0 0 75px" : "0 0 335px"};
+      flex: ${shrink ? '0 0 75px' : '0 0 335px'};
       max-width: 335px;
       padding: ${shrink ? theme.spacing(3, 2, 2) : theme.spacing(3, 4, 4)};
     }
@@ -308,7 +278,7 @@ const Container = styled.div`
 
       > .MuiSvgIcon-root {
         @media (min-width: ${theme.breakpoints.values.md}px) {
-          display: ${shrink ? "none" : "block"};
+          display: ${shrink ? 'none' : 'block'};
         }
       }
 
@@ -327,7 +297,7 @@ const Container = styled.div`
         min-width: 40px;
 
         @media (min-width: ${theme.breakpoints.values.md}px) {
-          min-width: ${shrink ? "auto" : "40px"};
+          min-width: ${shrink ? 'auto' : '40px'};
         }
       }
     }
@@ -351,7 +321,6 @@ const Container = styled.div`
     }
   `}
 `;
-
 const ListItem = styled(ListItemButton)`
   ${({ theme, activestate }) => `
     &.MuiButtonBase-root {
@@ -377,7 +346,6 @@ const ListItem = styled(ListItemButton)`
     }
   `}
 `;
-
 const MuiIconButton = styled(IconButton)`
   ${({ theme, shrink }) => `
     &.MuiIconButton-root {
@@ -388,7 +356,7 @@ const MuiIconButton = styled(IconButton)`
       border: 1px solid ${theme.colors.palette.lightGrey};
       position: absolute;
       top: 18px;
-      right: ${!shrink ? "-40px" : 0};
+      right: ${!shrink ? '-40px' : 0};
       transform: translateX(50%);
       filter: drop-shadow(8px 0px 25px ${theme.colors.palette.lightGrey});
 
@@ -399,7 +367,6 @@ const MuiIconButton = styled(IconButton)`
     }
   `}
 `;
-
 const LogoContainer = styled.div`
   ${({ theme, shrink }) => `
     margin-bottom: ${theme.spacing(4)};
@@ -407,7 +374,7 @@ const LogoContainer = styled.div`
     overflow: hidden;
 
     @media (min-width: ${theme.breakpoints.values.md}px) {
-      width: ${shrink ? "40px" : "176px"};
+      width: ${shrink ? '40px' : '176px'};
     }
   `}
 `;

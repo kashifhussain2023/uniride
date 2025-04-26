@@ -1,10 +1,9 @@
-import React from 'react';
 import Button from '@mui/material/Button';
+import React from 'react';
 //import AddLocation from '../common/model/AddLocation';
- //import ConfirmBooking from '../common/model/ConfirmBooking';
+//import ConfirmBooking from '../common/model/ConfirmBooking';
 //import SelectGender from '../common/model/SelectGender';
-import Delete from '../common/model/Delete'; 
-
+import Delete from '../common/model/Delete';
 export default function ModuleCard({ open, handleClickOpen, handleClose }) {
   return (
     <React.Fragment>
@@ -18,4 +17,3 @@ export default function ModuleCard({ open, handleClickOpen, handleClose }) {
     </React.Fragment>
   );
 }
-

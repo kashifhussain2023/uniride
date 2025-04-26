@@ -1,18 +1,16 @@
-import React from "react";
-import Button from "@mui/material/Button";
-import { styled } from "@mui/material/styles";
-import Dialog from "@mui/material/Dialog";
-import DialogContent from "@mui/material/DialogContent";
-import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
-import ListItemButton from "@mui/material/ListItemButton";
-import ListItemText from "@mui/material/ListItemText";
-import { Radio, Typography } from "@mui/material";
-
+import React from 'react';
+import Button from '@mui/material/Button';
+import { styled } from '@mui/material/styles';
+import Dialog from '@mui/material/Dialog';
+import DialogContent from '@mui/material/DialogContent';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemButton from '@mui/material/ListItemButton';
+import ListItemText from '@mui/material/ListItemText';
+import { Radio, Typography } from '@mui/material';
 const SelectGender = ({ open, handleGenderClose, proceedGenderModel }) => {
-  const [checked, setChecked] = React.useState("0");
-
-  const handleToggle = (value) => () => {
+  const [checked, setChecked] = React.useState('0');
+  const handleToggle = value => () => {
     setChecked(value);
   };
   const handleSelectGender = () => {
@@ -21,18 +19,17 @@ const SelectGender = ({ open, handleGenderClose, proceedGenderModel }) => {
   const handleClose = () => {
     handleGenderClose();
   };
-
   return (
-    <BootstrapDialog
-      aria-labelledby="customized-dialog-title"
-      open={open}
-      fullWidth
-      maxWidth="md"
-    >
+    <BootstrapDialog aria-labelledby="customized-dialog-title" open={open} fullWidth maxWidth="md">
       <DialogContent>
         <LeftSection>
           <Typography variant="subtitle2">Select</Typography>
-          <Typography variant="h2" sx={{ mt: 0 }}>
+          <Typography
+            variant="h2"
+            sx={{
+              mt: 0,
+            }}
+          >
             preferred gender of driver
           </Typography>
           <img src="../selctpreferred.png" />
@@ -40,22 +37,22 @@ const SelectGender = ({ open, handleGenderClose, proceedGenderModel }) => {
         <RightSection>
           <List>
             <ListItem>
-              <ListItemButton onClick={handleToggle("0")}>
-                <Radio checked={checked === "0"} />
+              <ListItemButton onClick={handleToggle('0')}>
+                <Radio checked={checked === '0'} />
 
                 <ListItemText primary={`Male `} />
               </ListItemButton>
             </ListItem>
             <ListItem>
-              <ListItemButton onClick={handleToggle("1")}>
-                <Radio checked={checked === "1"} />
+              <ListItemButton onClick={handleToggle('1')}>
+                <Radio checked={checked === '1'} />
 
                 <ListItemText primary={`Female `} />
               </ListItemButton>
             </ListItem>
             <ListItem>
-              <ListItemButton onClick={handleToggle("Any")}>
-                <Radio checked={checked === "Any"} />
+              <ListItemButton onClick={handleToggle('Any')}>
+                <Radio checked={checked === 'Any'} />
 
                 <ListItemText primary={`Any `} />
               </ListItemButton>
@@ -74,39 +71,33 @@ const SelectGender = ({ open, handleGenderClose, proceedGenderModel }) => {
     </BootstrapDialog>
   );
 };
-
 export default SelectGender;
-
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
-  "& .MuiPaper-root": {
-    maxWidth: 750,
-    borderRadius: 24,
+  '& .MuiDialogActions-root': {
     padding: theme.spacing(1),
   },
-
-  "& .MuiDialogContent-root": {
-    padding: theme.spacing(2),
+  '& .MuiDialogContent-root': {
+    alignItems: 'center',
     background: theme.colors.palette.lightGrey,
     borderRadius: 24,
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
+    display: 'flex',
+    justifyContent: 'space-between',
+    padding: theme.spacing(2),
   },
-
-  "& .MuiIconButton-root": {
-    right: -15,
-    top: -25,
+  '& .MuiIconButton-root': {
     color: theme.colors.palette.black,
     fontSize: 30,
+    right: -15,
+    top: -25,
     zIndex: 999,
   },
-
-  "& .MuiDialogActions-root": {
+  '& .MuiPaper-root': {
+    borderRadius: 24,
+    maxWidth: 750,
     padding: theme.spacing(1),
   },
 }));
-
-const LeftSection = styled("div")`
+const LeftSection = styled('div')`
   ${({ theme }) => `
     width: 50%;
     display: none;
@@ -120,7 +111,7 @@ const LeftSection = styled("div")`
     }
   `}
 `;
-const RightSection = styled("div")`
+const RightSection = styled('div')`
   ${({ theme }) => `
   width:100%; background-color:#fff; border-radius:12px; padding:20px;
   @media (min-width: ${theme.breakpoints.values.md}px) {           
@@ -142,33 +133,12 @@ const RightSection = styled("div")`
 
 `}
 `;
-const ButtonBox = styled("div")`
+const ButtonBox = styled('div')`
   ${({ theme }) => `
     display: flex;
     border-top: 1px solid ${theme.colors.palette.grey};
     justify-content: space-between;
      padding: ${theme.spacing(2, 3)};
      gap: 15px;
-  `}
-`;
-
-const FormControl = styled("div")`
-  ${({ theme }) => `
-    margin-bottom: 10px;
-    .MuiInputBase-input {
-      font-size: 16px;
-      height: 30px;
-      padding: 5px 10px;
-      border-radius: 6px;
-    }
-    .MuiInputLabel-root {
-      margin-top: 0px;
-      display: block;
-      margin-bottom: 5px;
-      color: ${theme.colors.palette.darkGrey};
-      span {
-        color: ${theme.colors.palette.red};
-      }
-    }
   `}
 `;

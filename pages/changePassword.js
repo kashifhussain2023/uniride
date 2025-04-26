@@ -1,49 +1,46 @@
-import { useState } from "react";
-import Head from "next/head";
-import { useRouter } from "next/router";
-import ThemeProvider from "@/theme/ThemeProvider";
-import Layout from "@/components/common/Layout";
-import styled from "@emotion/styled";
-import { toast } from "react-toastify";
-
+import Layout from '@/components/common/Layout';
+import SpinnerLoader from '@/components/common/SpinnerLoader';
+import ThemeProvider from '@/theme/ThemeProvider';
+import { api } from '@/utils/api/common';
+import { validateChangePassword } from '@/utils/change-password';
+import styled from '@emotion/styled';
+import { Lock } from '@mui/icons-material';
 import {
   Button,
-  FormControl as MuiFormControl,
   InputAdornment,
+  FormControl as MuiFormControl,
   TextField,
   Typography,
-} from "@mui/material";
-import { Lock } from "@mui/icons-material";
-import { validateChangePassword } from "@/utils/change-password";
-import { getSession, useSession, signOut } from "next-auth/react";
-import { api } from "@/utils/api/common";
-import SpinnerLoader from "@/components/common/SpinnerLoader";
-
+} from '@mui/material';
+import { signOut } from 'next-auth/react';
+import Head from 'next/head';
+import { useRouter } from 'next/router';
+import { useState } from 'react';
+import { toast } from 'react-toastify';
 export default function ChangePassword({ userAuth }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({
-    old_password: "",
-    new_password: "",
-    confirm_password: "",
+    confirm_password: '',
+    new_password: '',
+    old_password: '',
   });
-
   const [inputs, setInputs] = useState({
-    old_password: "",
-    new_password: "",
-    confirm_password: "",
+    confirm_password: '',
+    new_password: '',
+    old_password: '',
   });
-
   const [removeErrors, setRemoveErrors] = useState(false);
-
   const handleInputChange = ({ target }) => {
-    setInputs((inputs) => ({
+    setInputs(inputs => ({
       ...inputs,
       [target.name]: target.value,
     }));
-
     if (removeErrors) {
-      var data = { ...inputs, [target.name]: target.value };
+      const data = {
+        ...inputs,
+        [target.name]: target.value,
+      };
       setErrors({
         ...validateChangePassword({
           ...data,
@@ -51,15 +48,13 @@ export default function ChangePassword({ userAuth }) {
       });
     }
   };
-
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault();
-    let inputForValidation = {
-      old_password: inputs.old_password,
-      new_password: inputs.new_password,
+    const inputForValidation = {
       confirm_password: inputs.confirm_password,
+      new_password: inputs.new_password,
+      old_password: inputs.old_password,
     };
-
     const validationErrors = validateChangePassword(inputForValidation);
     const noErrors = Object.keys(validationErrors).length === 0;
     setRemoveErrors(true);
@@ -69,37 +64,33 @@ export default function ChangePassword({ userAuth }) {
     if (noErrors) {
       setLoading(true);
       const formData = new FormData();
-      formData.append("old_password", inputs.old_password);
-      formData.append("new_password", inputs.new_password);
-      formData.append("customer_id", userAuth.customer_id);
-      formData.append("token_code", userAuth.token_code);
-
+      formData.append('old_password', inputs.old_password);
+      formData.append('new_password', inputs.new_password);
+      formData.append('customer_id', userAuth.customer_id);
+      formData.append('token_code', userAuth.token_code);
       const requestBody = {
-        old_password: inputs.old_password,
-        new_password: inputs.new_password,
         confirm_password: inputs.confirm_password,
-      }
-
+        new_password: inputs.new_password,
+        old_password: inputs.old_password,
+      };
       const response = await api({
-        url: "/customer/change-password",
-        method: "POST",
         data: requestBody,
+        method: 'POST',
+        url: '/customer/change-password',
       });
-
       if (response.status === true) {
         setLoading(false);
         toast.success(response.message);
-        router.push("/profile");
-      } else if (
-        response.status === false &&
-        response.message === "Invalid token code"
-      ) {
+        router.push('/profile');
+      } else if (response.status === false && response.message === 'Invalid token code') {
         setLoading(false);
         toast.error(
-          "Your account has been logged in on another device.Please login again to continue."
+          'Your account has been logged in on another device.Please login again to continue.'
         );
-        await signOut({ redirect: false });
-        router.push("/login");
+        await signOut({
+          redirect: false,
+        });
+        router.push('/login');
       } else {
         setLoading(false);
         toast.error(response.message);
@@ -108,7 +99,6 @@ export default function ChangePassword({ userAuth }) {
       setErrors(validationErrors);
     }
   };
-
   return (
     <ThemeProvider>
       <Head>
@@ -124,12 +114,23 @@ export default function ChangePassword({ userAuth }) {
             <RightSide>
               <SignInHead>
                 <img src="../loginIcon.png" />
-                <Typography variant="h2" sx={{ mb: 3 }}>
+                <Typography
+                  variant="h2"
+                  sx={{
+                    mb: 3,
+                  }}
+                >
                   Change Password
                 </Typography>
               </SignInHead>
               <Typography variant="h6">Old Password</Typography>
-              <FormControl variant="outlined" fullWidth sx={{ mb: 2 }}>
+              <FormControl
+                variant="outlined"
+                fullWidth
+                sx={{
+                  mb: 2,
+                }}
+              >
                 <TextField
                   id="outlined-start-adornment"
                   fullWidth
@@ -148,7 +149,13 @@ export default function ChangePassword({ userAuth }) {
                 />
               </FormControl>
               <Typography variant="h6">New Password</Typography>
-              <FormControl variant="outlined" fullWidth sx={{ mb: 2 }}>
+              <FormControl
+                variant="outlined"
+                fullWidth
+                sx={{
+                  mb: 2,
+                }}
+              >
                 <TextField
                   id="outlined-start-adornment"
                   fullWidth
@@ -167,7 +174,13 @@ export default function ChangePassword({ userAuth }) {
                 />
               </FormControl>
               <Typography variant="h6">Confirm Password</Typography>
-              <FormControl variant="outlined" fullWidth sx={{ mb: 2 }}>
+              <FormControl
+                variant="outlined"
+                fullWidth
+                sx={{
+                  mb: 2,
+                }}
+              >
                 <TextField
                   id="outlined-start-adornment"
                   fullWidth
@@ -189,16 +202,14 @@ export default function ChangePassword({ userAuth }) {
                 <Button
                   variant=""
                   color="primary"
-                  onClick={() => router.push("profile")}
-                  sx={{ mr: 1 }}
+                  onClick={() => router.push('profile')}
+                  sx={{
+                    mr: 1,
+                  }}
                 >
                   Back
-                </Button>{" "}
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={handleSubmit}
-                >
+                </Button>{' '}
+                <Button variant="contained" color="primary" onClick={handleSubmit}>
                   Proceed
                 </Button>
               </ChangeFooter>
@@ -209,7 +220,6 @@ export default function ChangePassword({ userAuth }) {
     </ThemeProvider>
   );
 }
-
 const LoginContainer = styled.div`
   ${({ theme }) => `
     max-width: 1200px;
@@ -240,7 +250,6 @@ const Box = styled.div`
     }
   `}
 `;
-
 const RightSide = styled.div`
   ${({ theme }) => `
     width: 100%;
@@ -271,7 +280,6 @@ const RightSide = styled.div`
     }
   `}
 `;
-
 const FormControl = styled(MuiFormControl)`
   ${({ theme }) => `
     font-size: 14px;
@@ -307,15 +315,13 @@ const FormControl = styled(MuiFormControl)`
     }
   `}
 `;
-
 const SignInHead = styled.div`
-  ${({ theme }) => `
+  ${() => `
     text-align: center;
   `}
 `;
-
 const ChangeFooter = styled.div`
-  ${({ theme }) => `
+  ${() => `
 display:flex; justify-content:center;
 
   `}

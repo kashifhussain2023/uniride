@@ -1,13 +1,6 @@
-import styled from "@emotion/styled";
-import { Button, Dialog, List, ListItem, Typography } from "@mui/material";
-
-const ScheduleRideTile = ({
-  content,
-  cancelSchedule,
-  open,
-  areYouSure,
-  close,
-}) => (
+import styled from '@emotion/styled';
+import { Button, Dialog, List, ListItem, Typography } from '@mui/material';
+const ScheduleRideTile = ({ content, cancelSchedule, open, areYouSure, close }) => (
   <Container>
     <ScheduleList disablePadding>
       <ListItem disableGutters>
@@ -33,9 +26,7 @@ const ScheduleRideTile = ({
       </Button>
       <Dialog open={open} size="sm" onClose={close}>
         <Body>
-          <Typography variant="h3">
-            Are You sure want to cancel this schedule ?
-          </Typography>
+          <Typography variant="h3">Are You sure want to cancel this schedule ?</Typography>
         </Body>
         <ButtonBox>
           <Button variant="secondary" onClick={close}>
@@ -49,9 +40,7 @@ const ScheduleRideTile = ({
     </ActionContainer>
   </Container>
 );
-
 export default ScheduleRideTile;
-
 const Container = styled.div`
   ${({ theme }) => `
      border: 1px solid ${theme.colors.palette.grey};
@@ -62,7 +51,6 @@ const Container = styled.div`
      flex-direction: column;
    `}
 `;
-
 const ScheduleList = styled(List)`
   .MuiListItem-root {
     align-items: flex-start;
@@ -73,7 +61,6 @@ const ScheduleList = styled(List)`
     }
   }
 `;
-
 const ActionContainer = styled.div`
   ${({ theme }) => `
     text-align: right;
@@ -86,7 +73,6 @@ const ActionContainer = styled.div`
     }
   `}
 `;
-
 const ButtonBox = styled.div`
   ${({ theme }) => `
     display: flex;
@@ -95,7 +81,6 @@ const ButtonBox = styled.div`
      padding: ${theme.spacing(2, 3)};
   `}
 `;
-
 const Body = styled.div`
   ${({ theme }) => `
     text-align: center;

@@ -1,56 +1,51 @@
-import React, { useState, useEffect } from "react";
-import { getSession, signOut } from "next-auth/react";
-import { useRouter } from "next/router";
-import Head from "next/head";
-import ThemeProvider from "@/theme/ThemeProvider";
-import Layout from "@/components/common/Layout";
-import LargeInnerContent from "@/components/presentation/LargeInnerContent";
-import styled from "@emotion/styled";
-import PageTitle from "@/components/common/PageTitle";
-import { Button } from "@mui/material";
-import Grid from "@mui/material/Grid";
-import DestinationList from "@/components/common/destination/Destination";
-import { api } from "@/utils/api/common";
-import AddLocation from "@/components/common/model/AddLocation";
-
-export default function favoriteDestination({ userAuth }) {
+import React, { useState, useEffect } from 'react';
+import { getSession, signOut } from 'next-auth/react';
+import { useRouter } from 'next/router';
+import Head from 'next/head';
+import ThemeProvider from '@/theme/ThemeProvider';
+import Layout from '@/components/common/Layout';
+import LargeInnerContent from '@/components/presentation/LargeInnerContent';
+import styled from '@emotion/styled';
+import PageTitle from '@/components/common/PageTitle';
+import { Button } from '@mui/material';
+import Grid from '@mui/material/Grid';
+import DestinationList from '@/components/common/destination/Destination';
+import { api } from '@/utils/api/common';
+import AddLocation from '@/components/common/model/AddLocation';
+export default function FavoriteDestination({ userAuth }) {
   const router = useRouter();
   const { type, page } = router.query;
-
   const [favoriteLocationList, setFavoriteLocationList] = useState();
   const [openFavoriteModel, setOpenFavoriteModel] = useState(false);
-
   const handleOpenLocationModel = () => {
     setOpenFavoriteModel(true);
   };
   const handleCloseLocationModel = () => {
     setOpenFavoriteModel(false);
   };
-
   const getFavoriteLocationList = async () => {
     const formData = new FormData();
-
-    formData.append("customer_id", userAuth.customer_id);
-    formData.append("token_code", userAuth.token_code);
+    formData.append('customer_id', userAuth.customer_id);
+    formData.append('token_code', userAuth.token_code);
     const response = await api({
-      url: "/customer/address/list",
-      method: "POST",
       data: formData,
+      method: 'POST',
+      url: '/customer/address/list',
     });
-
     if (response.status === true) {
       if (response.data.data.length > 0) {
         setFavoriteLocationList(response.data.data);
       }
-    } else if (response.message == "Invalid token code") {
-      await signOut({ redirect: false });
-      router.push("/login");
+    } else if (response.message === 'Invalid token code') {
+      await signOut({
+        redirect: false,
+      });
+      router.push('/login');
     }
   };
   useEffect(() => {
     getFavoriteLocationList();
   }, []);
-
   return (
     <ThemeProvider>
       <Head>
@@ -66,13 +61,10 @@ export default function favoriteDestination({ userAuth }) {
               <PageTitle
                 title="Favorite"
                 subtitle="Destination"
-                images_icon={"../location.png"}
+                images_icon={'../location.png'}
               ></PageTitle>
               <ButtonArea>
-                <Button
-                  variant="containedSecondary"
-                  onClick={handleOpenLocationModel}
-                >
+                <Button variant="containedSecondary" onClick={handleOpenLocationModel}>
                   Add New Location
                 </Button>
                 <AddLocation
@@ -101,12 +93,11 @@ export default function favoriteDestination({ userAuth }) {
 export async function getServerSideProps(context) {
   // You can access the session and user information here.
   const session = await getSession(context);
-
   if (!session) {
     // Handle unauthenticated access
     return {
       redirect: {
-        destination: "/login",
+        destination: '/login',
         permanent: false,
       },
     };
@@ -125,7 +116,6 @@ const Box = styled.div`
     padding: 24px;
   `}
 `;
-
 const HeadSection = styled.div`
   ${({ theme }) => `
     display: flex;
@@ -138,7 +128,6 @@ const HeadSection = styled.div`
     }
   `}
 `;
-
 const ButtonArea = styled.div`
   ${({ theme }) => `
     width: 170px;

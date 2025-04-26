@@ -1,47 +1,20 @@
-import styled from "@emotion/styled";
-import { Typography } from "@mui/material";
-import TextField from "@mui/material/TextField";
-import {
-  DirectionsRenderer,
-  GoogleMap,
-  LoadScript,
-  MarkerF,
-  StandaloneSearchBox,
-} from "@react-google-maps/api";
-import { useEffect, useState } from "react";
-
-const LocationMapArrived = ({
-  currentLocation,
-  dropPickLocationType,
-  dropCustomerLocation,
-  centerMapLocation,
-  mapLocationLabel,
-  driverLocation,
-}) => {
+import styled from '@emotion/styled';
+import { Typography } from '@mui/material';
+import { DirectionsRenderer, GoogleMap, LoadScript } from '@react-google-maps/api';
+import { useEffect, useState } from 'react';
+const LocationMapArrived = ({ currentLocation, driverLocation, centerMapLocation }) => {
   const [directions, setDirections] = useState(null);
   const [distance, setDistance] = useState(null);
   const [duration, setDuration] = useState(null);
-
   const mapContainerStyle = {
-    width: "100%",
-    height: "100%",
+    height: '100%',
+    width: '100%',
   };
-
-  const defaultCenter = {
-    lat: currentLocation.lat,
-    lng: currentLocation.lng,
-  };
-
-  const setLocationType = (type) => {
-    dropPickLocationType(type);
-  };
-
-  const handleMapClick = (e) => {
+  const handleMapClick = e => {
     const clickedLocation = {
       lat: e.latLng.lat(),
       lng: e.latLng.lng(),
     };
-
     if (!currentLocation) {
       //setcurrentLocation(clickedLocation);
     } else {
@@ -49,21 +22,14 @@ const LocationMapArrived = ({
       calculateDirections(clickedLocation);
     }
   };
-  const calculateDirections = (driverLocation) => {
+  const calculateDirections = driverLocation => {
     const directionsService = new window.google.maps.DirectionsService();
-    const origin = new window.google.maps.LatLng(
-      currentLocation.lat,
-      currentLocation.lng
-    );
-    const destination = new window.google.maps.LatLng(
-      driverLocation.lat,
-      driverLocation.lng
-    );
-
+    const origin = new window.google.maps.LatLng(currentLocation.lat, currentLocation.lng);
+    const destination = new window.google.maps.LatLng(driverLocation.lat, driverLocation.lng);
     directionsService.route(
       {
-        origin,
         destination,
+        origin,
         travelMode: window.google.maps.TravelMode.DRIVING,
       },
       (result, status) => {
@@ -77,7 +43,7 @@ const LocationMapArrived = ({
             setDuration(leg.duration.text);
           }
         } else {
-          console.error("Directions request failed:", status);
+          console.error('Directions request failed:', status);
         }
       }
     );
@@ -96,10 +62,10 @@ const LocationMapArrived = ({
         zoom={15}
         onClick={handleMapClick}
         options={{
-          zoomControl: false,
-          streetViewControl: false,
-          mapTypeControl: false,
           fullscreenControl: false,
+          mapTypeControl: false,
+          streetViewControl: false,
+          zoomControl: false,
         }}
       >
         {/* {driverLocation && <MarkerF position={driverLocation} label="driver" />} */}
@@ -116,19 +82,8 @@ const LocationMapArrived = ({
     </LoadScript>
   );
 };
-const LIBRARIES = ["places"];
+const LIBRARIES = ['places'];
 export default LocationMapArrived;
-const DropinOut = styled.div`
-  ${({ theme }) => `
-
-  position:absolute;
-  max-width:1270px; margin:0 auto; left:0px; right:0px; top:15px; padding:0px 15px;
-  z-index:1
-  
-  }
-
-  `}
-`;
 const DistanceDurationOverlay = styled.div`
   position: absolute;
   top: 10px;
@@ -138,31 +93,4 @@ const DistanceDurationOverlay = styled.div`
   border-radius: 5px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
   z-index: 1;
-`;
-const DropField = styled.div`
-  ${({ theme }) => `
-    position: relative;
-    &::before {
-      position: absolute;
-      content: "";
-      background-image: url(../line.png);
-      width: 9px;
-      height: 68px;
-      z-index: 999;
-      left: 18px;
-      background-repeat: none;
-      top: 20px;
-    }
-
-    .MuiTextField-root {
-      width: 100%;
-      .MuiOutlinedInput-root {
-        background-color: #fff;
-        margin-bottom: 10px;
-        height: 50px;
-        border: 0px solid #000;
-        padding-left: 25px;
-      }
-    }
-  `}
 `;

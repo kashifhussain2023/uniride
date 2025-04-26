@@ -1,94 +1,77 @@
-import React, { useState, useEffect } from "react";
-import { getSession, signOut } from "next-auth/react";
-import Head from "next/head";
-import { useRouter } from "next/router";
-import ThemeProvider from "@/theme/ThemeProvider";
-import Layout from "@/components/common/Layout";
-import SmallContent from "@/components/presentation/SmallContent";
-import styled from "@emotion/styled";
-import PageTitle from "@/components/common/PageTitle";
-import { Button, Typography } from "@mui/material";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-import { api } from "@/utils/api/common";
-import SpinnerLoader from "@/components/common/SpinnerLoader";
-import DeleteModel from "@/components/common/model/DeleteModel";
-import { toast } from "react-toastify";
-
+import React, { useState, useEffect } from 'react';
+import { signOut } from 'next-auth/react';
+import Head from 'next/head';
+import { useRouter } from 'next/router';
+import ThemeProvider from '@/theme/ThemeProvider';
+import Layout from '@/components/common/Layout';
+import SmallContent from '@/components/presentation/SmallContent';
+import styled from '@emotion/styled';
+import PageTitle from '@/components/common/PageTitle';
+import { Button, Typography } from '@mui/material';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import { api } from '@/utils/api/common';
+import DeleteModel from '@/components/common/model/DeleteModel';
+import { toast } from 'react-toastify';
 export default function EmergencyContacts() {
   const router = useRouter();
   const [emergencyList, setEmergencyList] = useState();
   const [open, setOpen] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [deleteContactId, setDeleteContactId] = useState(null);
-
   const getEmergencyContactList = async () => {
     const formData = new FormData();
     const response = await api({
-      url: "/customer/emergency/list",
-      method: "GET",
       data: formData,
+      method: 'GET',
+      url: '/customer/emergency/list',
     });
-
     if (response.status === true) {
       const list = response?.data?.data || [];
       setEmergencyList(list);
-      setLoading(false);
-    } else if (response.message === "Invalid token code") {
-      await signOut({ redirect: false });
-      router.push("/login");
+    } else if (response.message === 'Invalid token code') {
+      await signOut({
+        redirect: false,
+      });
+      router.push('/login');
     } else {
       setEmergencyList([]);
-      setLoading(false);
     }
   };
-
-  const editContact = (id) => {
+  const editContact = id => {
     router.push(`/emergency-contact/edit/${id}`);
   };
-
-  const handleDelete = async (contactId) => {
-      try {
-        setLoading(true);
-        const response = await api({
-          url: `/customer/emergency/remove/${contactId}`,
-          method: "DELETE"
-        });
-
-        if (response.status === true) {
-          toast.success("Emergency contact deleted successfully");
-          setOpen(false);
-          setEmergencyList(prevContacts => prevContacts.filter(contact => contact.id !== contactId));
-        } else {
-          toast.error(response.message || "Failed to delete emergency contact");
-        }
-      } catch (error) {
-        console.error("Error deleting emergency contact:", error);
-        toast.error("An error occurred while deleting the contact");
-      } finally {
-        setLoading(false);
+  const handleDelete = async contactId => {
+    try {
+      const response = await api({
+        method: 'DELETE',
+        url: `/customer/emergency/remove/${contactId}`,
+      });
+      if (response.status === true) {
+        toast.success('Emergency contact deleted successfully');
+        setOpen(false);
+        setEmergencyList(prevContacts => prevContacts.filter(contact => contact.id !== contactId));
+      } else {
+        toast.error(response.message || 'Failed to delete emergency contact');
       }
+    } catch (error) {
+      console.error('Error deleting emergency contact:', error);
+      toast.error('An error occurred while deleting the contact');
+    }
   };
-
-  const handleOpen = (id) => {
+  const handleOpen = () => {
     setOpen(true);
-    setDeleteContactId(id);
   };
-
   const handleClose = () => {
     setOpen(false);
   };
-
   useEffect(() => {
     getEmergencyContactList();
   }, []);
-
   return (
     <ThemeProvider>
       <Head>
@@ -104,12 +87,12 @@ export default function EmergencyContacts() {
               <PageTitle
                 title="Emergency"
                 subtitle="Contact"
-                images_icon={"../emergencyContact.png"}
+                images_icon={'../emergencyContact.png'}
               ></PageTitle>
               <Button
                 variant="contained"
                 color="primary"
-                onClick={() => router.push("/emergency-contact/add")}
+                onClick={() => router.push('/emergency-contact/add')}
               >
                 Add Contact
               </Button>
@@ -117,7 +100,12 @@ export default function EmergencyContacts() {
             {emergencyList ? (
               <EmergenceyList>
                 <TableContainer>
-                  <Table sx={{ minWidth: 650 }} aria-label="simple table">
+                  <Table
+                    sx={{
+                      minWidth: 650,
+                    }}
+                    aria-label="simple table"
+                  >
                     <TableHead>
                       <TableRow>
                         <TableCell>Name</TableCell>
@@ -128,7 +116,7 @@ export default function EmergencyContacts() {
                     </TableHead>
                     <TableBody>
                       {emergencyList.length > 0 ? (
-                        emergencyList.map((list) => (
+                        emergencyList.map(list => (
                           <TableRow key={list.id}>
                             <TableCell>{list.name}</TableCell>
                             <TableCell>{list.email}</TableCell>
@@ -138,11 +126,16 @@ export default function EmergencyContacts() {
                             <TableCell>
                               <EditIcon
                                 onClick={() => editContact(list.id)}
-                                sx={{ cursor: "pointer", mr: 1 }}
+                                sx={{
+                                  cursor: 'pointer',
+                                  mr: 1,
+                                }}
                               />
                               <DeleteOutlineIcon
                                 onClick={() => handleOpen(list.id)}
-                                sx={{ cursor: "pointer" }}
+                                sx={{
+                                  cursor: 'pointer',
+                                }}
                               />
                               <DeleteModel
                                 open={open}
@@ -156,9 +149,7 @@ export default function EmergencyContacts() {
                       ) : (
                         <TableRow>
                           <TableCell colSpan={4}>
-                            <Typography align="center">
-                              No records found
-                            </Typography>
+                            <Typography align="center">No records found</Typography>
                           </TableCell>
                         </TableRow>
                       )}
@@ -175,7 +166,6 @@ export default function EmergencyContacts() {
     </ThemeProvider>
   );
 }
-
 const EmergencyContact = styled.div`
   ${({ theme }) => `
     border-radius: 16px 0px 16px 16px;
@@ -199,7 +189,6 @@ const EmergencyContact = styled.div`
     }
   `}
 `;
-
 const EmergencyHead = styled.div`
   ${({ theme }) => `
     display: flex;
@@ -260,7 +249,6 @@ const EmergenceyList = styled.div`
     }
   `}
 `;
-
 const NoRecord = styled(Typography)`
   ${({ theme }) => `
     padding-bottom: ${theme.spacing(3)};

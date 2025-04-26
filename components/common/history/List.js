@@ -1,20 +1,16 @@
-import styled from "@emotion/styled";
-import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
-import { Typography } from "@mui/material";
-import { format, parse } from "date-fns";
-import RideDetails from "../RideDetails";
-import { useState } from "react";
-
+import styled from '@emotion/styled';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+import { Typography } from '@mui/material';
+import { useState } from 'react';
+import RideDetails from '../RideDetails';
 export default function RiderHistory({ riderHistory, setSubTitle }) {
   const [rideDetailStatus, setRideDetailStatus] = useState(true);
   const [rideDetail, setRideDetail] = useState();
-
-  const rideDetailData = (index) => {
+  const rideDetailData = index => {
     setRideDetailStatus(false);
     setRideDetail(riderHistory[index]);
-    setSubTitle("History Detail");
+    setSubTitle('History Detail');
   };
-
   return (
     <>
       {rideDetailStatus ? (
@@ -23,11 +19,11 @@ export default function RiderHistory({ riderHistory, setSubTitle }) {
             <HistoryRow key={index}>
               <HistoryImage onClick={() => rideDetailData(index)}>
                 <img
-                  src={historyItem.path_image || "../mapImg.png"}
+                  src={historyItem.path_image || '../mapImg.png'}
                   alt="Map Image"
-                  onError={(e) => {
+                  onError={e => {
                     e.target.onerror = null;
-                    e.target.src = "../mapImg.png";
+                    e.target.src = '../mapImg.png';
                   }}
                 />
               </HistoryImage>
@@ -41,35 +37,38 @@ export default function RiderHistory({ riderHistory, setSubTitle }) {
                 </Typography>
                 <DateTime>
                   <CalendarMonthIcon />
-                  {new Date(historyItem.ride_start_time).toLocaleString("en-GB", {
-                    day: "2-digit",
-                    month: "2-digit",
-                    year: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
+                  {new Date(historyItem.ride_start_time).toLocaleString('en-GB', {
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
                   })}
                 </DateTime>
-  
-                <Typography variant="subtitle1">
-                  {historyItem.distance_travelled} mi
-                </Typography>
-                <Typography variant="subtitle1" sx={{ mt: 1 }}>
+
+                <Typography variant="subtitle1">{historyItem.distance_travelled} mi</Typography>
+                <Typography
+                  variant="subtitle1"
+                  sx={{
+                    mt: 1,
+                  }}
+                >
                   {historyItem.request.ride_type}
                 </Typography>
               </HistoryDescription>
               <HistoryAction>
                 <Price>
                   $
-                  {(parseFloat(historyItem.request.approximate_fare) || 0).toLocaleString("en-US", {
-                    minimumFractionDigits: 2,
+                  {(parseFloat(historyItem.request.approximate_fare) || 0).toLocaleString('en-US', {
                     maximumFractionDigits: 2,
+                    minimumFractionDigits: 2,
                   })}
                 </Price>
                 <Action>
                   <Typography variant="success">
                     {historyItem.customer_cancel_ride || historyItem.driver_cancel_ride
-                      ? "Cancelled"
-                      : "Success"}
+                      ? 'Cancelled'
+                      : 'Success'}
                   </Typography>
                 </Action>
               </HistoryAction>
@@ -89,9 +88,7 @@ export default function RiderHistory({ riderHistory, setSubTitle }) {
       )}
     </>
   );
-  
 }
-
 const HistoryRow = styled.div`
   ${({ theme }) => `
     border: 1px solid ${theme.colors.palette.grey};
@@ -116,7 +113,6 @@ const HistoryRow = styled.div`
     }
   `}
 `;
-
 const HistoryImage = styled.div`
   ${({ theme }) => `
     width: 100%;
@@ -147,7 +143,6 @@ const HistoryImage = styled.div`
     }
   `}
 `;
-
 const HistoryDescription = styled.div`
   ${({ theme }) => `
     width: 100%;
@@ -175,12 +170,10 @@ const HistoryDescription = styled.div`
     }
   `}
 `;
-
 const HistoryAction = styled.div`
   width: 100%;
   flex: 0 0 100px;
 `;
-
 const DateTime = styled.div`
   ${({ theme }) => `
     margin: 5px 0px;
@@ -205,7 +198,6 @@ const Price = styled.div`
     }
   `}
 `;
-
 const Action = styled.div`
   ${({ theme }) => `
     text-align: right;
@@ -224,7 +216,6 @@ const NoRecord = styled(Typography)`
     font-weight: 500;
   `}
 `;
-
 const Title = styled(Typography)`
   ${({ theme }) => `
       &.MuiTypography-root {

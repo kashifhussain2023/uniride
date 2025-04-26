@@ -4,14 +4,10 @@ import { MenuItem, menuItemClasses } from '@mui/base/MenuItem';
 import { MenuButton } from '@mui/base/MenuButton';
 import { Dropdown } from '@mui/base/Dropdown';
 import { useTheme } from '@mui/system';
-
 export default function MenuIntroduction() {
-  const createHandleMenuClick = (menuItem) => {
-    return () => {
-      
-    };
+  const createHandleMenuClick = () => {
+    return () => {};
   };
-
   return (
     <Dropdown>
       <MenuButton className="TriggerButtonIntroduction">My account</MenuButton>
@@ -19,7 +15,9 @@ export default function MenuIntroduction() {
       <Menu
         className="CustomMenuIntroduction"
         slotProps={{
-          listbox: { className: 'CustomMenuIntroduction--listbox' },
+          listbox: {
+            className: 'CustomMenuIntroduction--listbox',
+          },
         }}
       >
         <MenuItem
@@ -45,7 +43,6 @@ export default function MenuIntroduction() {
     </Dropdown>
   );
 }
-
 const cyan = {
   50: '#E9F8FC',
   100: '#BDEBF4',
@@ -58,7 +55,6 @@ const cyan = {
   800: '#043039',
   900: '#022127',
 };
-
 const grey = {
   50: '#F3F6F9',
   100: '#E5EAF2',
@@ -71,16 +67,13 @@ const grey = {
   800: '#303740',
   900: '#1C2025',
 };
-
 function useIsDarkMode() {
   const theme = useTheme();
   return theme.palette.mode === 'dark';
 }
-
 function Styles() {
   // Replace this with your app logic for determining dark mode
   const isDarkMode = useIsDarkMode();
-
   return (
     <style>{`
     .CustomMenuIntroduction--listbox {

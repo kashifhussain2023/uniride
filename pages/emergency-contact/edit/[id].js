@@ -1,88 +1,83 @@
-import CountrySelect from "@/components/common/CountrySelect";
-import Layout from "@/components/common/Layout";
-import PageTitle from "@/components/common/PageTitle";
-import SpinnerLoader from "@/components/common/SpinnerLoader";
-import SmallContent from "@/components/presentation/SmallContent";
-import CustomFormControl from "@/theme/CustomFormControl";
-import ThemeProvider from "@/theme/ThemeProvider";
-import { api } from "@/utils/api/common";
-import { validateEmergencyContact } from "@/utils/emergency-contact";
-import styled from "@emotion/styled";
-import { Button, Typography } from "@mui/material";
-import InputLabel from "@mui/material/InputLabel";
-import { getSession, signOut } from "next-auth/react";
-import Head from "next/head";
-import { useRouter } from "next/router";
-import { useState, useEffect } from "react";
-import { toast } from "react-toastify";
+import CountrySelect from '@/components/common/CountrySelect';
+import Layout from '@/components/common/Layout';
+import PageTitle from '@/components/common/PageTitle';
+import SpinnerLoader from '@/components/common/SpinnerLoader';
+import SmallContent from '@/components/presentation/SmallContent';
+import CustomFormControl from '@/theme/CustomFormControl';
+import ThemeProvider from '@/theme/ThemeProvider';
+import { api } from '@/utils/api/common';
+import { validateEmergencyContact } from '@/utils/emergency-contact';
+import styled from '@emotion/styled';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-
+import { Button, Typography } from '@mui/material';
+import InputLabel from '@mui/material/InputLabel';
+import { signOut } from 'next-auth/react';
+import Head from 'next/head';
+import { useRouter } from 'next/router';
+import { useEffect, useState } from 'react';
+import { toast } from 'react-toastify';
 export default function EditEmergencyContact() {
   const router = useRouter();
   const { id } = router.query;
-  const [countrycode, setCountryCode] = useState("+1");
+  const [countrycode, setCountryCode] = useState('+1');
   const [loading, setLoading] = useState(false);
   const [inputs, setInputs] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    country_code: "",
+    country_code: '',
+    email: '',
+    name: '',
+    phone: '',
   });
   const [errors, setErrors] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    country_code: "",
+    country_code: '',
+    email: '',
+    name: '',
+    phone: '',
   });
   const [removeErrors, setRemoveErrors] = useState(false);
-
   useEffect(() => {
     if (id) {
       fetchContactDetails();
     }
   }, [id]);
-
   const fetchContactDetails = async () => {
     try {
       setLoading(true);
       const response = await api({
+        method: 'GET',
         url: `/customer/emergency/edit/${id}`,
-        method: "GET"
       });
-
       if (response.status === true) {
         const contact = response.data;
-        
-        const countryCode = contact.country_code || "+1";
+        const countryCode = contact.country_code || '+1';
         setCountryCode(countryCode);
-        
         setInputs({
-          name: contact.name || "",
-          email: contact.email || "",
-          phone: contact.phone || "",
-          country_code: countryCode
+          country_code: countryCode,
+          email: contact.email || '',
+          name: contact.name || '',
+          phone: contact.phone || '',
         });
       } else {
-        toast.error(response.message || "Failed to fetch contact details");
-        router.push("/emergency-contact");
+        toast.error(response.message || 'Failed to fetch contact details');
+        router.push('/emergency-contact');
       }
     } catch (error) {
-      console.error("Error fetching contact details:", error);
-      toast.error("An error occurred while fetching contact details");
-      router.push("/emergency-contact");
+      console.error('Error fetching contact details:', error);
+      toast.error('An error occurred while fetching contact details');
+      router.push('/emergency-contact');
     } finally {
       setLoading(false);
     }
   };
-
   const handleInputChange = ({ target }) => {
-    setInputs((inputs) => ({
+    setInputs(inputs => ({
       ...inputs,
       [target.name]: target.value,
     }));
-
     if (removeErrors) {
-      var data = { ...inputs, [target.name]: target.value };
+      const data = {
+        ...inputs,
+        [target.name]: target.value,
+      };
       setErrors({
         ...validateEmergencyContact({
           ...data,
@@ -90,44 +85,41 @@ export default function EditEmergencyContact() {
       });
     }
   };
-
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault();
-
-    let inputForValidation = {
+    const inputForValidation = {
       email: inputs.email,
       name: inputs.name,
       phone: inputs.phone,
     };
-
     const validationErrors = validateEmergencyContact(inputForValidation);
     const noErrors = Object.keys(validationErrors).length === 0;
     setRemoveErrors(true);
-
     const requestBody = {
-      id:Number(id),
-      name: inputs.name,
       email: inputs.email,
+      id: Number(id),
+      name: inputs.name,
       phone: inputs.phone,
       phone_code: countrycode,
     };
-
     if (noErrors) {
       setLoading(true);
       const response = await api({
-        url: `/customer/emergency/update`,
-        method: "PUT",
         data: requestBody,
+        method: 'PUT',
+        url: `/customer/emergency/update`,
       });
       if (response.status === true) {
         setLoading(false);
         toast.success(response.message);
-        router.push("/emergency-contact");
+        router.push('/emergency-contact');
       } else if (response.status === false) {
         setLoading(false);
         toast.error(response.message);
-        await signOut({ redirect: false });
-        router.push("/login");
+        await signOut({
+          redirect: false,
+        });
+        router.push('/login');
       } else {
         setLoading(false);
         toast.error(response.message);
@@ -136,17 +128,15 @@ export default function EditEmergencyContact() {
       setErrors(validationErrors);
     }
   };
-
-  const handleCountryCode = (value) => {
-    const newCountryCode = "+" + value;
+  const handleCountryCode = value => {
+    const newCountryCode = '+' + value;
     setCountryCode(newCountryCode);
     // Also update the country_code in the inputs state
     setInputs(prevInputs => ({
       ...prevInputs,
-      country_code: newCountryCode
+      country_code: newCountryCode,
     }));
   };
-
   return (
     <ThemeProvider>
       <Head>
@@ -161,12 +151,19 @@ export default function EditEmergencyContact() {
           <EmergencyContact>
             <LeftSection>
               <PageTitle
-                sx={{ mb: 0 }}
+                sx={{
+                  mb: 0,
+                }}
                 title="Emergency"
                 subtitle="Contact"
-                images_icon={"../../iconInRoute.png"}
+                images_icon={'../../iconInRoute.png'}
               ></PageTitle>
-              <Typography variant="h3" sx={{ mb: 1 }}>
+              <Typography
+                variant="h3"
+                sx={{
+                  mb: 1,
+                }}
+              >
                 Please update your contact info
               </Typography>
               <FormControl>
@@ -176,7 +173,7 @@ export default function EditEmergencyContact() {
                   type="text"
                   placeholder="Enter name"
                   name="name"
-                  value={inputs.name || ""}
+                  value={inputs.name || ''}
                   onChange={handleInputChange}
                 />
                 <span className="text-danger">{errors && errors.name}</span>
@@ -188,7 +185,7 @@ export default function EditEmergencyContact() {
                   type="text"
                   placeholder="Enter email"
                   name="email"
-                  value={inputs.email || ""}
+                  value={inputs.email || ''}
                   onChange={handleInputChange}
                 />
                 <span className="text-danger">{errors && errors.email}</span>
@@ -196,25 +193,22 @@ export default function EditEmergencyContact() {
               <FormControl>
                 <InputLabel>Phone Number</InputLabel>
                 <CountryMobile>
-                  <CountrySelect
-                    onCountryCode={handleCountryCode}
-                    countrycode={countrycode}
-                  />
+                  <CountrySelect onCountryCode={handleCountryCode} countrycode={countrycode} />
                   <CustomFormControl
                     fullWidth
                     type="text"
                     placeholder="Enter mobile"
                     name="phone"
-                    value={inputs.phone || ""}
+                    value={inputs.phone || ''}
                     onChange={handleInputChange}
                   />
                 </CountryMobile>
                 <span className="text-danger">{errors && errors.phone}</span>
               </FormControl>
               <ButtonContainer>
-                <Button 
-                  variant="outlined" 
-                  onClick={() => router.push("/emergency-contact")}
+                <Button
+                  variant="outlined"
+                  onClick={() => router.push('/emergency-contact')}
                   startIcon={<ArrowBackIcon />}
                 >
                   Back
@@ -233,8 +227,6 @@ export default function EditEmergencyContact() {
     </ThemeProvider>
   );
 }
-
-
 const EmergencyContact = styled.div`
   ${({ theme }) => `
     border-radius: 16px 0px 16px 16px;
@@ -260,14 +252,12 @@ const EmergencyContact = styled.div`
     }
   `}
 `;
-
 const LeftSection = styled.div`
-  ${({ theme }) => `
+  ${() => `
     width: 100%;
     margin-right: 20px;
   `}
 `;
-
 const RightSection = styled.div`
   ${({ theme }) => `
     width: 100%;
@@ -278,7 +268,6 @@ const RightSection = styled.div`
     }
   `}
 `;
-
 const FormControl = styled.div`
   ${({ theme }) => `
     margin-bottom: 16px;
@@ -299,7 +288,6 @@ const FormControl = styled.div`
     }
   `}
 `;
-
 const CountryMobile = styled.div`
   ${({ theme }) => `
     display: flex;
@@ -338,7 +326,6 @@ const CountryMobile = styled.div`
     }
   `}
 `;
-
 const ButtonContainer = styled.div`
   ${({ theme }) => `
     display: flex;

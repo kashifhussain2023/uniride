@@ -1,31 +1,23 @@
-import styled from "@emotion/styled";
-import { Select } from "@mui/material";
-
-const MuiDatePicker = ({
-  renderDays,
-  renderMonths,
-  renderYears,
-  handleDateChange,
-  date,
-}) => {
+import styled from '@emotion/styled';
+import { Select } from '@mui/material';
+const MuiDatePicker = ({ renderDays, renderMonths, renderYears, handleDateChange, date }) => {
   const customMenuProps = {
-    anchorOrigin: {
-      vertical: "bottom",
-      horizontal: "left",
-    },
-    transformOrigin: {
-      vertical: "top",
-      horizontal: "left",
-    },
     PaperProps: {
-      className: "custom-select-menu",
+      className: 'custom-select-menu',
       style: {
         maxHeight: 360,
       },
     },
+    anchorOrigin: {
+      horizontal: 'left',
+      vertical: 'bottom',
+    },
     getcontentanchorel: null,
+    transformOrigin: {
+      horizontal: 'left',
+      vertical: 'top',
+    },
   };
-
   return (
     <Container>
       <Select
@@ -64,9 +56,7 @@ const MuiDatePicker = ({
     </Container>
   );
 };
-
 export default MuiDatePicker;
-
 const Container = styled.div`
   ${({ theme }) => `
     border-radius: 4px;

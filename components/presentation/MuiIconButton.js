@@ -1,10 +1,8 @@
-import styled from "@emotion/styled";
-import { IconButton as MuiIcon } from "@mui/material";
-
+import styled from '@emotion/styled';
+import { IconButton as MuiIcon } from '@mui/material';
 export default function MuiIconButton({ children, color }) {
   return <IconButton color={color}>{children}</IconButton>;
 }
-
 const IconButton = styled(MuiIcon)`
   ${({ theme, color }) => `
     width: 28px;

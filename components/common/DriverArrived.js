@@ -1,17 +1,12 @@
-import { useState } from "react";
-import styled from "@emotion/styled";
-import PageTitle from "@/components/common/PageTitle";
-import { Button, Typography } from "@mui/material";
-import StarIcon from "@mui/icons-material/Star";
-import CallOutlinedIcon from "@mui/icons-material/CallOutlined";
-import HighlightOffOutlinedIcon from "@mui/icons-material/HighlightOffOutlined";
-import CancelModel from "./model/CancelModel";
-
-export default function DriverArrived(
-  handleCancelModelInfo,
-  acceptDriverDetail,
-  rideStatus
-) {
+import PageTitle from '@/components/common/PageTitle';
+import styled from '@emotion/styled';
+import CallOutlinedIcon from '@mui/icons-material/CallOutlined';
+import HighlightOffOutlinedIcon from '@mui/icons-material/HighlightOffOutlined';
+import StarIcon from '@mui/icons-material/Star';
+import { Button, Typography } from '@mui/material';
+import { useState } from 'react';
+import CancelModel from './model/CancelModel';
+export default function DriverArrived(handleCancelModelInfo, acceptDriverDetail, rideStatus) {
   //const router = useRouter();
   const [openCancelModel, setOpenCancelModel] = useState(false);
   const handleOpenModel = () => {
@@ -29,53 +24,64 @@ export default function DriverArrived(
       <PageTitle
         title={
           rideStatus === 2
-            ? "Arriving Now"
+            ? 'Arriving Now'
             : rideStatus === 3
-            ? "Driver Arrived"
+            ? 'Driver Arrived'
             : rideStatus === 4
-            ? "In Route"
-            : ""
+            ? 'In Route'
+            : ''
         }
         subtitle="Arrived"
-        images_icon={"../driver.png"}
+        images_icon={'../driver.png'}
       ></PageTitle>
 
       <RouteDriver>
         <DriverInfo>
           <DriverLeft>
-            <Typography variant="subtitle2">
-              {acceptDriverDetail?.driver_name}
-            </Typography>
+            <Typography variant="subtitle2">{acceptDriverDetail?.driver_name}</Typography>
             <Typography variant="h2" component="h2">
               {acceptDriverDetail?.vehicle_number}
             </Typography>
-            <Typography variant="subtitle2" sx={{ mt: 0 }}>
-            {acceptDriverDetail?.vehicle_color}{" "}
-              {acceptDriverDetail?.vehicle_make}{" "}
-              {acceptDriverDetail?.vehicle_model}{" "}
-              {acceptDriverDetail?.vehicle_type}
+            <Typography
+              variant="subtitle2"
+              sx={{
+                mt: 0,
+              }}
+            >
+              {acceptDriverDetail?.vehicle_color} {acceptDriverDetail?.vehicle_make}{' '}
+              {acceptDriverDetail?.vehicle_model} {acceptDriverDetail?.vehicle_type}
             </Typography>
             <RatingStar>
               <StarIcon /> {acceptDriverDetail?.rating}
             </RatingStar>
           </DriverLeft>
-          {<DriverRight>
-            <img src={`${acceptDriverDetail?.vehicle_image}`} />
-            <div>
-              <img src={`${acceptDriverDetail?.driver_image}`} />
-            </div>
-          </DriverRight>
+          {
+            <DriverRight>
+              <img src={`${acceptDriverDetail?.vehicle_image}`} />
+              <div>
+                <img src={`${acceptDriverDetail?.driver_image}`} />
+              </div>
+            </DriverRight>
           }
         </DriverInfo>
 
-        <Button variant="contained" color="primary" fullWidth sx={{ mt: 2 }}>
+        <Button
+          variant="contained"
+          color="primary"
+          fullWidth
+          sx={{
+            mt: 2,
+          }}
+        >
           <CallOutlinedIcon /> Call Driver
         </Button>
         <Button
           variant="outlinedSecondary"
           color="primary"
           fullWidth
-          sx={{ mt: 1 }}
+          sx={{
+            mt: 1,
+          }}
           onClick={handleOpenModel}
         >
           <HighlightOffOutlinedIcon /> Cancel Ride
@@ -89,32 +95,28 @@ export default function DriverArrived(
     </>
   );
 }
-
 const RouteDriver = styled.div`
-  ${({ theme }) => `
+  ${() => `
     border: 1px solid #e9e9e9;
     border-radius: 6px;
     padding: 20px 15px;
   `}
 `;
-
 const DriverInfo = styled.div`
-  ${({ theme }) => `
+  ${() => `
     display: flex;
     align-items: center;
     justify-content: space-between;
   `}
 `;
-
 const DriverLeft = styled.div`
-  ${({ theme }) => `
+  ${() => `
     h2 {
       font-weight: 700;
     }
     font-size: 22px;
   `}
 `;
-
 const RatingStar = styled.div`
   ${({ theme }) => `
     display: flex;
@@ -127,9 +129,8 @@ const RatingStar = styled.div`
     }
   `}
 `;
-
 const DriverRight = styled.div`
-  ${({ theme }) => `
+  ${() => `
     position: relative;
     text-align: center;
     margin-right: 10px;

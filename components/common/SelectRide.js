@@ -1,7 +1,6 @@
-import styled from "@emotion/styled";
-import PageTitle from "@/components/common/PageTitle";
-import RidesTabs from "./RidesTabs";
-
+import styled from '@emotion/styled';
+import PageTitle from '@/components/common/PageTitle';
+import RidesTabs from './RidesTabs';
 export default function SelectRide({
   carsList,
   handleSelectRide,
@@ -22,13 +21,11 @@ export default function SelectRide({
       <PageTitle
         title="Book Your"
         subtitle="Rides"
-        images_icon={"../icon1.png"}
+        images_icon={'../icon1.png'}
         isAddDesignated={isAddDesignated}
       />
       {isAddDesignated && (
-        <DesignatedBar>
-          Select the car type you want to designated driver for
-        </DesignatedBar>
+        <DesignatedBar>Select the car type you want to designated driver for</DesignatedBar>
       )}
       <RidesTabs
         carsList={carsList}
@@ -48,7 +45,6 @@ export default function SelectRide({
     </>
   );
 }
-
 const DesignatedBar = styled.div`
   ${({ theme }) => `
     padding:10px;

@@ -1,19 +1,7 @@
-import styled from "@emotion/styled";
-import {
-  Dialog,
-  DialogContent,
-  IconButton,
-  List,
-  ListItem,
-  Typography,
-} from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
-
-const RidesFareDialog = ({
-  doubleClickDialogOpen,
-  handleClose,
-  ridesFareData,
-}) => {
+import styled from '@emotion/styled';
+import { Dialog, DialogContent, IconButton, List, ListItem, Typography } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
+const RidesFareDialog = ({ doubleClickDialogOpen, handleClose, ridesFareData }) => {
   return (
     <RideDialog
       open={doubleClickDialogOpen}
@@ -51,9 +39,7 @@ const RidesFareDialog = ({
     </RideDialog>
   );
 };
-
 export default RidesFareDialog;
-
 const RideDialog = styled(Dialog)`
   ${({ theme }) => `
     &.MuiDialog-root {
@@ -87,7 +73,6 @@ const RideDialog = styled(Dialog)`
     }
   `}
 `;
-
 const PriceBlock = styled.div`
   ${({ theme }) => `
     padding: ${theme.spacing(1, 2)};
