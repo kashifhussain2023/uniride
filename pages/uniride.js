@@ -5,7 +5,7 @@ import RiderInfo from '@/components/common/RiderInfo';
 import SpinnerLoader from '@/components/common/SpinnerLoader';
 import LocationValueModel from '@/components/common/model/LocationValueModel';
 import InnerContent from '@/components/presentation/InnerContent';
-import socket, {
+import {
   socketEvents,
   socketHelpers,
   socketService,
@@ -13,20 +13,43 @@ import socket, {
 import ThemeProvider from '@/theme/ThemeProvider';
 import { api } from '@/utils/api/register';
 import styled from '@emotion/styled';
-import { signOut, getSession, useSession } from 'next-auth/react';
+import { signOut, useSession } from 'next-auth/react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import { useCarContext } from './context/CarListContext';
 import MessageModel from '@/components/common/model/MessageModel';
-import { parse, format } from 'date-fns';
-import { ConstructionOutlined } from '@mui/icons-material';
+import { format } from 'date-fns';
 import rideManagerService from '@/components/presentation/RideManagerService';
 
-export default function Dashboard({ userAuth }) {
+export default function Dashboard() {
   const router = useRouter();
   const { type, lat, lng, address } = router.query;
+  const { data: session, status } = useSession();
+  const [userAuth, setUserAuth] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Check authentication status
+  useEffect(() => {
+    const checkAuth = async () => {
+      if (status === 'loading') return;
+
+      if (status === 'unauthenticated') {
+        router.push('/login');
+        return;
+      }
+
+      if (session?.user) {
+        setUserAuth(session.user);
+      }
+
+      setIsLoading(false);
+    };
+
+    checkAuth();
+  }, [session, status, router]);
+
   let dLocation = '';
   let pLocation = '';
   if (type === 'drop' && lat && lng && address) {
@@ -159,7 +182,6 @@ export default function Dashboard({ userAuth }) {
       dropPickLocationType('drop');
     }
   };
-
   const dropPickLocationType = (type) => {
     setLocationType(type);
     setOpenValueModel(true);
@@ -171,6 +193,12 @@ export default function Dashboard({ userAuth }) {
     setGenderModelOpen(close);
   };
   const proceedGenderModel = async (gender) => {
+    if (!userAuth) {
+      toast.error('Please log in to continue');
+      router.push('/login');
+      return;
+    }
+
     if (selectedDate !== null && selectedTime !== null) {
       try {
         setLoading(true);
@@ -492,143 +520,6 @@ export default function Dashboard({ userAuth }) {
       setCarsList(response.data);
       setCarStatus(true);
     }
-
-    //   const carsList = [
-    //     {
-    //         "is_corporate": "0",
-    //         "id": "5",
-    //         "name": "Sedan",
-    //         "no_of_seats": "4",
-    //         "map_car_image": "https://www.unirideus.com/staging/uploads/managers/images/1498112898.png",
-    //         "list_car_image": "https://www.unirideus.com/staging/uploads/managers/images/1568266092.png",
-    //         "base_fare": "20.00",
-    //         "allow_basefare": "1",
-    //         "cancelation_fee": "30.00",
-    //         "per_mile_fare": "10.00",
-    //         "per_minute_fare": "10.00",
-    //         "minimum_fare": "35.00",
-    //         "default_car": false,
-    //         "avg_time": "no cars",
-    //         "drivers": []
-    //     },
-    //     {
-    //         "is_corporate": "0",
-    //         "id": "6",
-    //         "name": "SUV",
-    //         "no_of_seats": "6",
-    //         "map_car_image": "https://www.unirideus.com/staging/uploads/managers/images/1568195848.png",
-    //         "list_car_image": "https://www.unirideus.com/staging/uploads/managers/images/1568266034.png",
-    //         "base_fare": "25.00",
-    //         "allow_basefare": "1",
-    //         "cancelation_fee": "30.00",
-    //         "per_mile_fare": "8.00",
-    //         "per_minute_fare": "1.50",
-    //         "minimum_fare": "40.00",
-    //         "default_car": true,
-    //         "avg_time": "no cars",
-    //         "drivers": []
-    //     },
-    //     {
-    //         "is_corporate": "0",
-    //         "id": "3",
-    //         "name": "Lux",
-    //         "no_of_seats": "4",
-    //         "map_car_image": "https://www.unirideus.com/staging/uploads/managers/images/1498112920.png",
-    //         "list_car_image": "https://www.unirideus.com/staging/uploads/managers/images/1568266147.png",
-    //         "base_fare": "25.00",
-    //         "allow_basefare": "1",
-    //         "cancelation_fee": "30.00",
-    //         "per_mile_fare": "25.00",
-    //         "per_minute_fare": "25.00",
-    //         "minimum_fare": "50.00",
-    //         "default_car": false,
-    //         "avg_time": "no cars",
-    //         "drivers": []
-    //     },
-    //     {
-    //         "is_corporate": "0",
-    //         "id": "2",
-    //         "name": "Mini Van",
-    //         "no_of_seats": "8",
-    //         "map_car_image": "https://www.unirideus.com/staging/uploads/managers/images/1498112909.png",
-    //         "list_car_image": "https://www.unirideus.com/staging/uploads/managers/images/1568266130.png",
-    //         "base_fare": "20.00",
-    //         "allow_basefare": "1",
-    //         "cancelation_fee": "30.00",
-    //         "per_mile_fare": "6.00",
-    //         "per_minute_fare": "6.00",
-    //         "minimum_fare": "10.00",
-    //         "default_car": false,
-    //         "avg_time": "no cars",
-    //         "drivers": []
-    //     }
-    // ]
-
-    // const defaultCars = carsList.filter((car) => {
-    //   return (
-    //     car.default_car === true &&
-    //     car.is_corporate === (customerRideType === "regular" ? "0" : "1")
-    //   );
-    // });
-
-    // setCarsList(carsList);
-    // setCarStatus(true);
-    // if (defaultCars.length > 0) {
-    //   setCarTypeId(defaultCars[0].id);
-    //   setAvgTime(defaultCars[0].avg_time);
-    //   setAvailableDriver(defaultCars[0].drivers);
-    // } else {
-    //   setCarTypeId(null);
-    //   setAvailableDriver([]);
-    // }
-    // setLoading(false);
-
-    // const session = await getSession();
-
-    // const formData = new FormData();
-    // formData.append("os", 1);
-    // formData.append("lat", location.lat);
-    // formData.append("lng", location.lng);
-    // formData.append("ride_type", customerRideType);
-    // formData.append("customer_id", userAuth.customer_id);
-    // formData.append("check_city", true);
-    // setLoading(true);
-    // const response = await api({
-    //   url: "/common/get_cars",
-    //   method: "POST",
-    //   data: formData,
-    // });
-
-    // if (response.status === true) {
-    //   setCarStatus(true);
-    //   setCarsList(response.data.cars);
-
-    //   // const defaultCars = response.data.cars?.filter(
-    //   //   (car) => car.default_car === true && car.is_corporate === "0"
-    //   // );
-    //   const defaultCars = response.data.cars?.filter((car) => {
-    //     return (
-    //       car.default_car === true &&
-    //       car.is_corporate === (customerRideType === "regular" ? "0" : "1")
-    //     );
-    //   });
-
-    //   if (defaultCars.length > 0) {
-    //     setCarTypeId(defaultCars[0].id);
-    //     setAvgTime(defaultCars[0].avg_time);
-    //     setAvailableDriver(defaultCars[0].drivers);
-    //   } else {
-    //     setCarTypeId(null);
-    //     setAvailableDriver([]);
-    //   }
-    //   setLoading(false);
-    // } else if (response.message == "Invalid token code") {
-    //   setLoading(false);
-    //   // await signOut({ redirect: false });
-    // } else {
-    //   setLoading(false);
-    //   setCarStatus(false);
-    // }
   };
   const getUserCurrentLoacation = () => {
     if (navigator.geolocation) {
@@ -669,6 +560,9 @@ export default function Dashboard({ userAuth }) {
     }
   };
   useEffect(() => {
+    // Only initialize socket and fetch data if userAuth is available
+    if (!userAuth) return;
+
     // Set the ride type to "regular" for uniride.js
     rideManagerService.setCustomerRideType('regular');
 
@@ -682,38 +576,48 @@ export default function Dashboard({ userAuth }) {
     const cleanup = rideManagerService.setupSocketEventListeners({
       setComfirmBooking,
       setSelectRide,
+      setInRRoute,
       setIsBookingInProgress,
       setBookingRequestId,
       setAcceptDriverDetail,
       setDriverId,
       setRideStatus,
-      setShowReview,
-      setEndRideData,
     });
+
+    // Add listener for car locations
+    const carLocationsHandler = (data) => {
+      console.log('Received car locations:', data);
+      if (data && Array.isArray(data)) {
+        setAvailableDriver(data);
+      }
+    };
+
+    const unsubscribeCarLocations =
+      socketHelpers.onCarLocations(carLocationsHandler);
 
     // Get current ride status
-    rideManagerService.getCurrentRideStatus(userAuth, {
-      setLoading,
-      setShowReview,
-      setSelectRide,
-      setComfirmBooking,
-      setInRRoute,
-      setCurrentLocation,
-      setDriverLocation,
-      setDropLocation,
-      setAcceptDriverDetail,
-      setRideStatus,
-      setDriverId,
-    });
+    // rideManagerService.getCurrentRideStatus(userAuth, {
+    //   setLoading,
+    //   setShowReview,
+    //   setSelectRide,
+    //   setComfirmBooking,
+    //   setInRRoute,
+    //   setCurrentLocation,
+    //   setDriverLocation,
+    //   setDropLocation,
+    //   setAcceptDriverDetail,
+    //   setRideStatus,
+    //   setDriverId,
+    // });
 
     // Get schedule ride detail
-    rideManagerService.getScheduleRideDetail(userAuth, {
-      setLoading,
-      setSaveDateTime,
-      setSelectedDate,
-      setSelectedTime,
-      setScheduleRideStatus,
-    });
+    // rideManagerService.getScheduleRideDetail(userAuth, {
+    //   setLoading,
+    //   setSaveDateTime,
+    //   setSelectedDate,
+    //   setSelectedTime,
+    //   setScheduleRideStatus,
+    // });
 
     // Get user current location
     rideManagerService.getUserCurrentLocation({
@@ -731,6 +635,7 @@ export default function Dashboard({ userAuth }) {
     // Clean up socket event listeners on unmount
     return () => {
       cleanup();
+      unsubscribeCarLocations();
     };
   }, [userAuth]);
 
@@ -749,10 +654,14 @@ export default function Dashboard({ userAuth }) {
     getUserCurrentLoacation();
   }, [customerRideType]);
 
-  // Add a function to cancel an ongoing booking request
-
   // Update the requestRide function
   const requestRide = async () => {
+    if (!userAuth) {
+      toast.error('Please log in to continue');
+      router.push('/login');
+      return;
+    }
+
     if (isBookingInProgress) {
       toast.info('A booking request is already in progress. Please wait...');
       return;
@@ -786,6 +695,12 @@ export default function Dashboard({ userAuth }) {
 
   // Update the scheduleRide function
   const scheduleRide = async () => {
+    if (!userAuth) {
+      toast.error('Please log in to continue');
+      router.push('/login');
+      return;
+    }
+
     try {
       const rideData = {
         pickup_lat: currentLocation.lat,
@@ -813,6 +728,12 @@ export default function Dashboard({ userAuth }) {
 
   // Update the cancelRide function
   const cancelRide = async () => {
+    if (!userAuth) {
+      toast.error('Please log in to continue');
+      router.push('/login');
+      return;
+    }
+
     try {
       const rideData = {
         request_id: bookingRequestId,
@@ -832,6 +753,12 @@ export default function Dashboard({ userAuth }) {
 
   // Update the endRunningRide function
   const endRunningRide = async () => {
+    if (!userAuth) {
+      toast.error('Please log in to continue');
+      router.push('/login');
+      return;
+    }
+
     try {
       const rideData = {
         request_id: bookingRequestId,
@@ -847,7 +774,7 @@ export default function Dashboard({ userAuth }) {
         setLoading,
         setSelectRide,
         setComfirmBooking,
-        setInRRoute,
+        setInRoute,
         setShowReview,
       });
     } catch (error) {
@@ -860,9 +787,15 @@ export default function Dashboard({ userAuth }) {
 
   // Update the applyCoupon function
   const applyCoupon = async () => {
+    if (!userAuth) {
+      toast.error('Please log in to continue');
+      router.push('/login');
+      return;
+    }
+
     await rideManagerService.applyCoupon(promoCodeValue, userAuth);
   };
-
+  console.log('availableDriver', availableDriver);
   return (
     <ThemeProvider>
       <Head>
@@ -871,7 +804,7 @@ export default function Dashboard({ userAuth }) {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <SpinnerLoader loading={loading} />
+      <SpinnerLoader loading={loading || isLoading} />
       <MessageModel
         open={scheduleMessage}
         close={closeScheduleMessage}
@@ -879,7 +812,11 @@ export default function Dashboard({ userAuth }) {
         message={scheduleMsg}
       />
       <Layout>
-        {showReview === false ? (
+        {isLoading ? (
+          <div>Loading...</div>
+        ) : !userAuth ? (
+          <div>Please log in to continue</div>
+        ) : showReview === false ? (
           <InnerContent>
             <PannelSection>
               <RiderInfo
@@ -961,93 +898,7 @@ export default function Dashboard({ userAuth }) {
     </ThemeProvider>
   );
 }
-export async function getServerSideProps(context) {
-  try {
-    const session = await getSession(context);
-    console.log('getServerSideProps session', session);
-    if (!session || !session.user) {
-      return {
-        redirect: {
-          destination: '/login',
-          permanent: false,
-        },
-      };
-    }
 
-    // Check if user data exists
-    if (!session.user.data) {
-      console.error('No user data in session:', session.user);
-      return {
-        redirect: {
-          destination: '/login',
-          permanent: false,
-        },
-      };
-    }
-
-    // Check profile status - convert to string for comparison
-    //const profileStatus = String(session.user.data.profile_status);
-
-    // if (profileStatus !== "3") {
-    //   // If profile status is 1, redirect to add-card
-    //   if (profileStatus === "1") {
-    //     return {
-    //       redirect: {
-    //         destination: "/add-card",
-    //         permanent: false,
-    //       },
-    //     };
-    //   }
-    //   // If profile status is 2 or anything else, redirect to verification
-    //   if (profileStatus === "2") {
-    //     return {
-    //       redirect: {
-    //         destination: "/verification",
-    //         permanent: false,
-    //       },
-    //     };
-    //   }
-    //   // For any other status, redirect to login
-    //   return {
-    //     redirect: {
-    //       destination: "/login",
-    //       permanent: false,
-    //     },
-    //   };
-    // }
-
-    // Ensure all required user data is present
-    if (!session.user.data.customer_id || !session.user.data.token_code) {
-      console.error('Missing required user data in session:', session.user);
-      return {
-        redirect: {
-          destination: '/login',
-          permanent: false,
-        },
-      };
-    }
-    return {
-      props: {
-        userAuth: {
-          customer_id: session.user.data.customer_id,
-          email: session.user.data.email || '',
-          mobile_number: session.user.data.mobile_number || '',
-          name: session.user.data.name || '',
-          profile_status: session.user.data.profile_status || '',
-          token_code: session.user.data.token_code,
-        },
-      },
-    };
-  } catch (error) {
-    console.error('Error in getServerSideProps:', error);
-    return {
-      redirect: {
-        destination: '/login',
-        permanent: false,
-      },
-    };
-  }
-}
 const PannelSection = styled.div`
   ${({ theme }) => `
     display: flex;

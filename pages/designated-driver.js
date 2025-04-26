@@ -16,17 +16,40 @@ import ThemeProvider from '@/theme/ThemeProvider';
 import { api } from '@/utils/api/register';
 import styled from '@emotion/styled';
 import { format } from 'date-fns';
-import { getSession, signOut } from 'next-auth/react';
+import { signOut, useSession } from 'next-auth/react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import { useCarContext } from './context/CarListContext';
 
-export default function Dashboard({ userAuth }) {
+export default function Dashboard() {
   const router = useRouter();
   const { type, lat, lng, address } = router.query;
   const [location, setLocation] = useState(null);
+  const { data: session, status } = useSession();
+  const [userAuth, setUserAuth] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Check authentication status
+  useEffect(() => {
+    const checkAuth = async () => {
+      if (status === 'loading') return;
+
+      if (status === 'unauthenticated') {
+        router.push('/login');
+        return;
+      }
+
+      if (session?.user) {
+        setUserAuth(session.user);
+      }
+
+      setIsLoading(false);
+    };
+
+    checkAuth();
+  }, [session, status, router]);
 
   useEffect(() => {
     if (type && lat && lng && address) {
@@ -40,7 +63,7 @@ export default function Dashboard({ userAuth }) {
 
   const [loading, setLoading] = useState(false);
   const [_errors, setErrors] = useState('');
-  const { setCarsList } = useCarContext();
+  const { carsList, setCarsList } = useCarContext();
   const [currentLocation, setCurrentLocation] = useState({});
   const [dropLocation, setDropLocation] = useState(location || '');
   const [openValueModel, setOpenValueModel] = useState(false);
@@ -82,6 +105,12 @@ export default function Dashboard({ userAuth }) {
   };
 
   const handleSelectRide = async (rideType) => {
+    if (!userAuth) {
+      toast.error('Please log in to continue.');
+      router.push('/login');
+      return;
+    }
+
     if (scheduleRideStatus) {
       setScheduleMessage(true);
       return;
@@ -112,6 +141,8 @@ export default function Dashboard({ userAuth }) {
           distance: String(distance || '6.8'),
           time: String(duration || '22'),
           car_type_id: carTypeId,
+          token_code: userAuth?.token_code || '',
+          customer_id: userAuth?.customer_id || '',
         };
 
         const response = await api({
@@ -165,6 +196,12 @@ export default function Dashboard({ userAuth }) {
   };
 
   const proceedGenderModel = async (gender) => {
+    if (!userAuth) {
+      toast.error('Please log in to continue.');
+      router.push('/login');
+      return;
+    }
+
     if (selectedDate !== null && selectedTime !== null) {
       try {
         setLoading(true);
@@ -193,6 +230,7 @@ export default function Dashboard({ userAuth }) {
         formData.append('gender', gender);
         formData.append('payment_type', 1);
         formData.append('customer_id', userAuth.customer_id);
+        formData.append('token_code', userAuth.token_code);
 
         const response = await api({
           url: '/customers/new_schedule_ride_request',
@@ -328,7 +366,7 @@ export default function Dashboard({ userAuth }) {
         const driverAcceptedHandler = (response) => {
           console.log('Driver accepted:', response);
           setAcceptDriverDetail(response);
-          setDriverId(response.driver_id);
+          _setDriverId(response.driver_id);
           setRideStatus(2); // Driver is on the way
           toast.success('A driver has accepted your ride request!');
           setIsBookingInProgress(false);
@@ -395,6 +433,12 @@ export default function Dashboard({ userAuth }) {
     setInRRoute(true);
   };
   const handleRideCancelModel = async () => {
+    if (!userAuth) {
+      toast.error('Please log in to continue.');
+      router.push('/login');
+      return;
+    }
+
     setLoading(true);
     const formData = new FormData();
     formData.append('request_id', acceptDriverDetail.request_id);
@@ -405,8 +449,6 @@ export default function Dashboard({ userAuth }) {
       url: '/customers/customer_cancel',
       method: 'POST',
       data: formData,
-      method: 'POST',
-      url: '/customers/customer_cancel',
     });
     if (response.status === true) {
       setLoading(false);
@@ -422,11 +464,17 @@ export default function Dashboard({ userAuth }) {
     }
   };
   const handleCancelRunningRide = async () => {
+    if (!userAuth) {
+      toast.error('Please log in to continue.');
+      router.push('/login');
+      return;
+    }
+
     setLoading(true);
     const formData = new FormData();
     formData.append('request_id', acceptDriverDetail.request_id);
     formData.append('ride_id', acceptDriverDetail.ride_id);
-    formData.append('driver_id', driverId);
+    formData.append('driver_id', _driverId);
     formData.append('ride_status', acceptDriverDetail.ride_status);
     formData.append('ride_type', acceptDriverDetail.ride_type);
     formData.append('customer_id', userAuth.customer_id);
@@ -435,8 +483,6 @@ export default function Dashboard({ userAuth }) {
       url: '/customers/end_journey_by_customer',
       method: 'POST',
       data: formData,
-      method: 'POST',
-      url: '/customers/end_journey_by_customer',
     });
     if (response.status === true) {
       setLoading(false);
@@ -559,7 +605,7 @@ export default function Dashboard({ userAuth }) {
       setDropLocation,
       setAcceptDriverDetail,
       setRideStatus,
-      setDriverId,
+      _setDriverId,
     });
   };
 
@@ -576,49 +622,52 @@ export default function Dashboard({ userAuth }) {
     // Set the ride type to designated
     rideManagerService.setCustomerRideType('designated');
 
-    // Initialize socket connection
-    rideManagerService.initializeSocket(userAuth);
+    // Only initialize socket and fetch data if userAuth is available
+    if (userAuth) {
+      // Initialize socket connection
+      rideManagerService.initializeSocket(userAuth);
 
-    // Get user's current location
-    getUserCurrentLoacation();
+      // Get user's current location
+      getUserCurrentLoacation();
 
-    // Get current ride status
-    getCurrentRideStatus();
+      // Get current ride status
+      getCurrentRideStatus();
 
-    // Get schedule ride detail
-    getScheduleRideDetail();
+      // Get schedule ride detail
+      getScheduleRideDetail();
 
-    // Set up socket event listeners
-    const cleanup = rideManagerService.setupSocketEventListeners({
-      setComfirmBooking,
-      setSelectRide,
-      setInRRoute,
-      setIsBookingInProgress: () => {},
-      setBookingRequestId: () => {},
-      setAcceptDriverDetail,
-      setDriverId,
-      setRideStatus,
-      setShowReview,
-      setEndRideData,
-    });
+      // Set up socket event listeners
+      const cleanup = rideManagerService.setupSocketEventListeners({
+        setComfirmBooking,
+        setSelectRide,
+        setInRRoute,
+        setIsBookingInProgress: () => {},
+        setBookingRequestId: () => {},
+        setAcceptDriverDetail,
+        _setDriverId,
+        setRideStatus,
+        setShowReview,
+        _setEndRideData,
+      });
 
-    // Request driver locations when component mounts and when currentLocation or carTypeId changes
-    if (currentLocation && carTypeId) {
-      rideManagerService.requestDriverLocations(currentLocation, carTypeId);
+      // Request driver locations when component mounts and when currentLocation or carTypeId changes
+      if (currentLocation && carTypeId) {
+        rideManagerService.requestDriverLocations(currentLocation, carTypeId);
+      }
+
+      // Clean up socket event listeners when component unmounts
+      return () => {
+        cleanup();
+      };
     }
-
-    // Clean up socket event listeners when component unmounts
-    return () => {
-      cleanup();
-    };
-  }, []); // Empty dependency array to run only once on mount
+  }, [userAuth]); // Add userAuth as a dependency
 
   // Add a separate effect to handle location and car type changes
   useEffect(() => {
-    if (currentLocation && carTypeId) {
+    if (userAuth && currentLocation && carTypeId) {
       rideManagerService.requestDriverLocations(currentLocation, carTypeId);
     }
-  }, [currentLocation, carTypeId]);
+  }, [currentLocation, carTypeId, userAuth]);
 
   return (
     <ThemeProvider>
@@ -628,7 +677,7 @@ export default function Dashboard({ userAuth }) {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <SpinnerLoader loading={loading} />
+      <SpinnerLoader loading={loading || isLoading} />
       <MessageModel
         open={scheduleMessage}
         close={closeScheduleMessage}
@@ -637,114 +686,93 @@ export default function Dashboard({ userAuth }) {
       />
 
       <Layout>
-        {showReview === false ? (
-          <InnerContent>
-            <PannelSection>
-              <RiderInfo
-                carsList={carsList}
-                handleSelectRide={handleSelectRide}
-                handleComfirmBooking={handleComfirmBooking}
-                proceedGenderModel={proceedGenderModel}
-                handleGenderClose={handleGenderClose}
-                handleInRoute={handleInRoute}
-                selectRide={selectRide}
-                comfirmBooking={comfirmBooking}
-                comfirmBookingData={comfirmBookingData}
-                inRoute={inRoute}
-                genderModelOpen={genderModelOpen}
-                handleCancelModelInfo={handleRideCancelModel}
-                acceptDriverDetail={acceptDriverDetail}
-                applyCoupon={applyCoupon}
-                userAuth={userAuth}
-                rideStatus={rideStatus}
-                handleCancelRunningRide={handleCancelRunningRide}
-                handleCarTypeId={handleCarTypeId}
-                isAddDesignated={true}
-                saveDateTime={saveDateTime}
-                setSaveDateTime={setSaveDateTime}
-                selectedDate={selectedDate}
-                setSelectedDate={setSelectedDate}
-                selectedTime={selectedTime}
-                setSelectedTime={setSelectedTime}
-                scheduleRideStatus={scheduleRideStatus}
-                carStatus={carStatus}
-                setAvgTime={setAvgTime}
-                avgTime={avgTime}
-                setAvailableDriver={setAvailableDriver}
-                setPromotionId={setPromotionId}
-                setCouponCode={setCouponCode}
-                setCouponActive={setCouponActive}
-                distance={distance}
-                duration={duration}
-                currentLocation={currentLocation}
-              />
-              <LocationValueModel
-                open={openValueModel}
-                handleCloseModel={closeValueModel}
-                actionFavorite={handleFavoriteModelValue}
-                locationType={locationType}
-                dropPickLocation={getDropPickLocation}
-                currentLocation={currentLocation}
-                dropLocation={dropLocation}
-              />
-              <RightPannel>
-                <LocationPickerMap
-                  currentLocation={currentLocation}
-                  dropCustomerLocation={dropLocation}
-                  dropPickLocationType={dropPickLocationType}
-                  centerMapLocation={centerMapLocation}
-                  mapLocationLabel={mapLocationLabel}
-                  driverLocation={driverLocation}
-                  rideStatus={rideStatus}
-                  locationType={locationType}
-                  getDropPickLocation={getDropPickLocation}
+        {isLoading ? (
+          <div>Loading...</div>
+        ) : userAuth ? (
+          showReview === false ? (
+            <InnerContent>
+              <PannelSection>
+                <RiderInfo
+                  carsList={carsList}
+                  handleSelectRide={handleSelectRide}
+                  handleComfirmBooking={handleComfirmBooking}
+                  proceedGenderModel={proceedGenderModel}
+                  handleGenderClose={handleGenderClose}
+                  handleInRoute={handleInRoute}
+                  selectRide={selectRide}
                   comfirmBooking={comfirmBooking}
                   comfirmBookingData={comfirmBookingData}
-                  selectRide={selectRide}
-                  availableDriver={availableDriver}
+                  inRoute={inRoute}
+                  genderModelOpen={genderModelOpen}
+                  handleCancelModelInfo={handleRideCancelModel}
+                  acceptDriverDetail={acceptDriverDetail}
+                  applyCoupon={applyCoupon}
+                  userAuth={userAuth}
+                  rideStatus={rideStatus}
+                  handleCancelRunningRide={handleCancelRunningRide}
+                  handleCarTypeId={handleCarTypeId}
+                  isAddDesignated={true}
+                  saveDateTime={saveDateTime}
+                  setSaveDateTime={setSaveDateTime}
+                  selectedDate={selectedDate}
+                  setSelectedDate={setSelectedDate}
+                  selectedTime={selectedTime}
+                  setSelectedTime={setSelectedTime}
+                  scheduleRideStatus={scheduleRideStatus}
+                  carStatus={carStatus}
+                  setAvgTime={setAvgTime}
+                  avgTime={avgTime}
+                  setAvailableDriver={setAvailableDriver}
+                  setPromotionId={setPromotionId}
+                  setCouponCode={setCouponCode}
+                  setCouponActive={setCouponActive}
+                  distance={distance}
+                  duration={duration}
+                  currentLocation={currentLocation}
                 />
-              </RightPannel>
-            </PannelSection>
-          </InnerContent>
+                <LocationValueModel
+                  open={openValueModel}
+                  handleCloseModel={closeValueModel}
+                  actionFavorite={handleFavoriteModelValue}
+                  locationType={locationType}
+                  dropPickLocation={getDropPickLocation}
+                  currentLocation={currentLocation}
+                  dropLocation={dropLocation}
+                />
+                <RightPannel>
+                  <LocationPickerMap
+                    currentLocation={currentLocation}
+                    dropCustomerLocation={dropLocation}
+                    dropPickLocationType={dropPickLocationType}
+                    centerMapLocation={centerMapLocation}
+                    mapLocationLabel={mapLocationLabel}
+                    driverLocation={driverLocation}
+                    rideStatus={rideStatus}
+                    locationType={locationType}
+                    getDropPickLocation={getDropPickLocation}
+                    comfirmBooking={comfirmBooking}
+                    comfirmBookingData={comfirmBookingData}
+                    selectRide={selectRide}
+                    availableDriver={availableDriver}
+                  />
+                </RightPannel>
+              </PannelSection>
+            </InnerContent>
+          ) : (
+            <Review
+              endRideData={_endRideData}
+              userAuth={userAuth}
+              acceptDriverDetail={acceptDriverDetail}
+            />
+          )
         ) : (
-          <Review
-            endRideData={_endRideData}
-            userAuth={userAuth}
-            acceptDriverDetail={acceptDriverDetail}
-          />
+          <div>Please log in to access this page.</div>
         )}
       </Layout>
     </ThemeProvider>
   );
 }
-export async function getServerSideProps(context) {
-  try {
-    const session = await getSession(context);
 
-    if (!session) {
-      return {
-        redirect: {
-          destination: '/login',
-          permanent: false,
-        },
-      };
-    }
-
-    return {
-      props: {
-        userAuth: session.user || null,
-      },
-    };
-  } catch (error) {
-    console.error('Error in getServerSideProps:', error);
-    return {
-      redirect: {
-        destination: '/login',
-        permanent: false,
-      },
-    };
-  }
-}
 const PannelSection = styled.div`
   ${({ theme }) => `
     display: flex;

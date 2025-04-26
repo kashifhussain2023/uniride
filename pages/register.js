@@ -51,7 +51,7 @@ export default function Login() {
       if (target.files.length > 0) {
         const imageUrl = URL.createObjectURL(file);
         document.getElementById('preview').src = imageUrl;
-        setInputs(inputs => ({
+        setInputs((inputs) => ({
           ...inputs,
           [target.name]: file,
         }));
@@ -63,7 +63,7 @@ export default function Login() {
       } else {
         // No file selected, set imageUrl to null
         document.getElementById('preview').src = '../avatar-photo.png';
-        setInputs(inputs => ({
+        setInputs((inputs) => ({
           ...inputs,
           [target.name]: null,
         }));
@@ -71,7 +71,7 @@ export default function Login() {
       }
     } else {
       // Handle other input types
-      setInputs(inputs => ({
+      setInputs((inputs) => ({
         ...inputs,
         [target.name]: target.value,
       }));
@@ -96,10 +96,10 @@ export default function Login() {
       });
     }
   };
-  const handleCountryCode = value => {
+  const handleCountryCode = (value) => {
     setCountryCode('+' + value);
   };
-  const handleTermsChange = event => {
+  const handleTermsChange = (event) => {
     setTermsCondition(event.target.checked);
     if (removeErrors) {
       const validationErrors = validatorInstance.validateRegisterCustomer({
@@ -109,7 +109,7 @@ export default function Login() {
       setErrors(validationErrors);
     }
   };
-  const handleSubmit = async e => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const inputForValidation = {
       cpassword: inputs.cpassword,
@@ -120,7 +120,8 @@ export default function Login() {
       password: inputs.password,
       terms_condition: termsCondition,
     };
-    const validationErrors = validatorInstance.validateRegisterCustomer(inputForValidation);
+    const validationErrors =
+      validatorInstance.validateRegisterCustomer(inputForValidation);
     const noErrors = Object.keys(validationErrors).length === 0;
     setRemoveErrors(true);
     setErrors(validationErrors);
@@ -130,7 +131,7 @@ export default function Login() {
     formData.append('version', 1);
     formData.append(
       'device_id',
-      '8091fd16cfaf9978ba777dbdbb7e92c7684da353d9d7f42b6aad6e5f17947829'
+      '8091fd16cfaf9978ba777dbdbb7e92c7684da353d9d7f42b6aad6e5f17947829',
     );
     formData.append('os', 2);
     formData.append('phone_code', countrycode);
@@ -146,7 +147,8 @@ export default function Login() {
     formData.append('profile_picture', base64Image);
     const requestBody = {
       confirm_password: inputs.cpassword,
-      device_id: '8091fd16cfaf9978ba777dbdbb7e92c7684da353d9d7f42b6aad6e5f17947829',
+      device_id:
+        '8091fd16cfaf9978ba777dbdbb7e92c7684da353d9d7f42b6aad6e5f17947829',
       email: inputs.email,
       first_name: inputs.first_name,
       last_name: inputs.last_name,
@@ -186,10 +188,10 @@ export default function Login() {
               maxAge: 5 * 60,
               // 5 minutes
               path: '/',
-            }
+            },
           );
           toast.success(
-            'OTP has been sent to your registered mobile number. Please verify your account.'
+            'OTP has been sent to your registered mobile number. Please verify your account.',
           );
           router.push('/verification');
         }
@@ -207,10 +209,10 @@ export default function Login() {
             }),
             {
               path: '/',
-            }
+            },
           );
           toast.success('Please add your card detail.');
-          router.push('/add-card');
+          router.push('/cards/add');
         } else {
           // If both OTP verified and profile complete, redirect to login
           toast.success('Registration successful. Please login to continue.');
@@ -276,7 +278,9 @@ export default function Login() {
                       onChange={handleInputChange}
                       helperText={errors && errors.first_name}
                     />
-                    <span className="text-danger">{errors && errors.first_name}</span>
+                    <span className="text-danger">
+                      {errors && errors.first_name}
+                    </span>
                   </Grid>
                   <Grid item md={6} sm={12} xs={12}>
                     <label>Last Name</label>
@@ -289,7 +293,9 @@ export default function Login() {
                       onChange={handleInputChange}
                       helperText={errors && errors.last_name}
                     />
-                    <span className="text-danger">{errors && errors.last_name}</span>
+                    <span className="text-danger">
+                      {errors && errors.last_name}
+                    </span>
                   </Grid>
                   <Grid item md={6} sm={12} xs={12}>
                     <label>Email</label>
@@ -303,12 +309,17 @@ export default function Login() {
                       helperText={errors && errors.email}
                       autoComplete="email"
                     />
-                    <span className="text-danger">{errors && errors.email}</span>
+                    <span className="text-danger">
+                      {errors && errors.email}
+                    </span>
                   </Grid>
                   <Grid item md={6} sm={12} xs={12}>
                     <label>Mobile Number</label>
                     <CountryMobile>
-                      <CountrySelect onCountryCode={handleCountryCode} countrycode={countrycode} />
+                      <CountrySelect
+                        onCountryCode={handleCountryCode}
+                        countrycode={countrycode}
+                      />
                       <CustomFormControl
                         fullWidth
                         type="text"
@@ -319,7 +330,9 @@ export default function Login() {
                         autoComplete="off"
                       />
                     </CountryMobile>
-                    <span className="text-danger">{errors && errors.mobile}</span>
+                    <span className="text-danger">
+                      {errors && errors.mobile}
+                    </span>
                   </Grid>
 
                   <Grid item md={6} sm={12} xs={12}>
@@ -332,7 +345,9 @@ export default function Login() {
                       value={inputs.password || ''}
                       onChange={handleInputChange}
                     />
-                    <span className="text-danger">{errors && errors.password}</span>
+                    <span className="text-danger">
+                      {errors && errors.password}
+                    </span>
                   </Grid>
                   <Grid item md={6} sm={12} xs={12}>
                     <label>Confirm Password</label>
@@ -344,7 +359,9 @@ export default function Login() {
                       value={inputs.cpassword}
                       onChange={handleInputChange}
                     />
-                    <span className="text-danger">{errors && errors.cpassword}</span>
+                    <span className="text-danger">
+                      {errors && errors.cpassword}
+                    </span>
                   </Grid>
                   <Grid item md={12}>
                     <ByClicking>
@@ -353,7 +370,8 @@ export default function Login() {
                         name="terms_condition"
                         onChange={handleTermsChange}
                       />{' '}
-                      By clicking register, you agree to our Terms & Conditions & Privacy Policy
+                      By clicking register, you agree to our Terms & Conditions
+                      & Privacy Policy
                       {errors.terms_condition && (
                         <span className="text-danger">
                           <br />
@@ -365,7 +383,11 @@ export default function Login() {
                 </Grid>
 
                 <SignUpFt>
-                  <Button variant="contained" color="primary" onClick={handleSubmit}>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={handleSubmit}
+                  >
                     Sign Up
                   </Button>
                   <Register>

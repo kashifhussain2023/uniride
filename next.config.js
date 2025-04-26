@@ -16,11 +16,11 @@ const headers = [
 ];
 const nextConfig = {
   env: {
-    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
-    NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY,
-    NEXT_PUBLIC_NEXTAUTH_SECRET: process.env.NEXT_PUBLIC_NEXTAUTH_SECRET,
-    NEXT_PUBLIC_STRIPE_PUBLIC_KEY: process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY,
-    NEXTAUTH_URL: process.env.NEXTAUTH_URL,
+    NEXT_PUBLIC_API_URL: 'https://www.unirideus.com/api',
+    NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: 'AIzaSyAOtGKS-WQKCVSgJgqXKdmorgzVrh-2JYM',
+    NEXT_PUBLIC_NEXTAUTH_SECRET: 'vZm2zMbZ6nDsns1Eik4fAg59yayyRa8L6/5FLmsje3c=',
+    NEXT_PUBLIC_STRIPE_PUBLIC_KEY: 'pk_test_yDgZEShai3aN7mhuouM2hUPG00Tyk0KRtu',
+    NEXTAUTH_URL: 'https://localhost:3000/api/auth',
   },
   eslint: {
     // Warning: This allows production builds to successfully complete even if

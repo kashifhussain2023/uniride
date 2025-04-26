@@ -89,7 +89,7 @@ class SocketService {
     }
 
     // Socket configuration
-    const SOCKET_URL = `https://uniridesocket.24livehost.com`;
+    const SOCKET_URL = `https://localhost:5103/connect-socket`;
     debugLog('Connecting to socket URL', SOCKET_URL);
     try {
       // Create query parameters with token
@@ -105,7 +105,7 @@ class SocketService {
               authorization: `Bearer ${this.authToken}`,
             }
           : {},
-        path: '/connect-socket/socket.io',
+        path: '/socket.io',
         query: query,
         reconnection: true,
         reconnectionAttempts: this.maxReconnectAttempts,

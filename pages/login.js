@@ -39,7 +39,7 @@ export default function Login() {
   const handleClickShowPassword = () => setShowPassword(!showPassword);
   const handleMouseDownPassword = () => setShowPassword(!showPassword);
   const handleInputChange = ({ target }) => {
-    setInputs(prev => ({
+    setInputs((prev) => ({
       ...prev,
       [target.name]: target.value,
     }));
@@ -49,7 +49,7 @@ export default function Login() {
     };
     setErrors(validateCustomer(data));
   };
-  const handleCountryCode = value => {
+  const handleCountryCode = (value) => {
     setCountryCode('+' + value);
   };
   const validateInputs = () => {
@@ -63,7 +63,7 @@ export default function Login() {
     }
     return true;
   };
-  const handleLoginSuccess = async session => {
+  const handleLoginSuccess = async (session) => {
     try {
       if (!session?.user?.data) {
         throw new Error('Invalid session data');
@@ -103,11 +103,13 @@ export default function Login() {
           {
             path: '/',
             secure: true,
-          }
+          },
         );
         if (userData.default_payment_method === null) {
-          toast.success('Please add your card details to complete registration.');
-          router.push('/add-card');
+          toast.success(
+            'Please add your card details to complete registration.',
+          );
+          router.push('/cards/add');
         } else {
           router.push('/uniride');
         }
@@ -123,7 +125,7 @@ export default function Login() {
       toast.error('Error processing login response');
     }
   };
-  const handleSubmit = async e => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       if (!validateInputs()) {
@@ -169,8 +171,8 @@ export default function Login() {
                 <Welcome>Welcome to</Welcome>
                 <img src="../logo1.png" alt="logo" />
                 <Typography variant="h4">
-                  Our professionally trained drivers will make sure that the customers enjoy a safe
-                  and reliable ride.
+                  Our professionally trained drivers will make sure that the
+                  customers enjoy a safe and reliable ride.
                 </Typography>
               </LoginDesc>
               <MobilePhone>
@@ -193,7 +195,10 @@ export default function Login() {
               <Grid item md={6} sm={12} xs={12}>
                 <label>Mobile Number</label>
                 <CountryMobile>
-                  <CountrySelect onCountryCode={handleCountryCode} countrycode={countrycode} />
+                  <CountrySelect
+                    onCountryCode={handleCountryCode}
+                    countrycode={countrycode}
+                  />
                   <CustomFormControl
                     fullWidth
                     type="text"
@@ -256,12 +261,20 @@ export default function Login() {
               </FormControl>
               <KeepMe>
                 <Typography align="center">
-                  <Button type="text" onClick={() => router.push('/forgot-password')}>
+                  <Button
+                    type="text"
+                    onClick={() => router.push('/forgot-password')}
+                  >
                     <u>Forgot password</u>
                   </Button>
                 </Typography>
               </KeepMe>
-              <Button variant="contained" color="primary" fullWidth onClick={handleSubmit}>
+              <Button
+                variant="contained"
+                color="primary"
+                fullWidth
+                onClick={handleSubmit}
+              >
                 Sign In
               </Button>
               <Register>
