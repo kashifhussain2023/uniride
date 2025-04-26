@@ -149,7 +149,7 @@ class SocketService {
         this.connectionPromise = null;
       }
     });
-    this.socket.on('disconnect', reason => {
+    this.socket.on('disconnect', (reason) => {
       debugLog('Socket disconnected', reason);
       this.isConnected = false;
       if (reason === 'io server disconnect') {
@@ -158,7 +158,7 @@ class SocketService {
         this.socket.connect();
       }
     });
-    this.socket.on('connect_error', error => {
+    this.socket.on('connect_error', (error) => {
       errorLog('Socket connection error', error);
       this.isConnected = false;
       this.connectionErrors.push({
@@ -176,7 +176,7 @@ class SocketService {
       // Attempt to reconnect
       this.retryConnection();
     });
-    this.socket.on('error', error => {
+    this.socket.on('error', (error) => {
       errorLog('Socket error', error);
 
       // Handle authentication errors specifically
@@ -186,7 +186,7 @@ class SocketService {
         this.handleAuthError();
       }
     });
-    this.socket.io.on('reconnect_attempt', attemptNumber => {
+    this.socket.io.on('reconnect_attempt', (attemptNumber) => {
       debugLog(`Reconnection attempt #${attemptNumber}`);
       this.connectionAttempts = attemptNumber;
 
@@ -204,16 +204,16 @@ class SocketService {
     this.socket.io.on('reconnect_failed', () => {
       errorLog('Failed to reconnect after maximum attempts');
     });
-    this.socket.io.on('reconnect', attemptNumber => {
+    this.socket.io.on('reconnect', (attemptNumber) => {
       debugLog(`Reconnected after ${attemptNumber} attempts`);
     });
-    this.socket.io.on('reconnect_error', error => {
+    this.socket.io.on('reconnect_error', (error) => {
       errorLog('Reconnection error', error);
     });
     this.socket.io.on('ping', () => {
       debugLog('Ping sent to server');
     });
-    this.socket.io.on('pong', latency => {
+    this.socket.io.on('pong', (latency) => {
       debugLog(`Pong received from server, latency: ${latency}ms`);
     });
   }
@@ -312,7 +312,7 @@ class SocketService {
           debugLog(`Socket connected, sending queued event: ${event}`);
           this.socket.emit(event, eventData);
         })
-        .catch(error => {
+        .catch((error) => {
           errorLog(`Failed to emit event ${event}`, error);
         });
     } else {
@@ -361,7 +361,7 @@ class SocketService {
   removeAllListeners(event) {
     debugLog(`Removing all handlers for event: ${event}`);
     if (this.eventHandlers[event]) {
-      this.eventHandlers[event].forEach(handler => {
+      this.eventHandlers[event].forEach((handler) => {
         try {
           this.socket.off(event, handler);
         } catch (error) {
@@ -433,7 +433,7 @@ const socketEvents = {
 // Socket helper functions
 const socketHelpers = {
   // Cancel ride
-  cancel_ride: data => {
+  cancel_ride: (data) => {
     debugLog('Canceling ride', data);
     socketService.emit('cancel_ride', data);
     // authorization token will be added automatically by the emit method
@@ -454,38 +454,38 @@ const socketHelpers = {
     return socketService.getConnectionStatus();
   },
   // Get driver location
-  getDriverLocation: data => {
+  getDriverLocation: (data) => {
     debugLog('Getting driver location', data);
     socketService.emit(socketEvents.GET_DRIVER_LOCATION, data);
     // authorization token will be added automatically by the emit method
   },
   // Listen for car locations
-  onCarLocations: handler => {
+  onCarLocations: (handler) => {
     debugLog('Registering handler for car locations');
     return socketService.on(socketEvents.CAR_LOCATIONS, handler);
   },
   // Listen for driver accepted (for customers)
-  onDriverAccepted: handler => {
+  onDriverAccepted: (handler) => {
     debugLog('Registering handler for driver accepted');
     return socketService.on(socketEvents.DRIVER_ACCEPTED, handler);
   },
   // Listen for driver rejected (for customers)
-  onDriverRejected: handler => {
+  onDriverRejected: (handler) => {
     debugLog('Registering handler for driver rejected');
     return socketService.on(socketEvents.DRIVER_REJECTED, handler);
   },
   // Listen for new ride requests (for drivers)
-  onNewRideRequest: handler => {
+  onNewRideRequest: (handler) => {
     debugLog('Registering handler for new ride requests');
     return socketService.on(socketEvents.NEW_RIDE_REQUEST, handler);
   },
   // Listen for request timeout (for drivers)
-  onRequestTimeout: handler => {
+  onRequestTimeout: (handler) => {
     debugLog('Registering handler for request timeout');
     return socketService.on(socketEvents.REQUEST_TIMEOUT, handler);
   },
   // Request car availability
-  requestCarAvailability: data => {
+  requestCarAvailability: (data) => {
     debugLog('Requesting car availability', data);
     return new Promise((resolve, reject) => {
       let resolved = false;
@@ -496,7 +496,7 @@ const socketHelpers = {
           reject(new Error('Request timed out'));
         }
       }, 10000);
-      const handler = response => {
+      const handler = (response) => {
         debugLog('Received car availability response', response);
         if (!resolved) {
           resolved = true;
@@ -524,7 +524,7 @@ const socketHelpers = {
           reject(new Error('Request timed out'));
         }
       }, 10000);
-      const handler = response => {
+      const handler = (response) => {
         debugLog('Received ride completeness response', response);
         if (!resolved) {
           resolved = true;
@@ -551,11 +551,14 @@ const socketHelpers = {
       const timeoutId = setTimeout(() => {
         if (!resolved) {
           debugLog('Schedule ride details request timed out');
-          socketService.off(socketEvents.SCHEDULE_RIDE_DETAILS_RESPONSE, handler);
+          socketService.off(
+            socketEvents.SCHEDULE_RIDE_DETAILS_RESPONSE,
+            handler,
+          );
           reject(new Error('Request timed out'));
         }
       }, 10000);
-      const handler = response => {
+      const handler = (response) => {
         debugLog('Received schedule ride details response', response);
         if (!resolved) {
           resolved = true;
@@ -571,13 +574,13 @@ const socketHelpers = {
       });
     });
   },
-  requestSendBooking: payload => {
+  requestSendBooking: (payload) => {
     debugLog('Requesting booking', payload);
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       let resolved = false;
 
       // Set up handlers for different response events
-      const requestSentHandler = response => {
+      const requestSentHandler = (response) => {
         debugLog('Request sent successfully', response);
         if (!resolved) {
           resolved = true;
@@ -646,7 +649,7 @@ const socketHelpers = {
     });
   },
   // Save socket info
-  saveSocketInfo: data => {
+  saveSocketInfo: (data) => {
     debugLog('Saving socket info', data);
     return new Promise((resolve, reject) => {
       let resolved = false;
@@ -657,7 +660,7 @@ const socketHelpers = {
           reject(new Error('Request timed out'));
         }
       }, 10000);
-      const handler = response => {
+      const handler = (response) => {
         debugLog('Received socket saved response', response);
         if (!resolved) {
           resolved = true;

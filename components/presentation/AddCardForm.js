@@ -40,15 +40,15 @@ export default function AddCardForm() {
     // expiration_month: "",
     // expiration_year: "",
   });
-  const handleCardDetail = event => {
+  const handleCardDetail = (event) => {
     const brandName = event.brand.toUpperCase();
-    setInputs(inputs => ({
+    setInputs((inputs) => ({
       ...inputs,
       ['card_type']: brandName,
     }));
   };
   const handleInputChange = ({ target }) => {
-    setInputs(inputs => ({
+    setInputs((inputs) => ({
       ...inputs,
       [target.name]: target.value,
     }));
@@ -60,7 +60,7 @@ export default function AddCardForm() {
       });
     }
   };
-  const handleSubmit = async e => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const inputForValidation = {
       card_holder: inputs.card_holder,
@@ -78,13 +78,14 @@ export default function AddCardForm() {
         }
 
         // Create payment method with Stripe
-        const { paymentMethod, error: paymentError } = await stripe.createPaymentMethod({
-          billing_details: {
-            name: inputs.card_holder,
-          },
-          card: cardElement,
-          type: 'card',
-        });
+        const { paymentMethod, error: paymentError } =
+          await stripe.createPaymentMethod({
+            billing_details: {
+              name: inputs.card_holder,
+            },
+            card: cardElement,
+            type: 'card',
+          });
         if (paymentError) {
           console.error('Stripe payment method error:', paymentError);
           setCardError(paymentError.message);
@@ -95,7 +96,8 @@ export default function AddCardForm() {
         // Send payment method to server
         const requestBody = {
           card_cvv: '',
-          card_expire: paymentMethod.card.exp_month + '/' + paymentMethod.card.exp_year,
+          card_expire:
+            paymentMethod.card.exp_month + '/' + paymentMethod.card.exp_year,
           card_holder: inputs.card_holder,
           card_number: '000000000000' + paymentMethod.card.last4,
           card_type: paymentMethod.card.brand.toUpperCase(),
@@ -135,12 +137,15 @@ export default function AddCardForm() {
             if (profileResponse.status === true) {
               localStorage.setItem(
                 'lastAddedCard',
-                JSON.stringify(profileResponse.data.default_payment_method)
+                JSON.stringify(profileResponse.data.default_payment_method),
               );
             }
             router.push('/uniride');
           }, 3000);
-        } else if (response.status === false && response.message === 'Invalid token code') {
+        } else if (
+          response.status === false &&
+          response.message === 'Invalid token code'
+        ) {
           toast.error('Your session has expired. Please login again.');
           await signOut({
             redirect: false,
@@ -151,7 +156,9 @@ export default function AddCardForm() {
         }
       } catch (error) {
         console.error('Add card error:', error);
-        toast.error('An error occurred while adding your card. Please try again.');
+        toast.error(
+          'An error occurred while adding your card. Please try again.',
+        );
       } finally {
         setLoading(false);
       }
@@ -204,7 +211,9 @@ export default function AddCardForm() {
                     name="card_holder"
                     onChange={handleInputChange}
                   />
-                  <span className="text-danger">{errors && errors.card_holder}</span>
+                  <span className="text-danger">
+                    {errors && errors.card_holder}
+                  </span>
                 </FormControl>
 
                 <FormControl>
