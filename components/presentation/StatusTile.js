@@ -1,7 +1,8 @@
 import styled from '@emotion/styled';
 import { IconButton, Typography } from '@mui/material';
-import Image from 'next/image';
 import curveLine from '../../public/curve-line.png';
+import SafeImage from '../common/SafeImage';
+
 export default function StatusTile({ bgColor, number, statusType, icon }) {
   return (
     <Container bgColor={bgColor}>
@@ -12,10 +13,10 @@ export default function StatusTile({ bgColor, number, statusType, icon }) {
         <Typography component="h3">{statusType}</Typography>
       </Status>
       <MuiIconButton>
-        <Image src={icon} alt="Icon" priority />
+        <SafeImage src={icon} alt="Status Icon" priority />
       </MuiIconButton>
       <CurveLine>
-        <Image src={curveLine} alt="Icon" priority />
+        <SafeImage src={curveLine} alt="Curve Line" priority />
       </CurveLine>
     </Container>
   );

@@ -1,7 +1,8 @@
 import styled from '@emotion/styled';
 import { List, ListItem, Typography } from '@mui/material';
-import Image from 'next/image';
 import { useState } from 'react';
+import SafeImage from '../common/SafeImage';
+
 export default function ChartCard({ chart, title }) {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const handleClick = (event, index) => {
@@ -23,7 +24,7 @@ export default function ChartCard({ chart, title }) {
           </ListItem>
         </List>
       </Header>
-      <Image src={chart} alt="chart" priority width="auto" height="auto" />
+      <SafeImage src={chart} alt="Chart" priority width="auto" height="auto" />
     </Container>
   );
 }

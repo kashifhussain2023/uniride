@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import Image from 'next/image';
 import Head from 'next/head';
 import styled from '@emotion/styled';
 import { List, ListItem, Rating, Typography } from '@mui/material';
@@ -10,6 +9,8 @@ import ThemeProvider from '@/theme/ThemeProvider';
 import { api } from '@/utils/api/common';
 import { signOut } from 'next-auth/react';
 import { useRouter } from 'next/router';
+import SafeImage from '@/components/common/SafeImage';
+
 export default function RiderHistoryDetail() {
   const router = useRouter();
   const [value, setValue] = useState(0);
@@ -46,11 +47,12 @@ export default function RiderHistoryDetail() {
             <PageTitle title="Rider" subtitle="History Detail" images_icon={'../history.png'} />
 
             <HistoryImage>
-              <Image
+              <SafeImage
                 src={historyDetailData.path_image || '/map.png'}
                 alt="Map Image Uniride"
-                layout="fill"
-                objectFit="cover"
+                width={800}
+                height={400}
+                style={{ height: '100%', objectFit: 'cover', width: '100%' }}
               />
             </HistoryImage>
             <RiderName variant="h3">{historyDetailData.driver_name}</RiderName>

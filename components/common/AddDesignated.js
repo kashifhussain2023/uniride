@@ -1,9 +1,9 @@
 import styled from '@emotion/styled';
 import { Button, Dialog, IconButton, Typography } from '@mui/material';
 import { format } from 'date-fns';
-import Image from 'next/image';
 import { useState } from 'react';
 import { DatePickerWrapper, TimePickerWrapper } from './DatePickerWrapper';
+import SafeImage from './SafeImage';
 
 const AddDesignated = ({
   saveDateTime,
@@ -126,13 +126,7 @@ const AddDesignated = ({
       {!saveDateTime ? (
         <>
           <IconButton onClick={handleOpen}>
-            <Image
-              src="/date-time-icon.png"
-              alt="date time"
-              layout="responsive"
-              width={30}
-              height={30}
-            />
+            <SafeImage src="/date-time-icon.png" alt="Date and Time" width={30} height={30} />
           </IconButton>
         </>
       ) : (
