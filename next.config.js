@@ -36,8 +36,8 @@ const nextConfig = {
     ];
   },
   images: {
-    domains: ['https://www.unirideus.com', 'blogadmin.uberinternal.com'],
+    domains: ['https://uniride.frontend:3000', 'https://unirideus-rebranding.24livehost.com:3000'],
   },
-  reactStrictMode: true,
+  reactStrictMode: false,
 };
 module.exports = nextConfig;

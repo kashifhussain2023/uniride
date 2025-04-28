@@ -3,8 +3,9 @@ import styled from '@emotion/styled';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { IconButton, Typography } from '@mui/material';
 import Radio from '@mui/material/Radio';
-import Image from 'next/image';
 import { useState } from 'react';
+import SafeImage from './SafeImage';
+
 export default function CardsList({ cardList, onDefaultCardChange, onDeleteCard }) {
   const [openDeleteModel, setOpenDeleteModel] = useState(false);
   const [cardId, setCardId] = useState(null);
@@ -41,10 +42,11 @@ export default function CardsList({ cardList, onDefaultCardChange, onDeleteCard 
                 }}
               />
               <ImageContainer>
-                <Image
+                <SafeImage
                   src={`/${list.card_type?.toLowerCase() || 'default'}.jpg`}
                   alt={list.card_type}
-                  layout="fill"
+                  width={70}
+                  height={38}
                   priority
                 />
               </ImageContainer>

@@ -1,7 +1,8 @@
 import styled from '@emotion/styled';
 import { Box, Button, Stack, Typography } from '@mui/material';
 import { format } from 'date-fns';
-import Image from 'next/image';
+import SafeImage from './SafeImage';
+
 export default function RideDetails({ rideDetail, setRideDetailStatus, setSubTitle }) {
   const handleBackButton = () => {
     setRideDetailStatus(false);
@@ -23,7 +24,7 @@ export default function RideDetails({ rideDetail, setRideDetailStatus, setSubTit
         <Stack spacing={2}>
           <Stack direction="row" spacing={2}>
             <Box>
-              <Image src="/map.png" layout="responsive" alt="map" width={30} height={30} />
+              <SafeImage src="/map.png" alt="map" width={30} height={30} />
             </Box>
             <Box>
               <Typography

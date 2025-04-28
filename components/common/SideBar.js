@@ -1,6 +1,5 @@
 import React, { Fragment, useState } from 'react';
 import { useRouter } from 'next/router';
-import Image from 'next/image';
 import Link from 'next/link';
 import styled from '@emotion/styled';
 import {
@@ -26,6 +25,8 @@ import {
 import logo from '../../public/logo.png';
 import menuIcon from '../../public/menu-icon.png';
 import { mainMenuItems } from '@/utils/constant';
+import SafeImage from './SafeImage';
+
 export const icons = {
   DashboardOutlined,
   InventoryOutlined,
@@ -62,11 +63,11 @@ export default function SideBar() {
     <Container shrink={shrink}>
       <LogoContainer shrink={shrink}>
         <Link href="/">
-          <Image src={logo} alt="logo" priority />
+          <SafeImage src={logo} alt="logo" priority />
         </Link>
       </LogoContainer>
       <MuiIconButton onClick={handleClickOpen} shrink={shrink}>
-        {shrink ? <EastOutlined /> : <Image src={menuIcon} alt="menu button" priority />}
+        {shrink ? <EastOutlined /> : <SafeImage src={menuIcon} alt="menu button" priority />}
       </MuiIconButton>
       <List component="nav" aria-labelledby="nested-list-subheader">
         {mainMenuItems.map(({ label, path, icon, subMenu }, index) => {

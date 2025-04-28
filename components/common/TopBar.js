@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { signOut, useSession } from 'next-auth/react';
-import Image from 'next/image';
 import { useRouter } from 'next/router';
 import styled from '@emotion/styled';
 import {
@@ -19,12 +18,15 @@ import {
 } from '@mui/material';
 import { Close, ExpandMore, Logout, AccountCircle, PersonAdd, Settings } from '@mui/icons-material';
 import { menuIcons, headerIcons } from '@/utils/constant';
+import SafeImage from './SafeImage';
+
 export const icons = {
   AccountCircle,
   Logout,
   PersonAdd,
   Settings,
 };
+
 export default function TopBar({ setOpenDelete }) {
   const router = useRouter();
   const [anchorEl, setAnchorEl] = useState(null);
@@ -68,7 +70,7 @@ export default function TopBar({ setOpenDelete }) {
     >
       <SidebarTop>
         <Logo>
-          <Image src="/logo.jpg" layout="responsive" alt="logo" width={112} height={43} />
+          <SafeImage src="/logo.jpg" alt="logo" width={112} height={43} />
         </Logo>
         <DrawerBtn onClick={toggleDrawer(anchor, true)}>
           <Close />
@@ -85,7 +87,7 @@ export default function TopBar({ setOpenDelete }) {
                 onClick={() => router.push(path)}
               >
                 <ListItemIcon>
-                  <Image src={`/${icon}`} layout="responsive" alt="logo" width={30} height={30} />
+                  <SafeImage src={`/${icon}`} alt={label} width={30} height={30} />
                 </ListItemIcon>
                 {label}
               </MenuItem>
@@ -93,10 +95,9 @@ export default function TopBar({ setOpenDelete }) {
           })}
           <MenuItem key="delete" onClick={openDelete}>
             <ListItemIcon>
-              <Image
+              <SafeImage
                 src="/icon/deleteAccountIcon.png"
-                layout="responsive"
-                alt="logo"
+                alt="Delete Account"
                 width={30}
                 height={30}
               />
@@ -112,7 +113,7 @@ export default function TopBar({ setOpenDelete }) {
               return (
                 <MenuItem key={label} onClick={() => router.push(path)}>
                   <ListItemIcon>
-                    <Image src={`/${icon}`} layout="responsive" alt="logo" width={30} height={30} />
+                    <SafeImage src={`/${icon}`} alt={label} width={30} height={30} />
                   </ListItemIcon>
                   {label}
                 </MenuItem>
@@ -128,19 +129,13 @@ export default function TopBar({ setOpenDelete }) {
       <Container>
         <LeftBar>
           <Logo>
-            <Image src="/logo.jpg" layout="responsive" alt="logo" width={112} height={43} />
+            <SafeImage src="/logo.jpg" alt="logo" width={112} height={43} />
           </Logo>
           <div>
             {['left'].map(anchor => (
               <React.Fragment key={anchor}>
                 <DrawerBtn onClick={toggleDrawer(anchor, true)}>
-                  <Image
-                    src="/menu-icon.png"
-                    layout="responsive"
-                    alt="logo"
-                    width={27}
-                    height={19}
-                  />
+                  <SafeImage src="/menu-icon.png" alt="Menu" width={27} height={19} />
                 </DrawerBtn>
                 <Drawer anchor={anchor} open={state[anchor]} onClose={toggleDrawer(anchor, false)}>
                   {list(anchor)}
@@ -182,8 +177,8 @@ export default function TopBar({ setOpenDelete }) {
                   height: 40,
                   width: 40,
                 }}
-                alt="Mani Sharp"
-                src={session?.user?.customer_image || '../avatar-photo.png'}
+                alt="User Avatar"
+                src={session?.user?.customer_image || '/avatar.png'}
               />
               <Typography component="span">{session?.user?.name || ''}</Typography>
               <ExpandMore />
