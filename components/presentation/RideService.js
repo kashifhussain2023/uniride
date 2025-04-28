@@ -4,6 +4,7 @@ import { toast } from 'react-toastify';
 import { signOut } from 'next-auth/react';
 import { getSession } from 'next-auth/react';
 import { socketHelpers, socketEvents, socketService } from './Socket';
+import { parse } from 'date-fns';
 
 // Debug flag - set to true to enable detailed logging
 const DEBUG = true;
@@ -77,11 +78,11 @@ class RideService {
 
     return socketHelpers
       .saveSocketInfo(socketInfo)
-      .then((response) => {
+      .then(response => {
         debugLog('Socket info saved', response);
         return response;
       })
-      .catch((error) => {
+      .catch(error => {
         errorLog('Error saving socket info', error);
         throw error;
       });
@@ -93,17 +94,17 @@ class RideService {
 
     if (response && response.length > 0) {
       // Update available drivers with the new locations
-      setAvailableDriver((prevDrivers) => {
+      setAvailableDriver(prevDrivers => {
         // Create a map of existing drivers for quick lookup
         const driverMap = new Map();
         if (prevDrivers && prevDrivers.length > 0) {
-          prevDrivers.forEach((driver) => {
+          prevDrivers.forEach(driver => {
             driverMap.set(driver.driver_id, driver);
           });
         }
 
         // Update or add new driver locations
-        response.forEach((location) => {
+        response.forEach(location => {
           if (driverMap.has(location.driver_id)) {
             // Update existing driver
             const updatedDriver = {
@@ -126,13 +127,13 @@ class RideService {
 
   // Request driver locations
   requestDriverLocations(currentLocation, carTypeId) {
-    debugLog('Requesting driver locations', { currentLocation, carTypeId });
+    debugLog('Requesting driver locations', { carTypeId, currentLocation });
 
     if (currentLocation && carTypeId) {
       const requestData = {
+        car_type: carTypeId,
         pickup_lat: currentLocation.lat,
         pickup_lng: currentLocation.lng,
-        car_type: carTypeId,
       };
 
       socketHelpers.getDriverLocation(requestData);
@@ -152,7 +153,7 @@ class RideService {
     } = setStateFunctions;
 
     // Set up event handlers
-    const requestSentHandler = (response) => {
+    const requestSentHandler = response => {
       debugLog('Request sent successfully', response);
       setComfirmBooking(false);
       setSelectRide(false);
@@ -166,7 +167,7 @@ class RideService {
       }
     };
 
-    const scheduleRequestSentHandler = (response) => {
+    const scheduleRequestSentHandler = response => {
       debugLog('Schedule request sent successfully', response);
       setComfirmBooking(false);
       setSelectRide(false);
@@ -176,7 +177,7 @@ class RideService {
       }, 3000);
     };
 
-    const noDriverFoundHandler = (response) => {
+    const noDriverFoundHandler = response => {
       debugLog('No driver found', response);
       setComfirmBooking(true);
       setSelectRide(false);
@@ -185,49 +186,43 @@ class RideService {
       this.isBookingInProgress = false;
     };
 
-    const errorHandler = (error) => {
+    const errorHandler = error => {
       errorLog('Error in booking request', error);
       setComfirmBooking(true);
       setSelectRide(false);
-      toast.error(
-        error.message ||
-          'An error occurred while requesting a ride. Please try again.',
-      );
+      toast.error(error.message || 'An error occurred while requesting a ride. Please try again.');
       setIsBookingInProgress(false);
       this.isBookingInProgress = false;
     };
 
-    const driverAcceptedHandler = (response) => {
+    const driverAcceptedHandler = response => {
       debugLog('Driver accepted', response);
       // Handle driver accepted event
     };
 
-    const driverRejectedHandler = (response) => {
+    const driverRejectedHandler = response => {
       debugLog('Driver rejected', response);
       // Handle driver rejected event
     };
 
     // Register event handlers
-    const unsubscribeRequestSent = socketService.on(
-      socketEvents.REQUEST_SENT,
-      requestSentHandler,
-    );
+    const unsubscribeRequestSent = socketService.on(socketEvents.REQUEST_SENT, requestSentHandler);
     const unsubscribeScheduleRequestSent = socketService.on(
       socketEvents.SCHEDULE_REQUEST_SENT,
-      scheduleRequestSentHandler,
+      scheduleRequestSentHandler
     );
     const unsubscribeNoDriverFound = socketService.on(
       socketEvents.NO_DRIVER_FOUND,
-      noDriverFoundHandler,
+      noDriverFoundHandler
     );
     const unsubscribeError = socketService.on(socketEvents.ERROR, errorHandler);
     const unsubscribeDriverAccepted = socketService.on(
       socketEvents.DRIVER_ACCEPTED,
-      driverAcceptedHandler,
+      driverAcceptedHandler
     );
     const unsubscribeDriverRejected = socketService.on(
       socketEvents.DRIVER_REJECTED,
-      driverRejectedHandler,
+      driverRejectedHandler
     );
 
     // Return cleanup function
@@ -272,29 +267,27 @@ class RideService {
       debugLog('Payment method ID', paymentMethodId);
 
       if (!paymentMethodId) {
-        toast.error(
-          'No payment method found. Please add a payment method first.',
-        );
+        toast.error('No payment method found. Please add a payment method first.');
         router.push('/cards/add');
         return;
       }
 
       const bookingPayload = {
-        pickup_lat: String(rideData.currentLocation.lat),
-        pickup_lng: String(rideData.currentLocation.lng),
-        pickup_name: String(rideData.currentLocation.address),
+        car_type: rideData.carTypeId,
+        city_name: rideData.currentLocation.city,
+        customer_id: rideData.userAuth.customer_id,
+        distance: rideData.distance,
         dropoff_lat: String(rideData.dropLocation.lat),
         dropoff_lng: String(rideData.dropLocation.lng),
         dropoff_name: String(rideData.dropLocation.address),
-        ride_type: rideData.rideType,
-        customer_id: rideData.userAuth.customer_id,
-        car_type: rideData.carTypeId,
         gender: rideData.gender,
-        promotion_id: rideData.promotionId,
-        promo_code: rideData.couponCode,
-        city_name: rideData.currentLocation.city,
         payment_method: paymentMethodId,
-        distance: rideData.distance,
+        pickup_lat: String(rideData.currentLocation.lat),
+        pickup_lng: String(rideData.currentLocation.lng),
+        pickup_name: String(rideData.currentLocation.address),
+        promo_code: rideData.couponCode,
+        promotion_id: rideData.promotionId,
+        ride_type: rideData.rideType,
         time: rideData.duration,
       };
 
@@ -322,24 +315,12 @@ class RideService {
       }
 
       formData.append('car_type', rideData.carTypeId);
-      formData.append(
-        'schedule_date',
-        format(new Date(rideData.selectedDate), 'yyyy-MM-dd'),
-      );
-      formData.append(
-        'schedule_time',
-        format(new Date(rideData.selectedTime), 'HH:mm:ss'),
-      );
-      formData.append(
-        'destination_Location_Name',
-        rideData.dropLocation.address,
-      );
+      formData.append('schedule_date', format(new Date(rideData.selectedDate), 'yyyy-MM-dd'));
+      formData.append('schedule_time', format(new Date(rideData.selectedTime), 'HH:mm:ss'));
+      formData.append('destination_Location_Name', rideData.dropLocation.address);
       formData.append('destination_point_lat', rideData.dropLocation.lat);
       formData.append('destination_point_long', rideData.dropLocation.lng);
-      formData.append(
-        'picking_Location_Name',
-        rideData.currentLocation.address,
-      );
+      formData.append('picking_Location_Name', rideData.currentLocation.address);
       formData.append('picking_point_lat', rideData.currentLocation.lat);
       formData.append('picking_point_long', rideData.currentLocation.lng);
       formData.append('ride_type', rideData.rideType);
@@ -348,9 +329,9 @@ class RideService {
       formData.append('customer_id', rideData.userAuth.customer_id);
 
       const response = await api({
-        url: '/customers/new_schedule_ride_request',
-        method: 'POST',
         data: formData,
+        method: 'POST',
+        url: '/customers/new_schedule_ride_request',
       });
 
       if (response.status === true) {
@@ -358,12 +339,9 @@ class RideService {
         setTimeout(() => {
           window.location.reload();
         }, 3000);
-      } else if (
-        response.status === 'FALSE' &&
-        response.message === 'Invalid token code'
-      ) {
+      } else if (response.status === 'FALSE' && response.message === 'Invalid token code') {
         toast.error(
-          'Your account has been logged in on another device. Please login again to continue.',
+          'Your account has been logged in on another device. Please login again to continue.'
         );
         await signOut({ redirect: false });
         router.push('/login');
@@ -374,9 +352,7 @@ class RideService {
       return response;
     } catch (error) {
       errorLog('Error scheduling ride', error);
-      toast.error(
-        'An error occurred while scheduling your ride. Please try again.',
-      );
+      toast.error('An error occurred while scheduling your ride. Please try again.');
       throw error;
     }
   }
@@ -387,11 +363,11 @@ class RideService {
 
     if (this.bookingRequestId) {
       const params = {
-        customer_id: userAuth.customer_id,
-        user_type: 'customer',
-        request_id: this.bookingRequestId,
         auth_token: userAuth.token_code,
+        customer_id: userAuth.customer_id,
+        request_id: this.bookingRequestId,
         token_code: userAuth.token_code,
+        user_type: 'customer',
       };
 
       socketHelpers.cancel_ride(params);
@@ -426,37 +402,31 @@ class RideService {
       formData.append('token_code', userAuth.token_code);
 
       const response = await api({
-        url: '/customers/ride_completeness',
-        method: 'POST',
         data: formData,
+        method: 'POST',
+        url: '/customers/ride_completeness',
       });
 
-      if (
-        response.status === true &&
-        response.message === 'Tip is not given for this ride'
-      ) {
+      if (response.status === true && response.message === 'Tip is not given for this ride') {
         setShowReview(true);
         setLoading(false);
-      } else if (
-        response.status === true &&
-        response.message === 'Driver is not arrived'
-      ) {
+      } else if (response.status === true && response.message === 'Driver is not arrived') {
         setSelectRide(false);
         setComfirmBooking(false);
         setInRRoute(true);
         setCurrentLocation({
+          address: response.customer_destination_point_name,
           lat: parseFloat(response.customer_destination_point_lat),
           lng: parseFloat(response.customer_destination_point_long),
-          address: response.customer_destination_point_name,
         });
         setDriverLocation({
           lat: parseFloat(response.driver_latitude),
           lng: parseFloat(response.driver_longitude),
         });
         setDropLocation({
+          address: response.destination_name,
           lat: parseFloat(response.destination_latitude),
           lng: parseFloat(response.destination_longitude),
-          address: response.destination_name,
         });
         setAcceptDriverDetail(response);
         setRideStatus(2);
@@ -470,43 +440,40 @@ class RideService {
         setComfirmBooking(false);
         setInRRoute(true);
         setCurrentLocation({
+          address: response.customer_destination_point_name,
           lat: parseFloat(response.customer_destination_point_lat),
           lng: parseFloat(response.customer_destination_point_long),
-          address: response.customer_destination_point_name,
         });
         setDriverLocation({
           lat: parseFloat(response.driver_latitude),
           lng: parseFloat(response.driver_longitude),
         });
         setDropLocation({
+          address: response.destination_name,
           lat: parseFloat(response.destination_latitude),
           lng: parseFloat(response.destination_longitude),
-          address: response.destination_name,
         });
         setAcceptDriverDetail(response);
         setRideStatus(3);
         setDriverId(response.driver_id);
         setLoading(false);
-      } else if (
-        response.status === true &&
-        response.message === 'Journey started'
-      ) {
+      } else if (response.status === true && response.message === 'Journey started') {
         setSelectRide(false);
         setComfirmBooking(false);
         setInRRoute(true);
         setCurrentLocation({
+          address: response.customer_destination_point_name,
           lat: parseFloat(response.customer_destination_point_lat),
           lng: parseFloat(response.customer_destination_point_long),
-          address: response.customer_destination_point_name,
         });
         setDriverLocation({
           lat: parseFloat(response.driver_latitude),
           lng: parseFloat(response.driver_longitude),
         });
         setDropLocation({
+          address: response.destination_name,
           lat: parseFloat(response.destination_latitude),
           lng: parseFloat(response.destination_longitude),
-          address: response.destination_name,
         });
         setAcceptDriverDetail(response);
         setRideStatus(4);
@@ -531,13 +498,8 @@ class RideService {
   async getScheduleRideDetail(userAuth, setStateFunctions) {
     debugLog('Getting schedule ride details');
 
-    const {
-      setLoading,
-      setSaveDateTime,
-      setSelectedDate,
-      setSelectedTime,
-      setScheduleRideStatus,
-    } = setStateFunctions;
+    const { setLoading, setSaveDateTime, setSelectedDate, setSelectedTime, setScheduleRideStatus } =
+      setStateFunctions;
 
     try {
       setLoading(true);
@@ -546,24 +508,16 @@ class RideService {
       formData.append('token_code', userAuth.token_code);
 
       const response = await api({
-        url: '/customers/schedule_ride_detail',
-        method: 'POST',
         data: formData,
+        method: 'POST',
+        url: '/customers/schedule_ride_detail',
       });
 
       if (response.code === 200 && response.status === true) {
         setLoading(false);
         setSaveDateTime(true);
-        setSelectedDate(
-          parse(
-            response.data[0].schedule_request_date,
-            'yyyy-MM-dd',
-            new Date(),
-          ),
-        );
-        setSelectedTime(
-          parse(response.data[0].schedule_request_time, 'HH:mm:ss', new Date()),
-        );
+        setSelectedDate(parse(response.data[0].schedule_request_date, 'yyyy-MM-dd', new Date()));
+        setSelectedTime(parse(response.data[0].schedule_request_time, 'HH:mm:ss', new Date()));
         setScheduleRideStatus(true);
       } else {
         setLoading(false);
@@ -590,9 +544,9 @@ class RideService {
       formData.append('token_code', rideData.userAuth.token_code);
 
       const response = await api({
-        url: '/customers/customer_cancel',
-        method: 'POST',
         data: formData,
+        method: 'POST',
+        url: '/customers/customer_cancel',
       });
 
       if (response.status === true) {
@@ -607,9 +561,7 @@ class RideService {
       return response;
     } catch (error) {
       errorLog('Error canceling ride', error);
-      toast.error(
-        'An error occurred while canceling your ride. Please try again.',
-      );
+      toast.error('An error occurred while canceling your ride. Please try again.');
       throw error;
     }
   }
@@ -618,13 +570,8 @@ class RideService {
   async endRunningRide(rideData, setStateFunctions) {
     debugLog('Ending running ride', rideData);
 
-    const {
-      setSelectRide,
-      setComfirmBooking,
-      setInRRoute,
-      setShowReview,
-      setLoading,
-    } = setStateFunctions;
+    const { setSelectRide, setComfirmBooking, setInRRoute, setShowReview, setLoading } =
+      setStateFunctions;
 
     try {
       setLoading(true);
@@ -638,9 +585,9 @@ class RideService {
       formData.append('token_code', rideData.userAuth.token_code);
 
       const response = await api({
-        url: '/customers/end_journey_by_customer',
-        method: 'POST',
         data: formData,
+        method: 'POST',
+        url: '/customers/end_journey_by_customer',
       });
 
       if (response.status === true) {
@@ -657,9 +604,7 @@ class RideService {
       return response;
     } catch (error) {
       errorLog('Error ending running ride', error);
-      toast.error(
-        'An error occurred while ending your journey. Please try again.',
-      );
+      toast.error('An error occurred while ending your journey. Please try again.');
       setLoading(false);
       throw error;
     }
@@ -680,17 +625,14 @@ class RideService {
       formData.append('customer_id', userAuth.customer_id);
 
       const response = await api({
-        url: '/customers/promo_code_validation',
-        method: 'POST',
         data: formData,
+        method: 'POST',
+        url: '/customers/promo_code_validation',
       });
 
       if (response.status === true) {
         toast.success(response.message);
-      } else if (
-        response.status === 'FALSE' &&
-        (response.code === 2 || response.code === 4)
-      ) {
+      } else if (response.status === 'FALSE' && (response.code === 2 || response.code === 4)) {
         toast.error(response.message);
       } else {
         toast.error(response.message || 'Failed to validate promo code');
@@ -699,9 +641,7 @@ class RideService {
       return response;
     } catch (error) {
       errorLog('Error applying coupon', error);
-      toast.error(
-        'An error occurred while applying the promo code. Please try again.',
-      );
+      toast.error('An error occurred while applying the promo code. Please try again.');
       throw error;
     }
   }
@@ -716,11 +656,11 @@ class RideService {
       setLoading(true);
 
       const response = await api({
-        url: '/customer/car-types',
-        method: 'GET',
         headers: {
           'x-login-method': `jwt`,
         },
+        method: 'GET',
+        url: '/customer/car-types',
       });
 
       setLoading(false);

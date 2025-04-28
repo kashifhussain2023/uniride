@@ -35,13 +35,13 @@ export default function LocationValueModel({
     }
   }, [open]);
 
-  const handleSearchBoxLoad = (ref) => {
+  const handleSearchBoxLoad = ref => {
     console.log('ref', ref);
     setSearchBox(ref);
   };
 
   const calculateDistanceAndDuration = (origin, destination) => {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       if (!origin || !destination) {
         resolve({
           distance: null,
@@ -52,9 +52,7 @@ export default function LocationValueModel({
       const service = new window.google.maps.DistanceMatrixService();
       service.getDistanceMatrix(
         {
-          destinations: [
-            new window.google.maps.LatLng(destination.lat, destination.lng),
-          ],
+          destinations: [new window.google.maps.LatLng(destination.lat, destination.lng)],
           origins: [new window.google.maps.LatLng(origin.lat, origin.lng)],
           travelMode: window.google.maps.TravelMode.DRIVING,
           unitSystem: window.google.maps.UnitSystem.METRIC,
@@ -77,7 +75,7 @@ export default function LocationValueModel({
               duration: null,
             });
           }
-        },
+        }
       );
     });
   };
@@ -109,17 +107,11 @@ export default function LocationValueModel({
       let distanceValue = null;
       let durationValue = null;
       if (locationType === 'drop' && currentLocation) {
-        const result = await calculateDistanceAndDuration(
-          currentLocation,
-          newLocation,
-        );
+        const result = await calculateDistanceAndDuration(currentLocation, newLocation);
         distanceValue = result.distance;
         durationValue = result.duration;
       } else if (locationType === 'pickup' && dropLocation) {
-        const result = await calculateDistanceAndDuration(
-          newLocation,
-          dropLocation,
-        );
+        const result = await calculateDistanceAndDuration(newLocation, dropLocation);
         distanceValue = result.distance;
         durationValue = result.duration;
       }
@@ -134,7 +126,7 @@ export default function LocationValueModel({
     }
   };
 
-  const handleInputChange = (e) => {
+  const handleInputChange = e => {
     setSearchInput(e.target.value);
     setError('');
   };
@@ -182,9 +174,7 @@ export default function LocationValueModel({
                 />
               </StandaloneSearchBox>
             </SearchBoxContainer>
-            {error && (
-              <div style={{ color: 'red', marginTop: '8px' }}>{error}</div>
-            )}
+            {error && <div style={{ color: 'red', marginTop: '8px' }}>{error}</div>}
             {isCalculating && (
               <div style={{ marginTop: '8px', textAlign: 'center' }}>
                 Calculating distance and duration...

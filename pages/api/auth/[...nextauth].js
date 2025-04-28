@@ -35,7 +35,7 @@ export const authOptions = {
   },
   providers: [
     CredentialsProvider({
-      authorize: async (credentials) => {
+      authorize: async credentials => {
         try {
           const formData = {
             password: credentials.password,

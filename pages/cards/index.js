@@ -30,7 +30,7 @@ export default function SaveCards({ userAuth }) {
       setCardList(response.data);
     } else if (response.message === 'Invalid token code') {
       toast.error(
-        'Your account has been logged in on another device.Please login again to continue.',
+        'Your account has been logged in on another device.Please login again to continue.'
       );
       await signOut({
         redirect: false,
@@ -38,7 +38,7 @@ export default function SaveCards({ userAuth }) {
       router.push('/login');
     }
   };
-  const handleMakeDefaultCard = async (value) => {
+  const handleMakeDefaultCard = async value => {
     setLoading(true);
     const formData = new FormData();
     formData.append('customer_id', userAuth.customer_id);
@@ -61,8 +61,7 @@ export default function SaveCards({ userAuth }) {
               ...session?.user,
               data: {
                 ...session?.user?.data,
-                default_payment_method:
-                  profileResponse.data.default_payment_method,
+                default_payment_method: profileResponse.data.default_payment_method,
               },
             },
           });
@@ -71,13 +70,10 @@ export default function SaveCards({ userAuth }) {
       setLoading(false);
       toast.success(response.message);
       getCustomerCardList();
-    } else if (
-      response.status === false &&
-      response.message === 'Invalid token code'
-    ) {
+    } else if (response.status === false && response.message === 'Invalid token code') {
       setLoading(false);
       toast.error(
-        'Your account has been logged in on another device. Please login again to continue.',
+        'Your account has been logged in on another device. Please login again to continue.'
       );
       await signOut({
         redirect: false,
@@ -88,7 +84,7 @@ export default function SaveCards({ userAuth }) {
       toast.success(response.message);
     }
   };
-  const handleDeleteCard = async (value) => {
+  const handleDeleteCard = async value => {
     setLoading(true);
     const formData = new FormData();
     formData.append('customer_id', userAuth.customer_id);
@@ -106,13 +102,10 @@ export default function SaveCards({ userAuth }) {
       setLoading(false);
       toast.success(response.message);
       getCustomerCardList();
-    } else if (
-      response.status === false &&
-      response.message === 'Invalid token code'
-    ) {
+    } else if (response.status === false && response.message === 'Invalid token code') {
       setLoading(false);
       toast.error(
-        'Your account has been logged in on another device.Please login again to continue.',
+        'Your account has been logged in on another device.Please login again to continue.'
       );
       await signOut({
         redirect: false,
@@ -143,17 +136,9 @@ export default function SaveCards({ userAuth }) {
         <SmallContent>
           <SaveCardsBox>
             <SaveCardHead>
-              <PageTitle
-                title="Save"
-                subtitle="Cards"
-                images_icon={'../cards.png'}
-              />
+              <PageTitle title="Save" subtitle="Cards" images_icon={'../cards.png'} />
 
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={handleAddCardClick}
-              >
+              <Button variant="contained" color="primary" onClick={handleAddCardClick}>
                 Add Card
               </Button>
             </SaveCardHead>

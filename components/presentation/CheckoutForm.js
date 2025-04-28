@@ -40,15 +40,15 @@ export default function AddPaymentInfo({ userAuth }) {
     // expiration_month: "",
     // expiration_year: "",
   });
-  const handleCardDetail = (event) => {
+  const handleCardDetail = event => {
     const brandName = event.brand.toUpperCase();
-    setInputs((inputs) => ({
+    setInputs(inputs => ({
       ...inputs,
       ['card_type']: brandName,
     }));
   };
   const handleInputChange = ({ target }) => {
-    setInputs((inputs) => ({
+    setInputs(inputs => ({
       ...inputs,
       [target.name]: target.value,
     }));
@@ -60,7 +60,7 @@ export default function AddPaymentInfo({ userAuth }) {
       });
     }
   };
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault();
     const inputForValidation = {
       card_holder: inputs.card_holder,
@@ -94,10 +94,7 @@ export default function AddPaymentInfo({ userAuth }) {
       formData.append('card_number', '000000000000' + token.card.last4);
       formData.append('card_type', inputs.card_type);
       formData.append('cv2', inputs.type);
-      formData.append(
-        'expire_date',
-        token.card.exp_month + '/' + token.card.exp_year,
-      );
+      formData.append('expire_date', token.card.exp_month + '/' + token.card.exp_year);
       formData.append('nonce', token.id);
       formData.append('customer_id', userAuth.customer_id);
       formData.append('token_code', userAuth.token_code);
@@ -120,8 +117,7 @@ export default function AddPaymentInfo({ userAuth }) {
                 ...session?.user,
                 data: {
                   ...session?.user?.data,
-                  default_payment_method:
-                    profileResponse.data.default_payment_method,
+                  default_payment_method: profileResponse.data.default_payment_method,
                 },
               },
             });
@@ -130,13 +126,10 @@ export default function AddPaymentInfo({ userAuth }) {
         setLoading(false);
         toast.success(response.message);
         router.push('/cards');
-      } else if (
-        response.status === 'FALSE' &&
-        response.message === 'Invalid token code'
-      ) {
+      } else if (response.status === 'FALSE' && response.message === 'Invalid token code') {
         setLoading(false);
         toast.error(
-          'Your account has been logged in on another device.Please login again to continue.',
+          'Your account has been logged in on another device.Please login again to continue.'
         );
         await signOut({
           redirect: false,
@@ -195,9 +188,7 @@ export default function AddPaymentInfo({ userAuth }) {
                     name="card_holder"
                     onChange={handleInputChange}
                   />
-                  <span className="text-danger">
-                    {errors && errors.card_holder}
-                  </span>
+                  <span className="text-danger">{errors && errors.card_holder}</span>
                 </FormControl>
 
                 <FormControl>
