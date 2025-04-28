@@ -134,7 +134,7 @@ class SocketService {
       this.connectionAttempts = 0;
     });
 
-    this.socket.on('disconnect', (reason) => {
+    this.socket.on('disconnect', reason => {
       debugLog('Socket disconnected', reason);
       this.isConnected = false;
       if (reason === 'io server disconnect') {
@@ -144,13 +144,13 @@ class SocketService {
       }
     });
 
-    this.socket.on('connect_error', (error) => {
+    this.socket.on('connect_error', error => {
       errorLog('Socket connection error', error);
       this.isConnected = false;
       this.retryConnection();
     });
 
-    this.socket.on('error', (error) => {
+    this.socket.on('error', error => {
       errorLog('Socket error', error);
     });
   }
@@ -200,9 +200,7 @@ class SocketService {
     debugLog(`Emitting event: ${event}`, eventData);
 
     if (!this.isConnected) {
-      debugLog(
-        `Socket not connected. Attempting to connect before emitting: ${event}`,
-      );
+      debugLog(`Socket not connected. Attempting to connect before emitting: ${event}`);
       this.connect();
     }
 
@@ -289,73 +287,73 @@ const socketEvents = {
 // Basic socket helper functions
 const socketHelpers = {
   // Cancel ride
-  cancelRide: (data) => {
+  cancelRide: data => {
     debugLog('Canceling ride', data);
     socketService.emit(socketEvents.CANCEL_RIDE, data);
   },
 
   // Get driver location
-  getDriverLocation: (data) => {
+  getDriverLocation: data => {
     debugLog('Getting driver location', data);
     socketService.emit(socketEvents.GET_DRIVER_LOCATION, data);
   },
 
-  // Request booking
-  requestSendBooking: (payload) => {
-    debugLog('Requesting booking', payload);
-    socketService.emit(socketEvents.REQUEST_BOOKING, payload);
-  },
-
-  // Save socket info
-  saveSocketInfo: (data) => {
-    debugLog('Saving socket info', data);
-    socketService.emit(socketEvents.SAVE_SOCKET_INFO, data);
-  },
-
   // Listen for car locations
-  onCarLocations: (handler) => {
+  onCarLocations: handler => {
     debugLog('Registering handler for car locations');
     return socketService.on(socketEvents.CAR_LOCATIONS, handler);
   },
 
   // Listen for driver accepted
-  onDriverAccepted: (handler) => {
+  onDriverAccepted: handler => {
     debugLog('Registering handler for driver accepted');
     return socketService.on(socketEvents.DRIVER_ACCEPTED, handler);
   },
 
   // Listen for driver rejected
-  onDriverRejected: (handler) => {
+  onDriverRejected: handler => {
     debugLog('Registering handler for driver rejected');
     return socketService.on(socketEvents.DRIVER_REJECTED, handler);
   },
 
-  // Listen for request sent
-  onRequestSent: (handler) => {
-    debugLog('Registering handler for request sent');
-    return socketService.on(socketEvents.REQUEST_SENT, handler);
-  },
-
-  // Listen for no driver found
-  onNoDriverFound: (handler) => {
-    debugLog('Registering handler for no driver found');
-    return socketService.on(socketEvents.NO_DRIVER_FOUND, handler);
-  },
-
   // Listen for error
-  onError: (handler) => {
+  onError: handler => {
     debugLog('Registering handler for error');
     return socketService.on(socketEvents.ERROR, handler);
   },
 
+  // Listen for no driver found
+  onNoDriverFound: handler => {
+    debugLog('Registering handler for no driver found');
+    return socketService.on(socketEvents.NO_DRIVER_FOUND, handler);
+  },
+
+  // Request booking
+  requestSendBooking: payload => {
+    debugLog('Requesting booking', payload);
+    socketService.emit(socketEvents.REQUEST_BOOKING, payload);
+  },
+
+  // Save socket info
+  saveSocketInfo: data => {
+    debugLog('Saving socket info', data);
+    socketService.emit(socketEvents.SAVE_SOCKET_INFO, data);
+  },
+
+  // Listen for request sent
+  onRequestSent: handler => {
+    debugLog('Registering handler for request sent');
+    return socketService.on(socketEvents.REQUEST_SENT, handler);
+  },
+
   // Listen for schedule request sent
-  onScheduleRequestSent: (handler) => {
+  onScheduleRequestSent: handler => {
     debugLog('Registering handler for schedule request sent');
     return socketService.on(socketEvents.SCHEDULE_REQUEST_SENT, handler);
   },
 
   // Listen for socket saved
-  onSocketSaved: (handler) => {
+  onSocketSaved: handler => {
     debugLog('Registering handler for socket saved');
     return socketService.on(socketEvents.SOCKET_SAVED, handler);
   },
