@@ -3,7 +3,8 @@ import { format } from 'date-fns';
 import { toast } from 'react-toastify';
 import { signOut } from 'next-auth/react';
 import { getSession } from 'next-auth/react';
-import { socketHelpers, socketEvents, socketService } from './Socket';
+import { socketHelpers, socketEvents, socketService } from './SocketEvents';
+import rideSocketHandler from './RideSocketHandler';
 
 // Debug flag - set to true to enable detailed logging
 const DEBUG = true;
@@ -57,46 +58,6 @@ class RideManagerService {
   // Get the customer ride type
   getCustomerRideType() {
     return this.customerRideType;
-  }
-
-  // Initialize socket connection
-  async initializeSocket(userAuth) {
-    debugLog('Initializing socket connection');
-
-    try {
-      if (userAuth && userAuth.token_code) {
-        debugLog('Setting auth token', userAuth.token_code);
-        socketService.setAuthToken(userAuth.token_code);
-      } else {
-        console.warn('No access token found in session');
-        if (userAuth && userAuth.token_code) {
-          debugLog('Using token_code as fallback', userAuth.token_code);
-          socketService.setAuthToken(userAuth.token_code);
-        }
-      }
-    } catch (error) {
-      errorLog('Error initializing socket', error);
-    }
-  }
-
-  // Save socket info
-  saveSocketInfo() {
-    debugLog('Saving socket info');
-
-    const socketInfo = {
-      user_type: 'customer',
-    };
-
-    return socketHelpers
-      .saveSocketInfo(socketInfo)
-      .then((response) => {
-        debugLog('Socket info saved', response);
-        return response;
-      })
-      .catch((error) => {
-        errorLog('Error saving socket info', error);
-        throw error;
-      });
   }
 
   // Handle car locations
@@ -155,111 +116,12 @@ class RideManagerService {
   setupSocketEventListeners(setStateFunctions) {
     debugLog('Setting up socket event listeners');
 
-    const {
-      setComfirmBooking,
-      setSelectRide,
-      setInRRoute,
-      setIsBookingInProgress,
-      setBookingRequestId,
-      setAcceptDriverDetail,
-      setDriverId,
-      setRideStatus,
-    } = setStateFunctions;
-
-    // Set up event handlers
-    const requestSentHandler = (response) => {
-      debugLog('Request sent successfully', response);
-      setComfirmBooking(false);
-      setSelectRide(false);
-      setInRRoute(true);
-      toast.success('Your ride request has been sent. Finding a driver...');
-
-      // Store the request ID for future reference
-      if (response && response.id) {
-        setBookingRequestId(response.id);
-        this.bookingRequestId = response.id;
-      }
-    };
-
-    const scheduleRequestSentHandler = (response) => {
-      debugLog('Schedule request sent successfully', response);
-      setComfirmBooking(false);
-      setSelectRide(false);
-      toast.success('Your scheduled ride request has been sent.');
-      setTimeout(() => {
-        window.location.reload();
-      }, 3000);
-    };
-
-    const noDriverFoundHandler = (response) => {
-      debugLog('No driver found', response);
-      setComfirmBooking(true);
-      setSelectRide(false);
-      toast.error('No drivers found in your area. Please try again later.');
-      setIsBookingInProgress(false);
-      this.isBookingInProgress = false;
-    };
-
-    const errorHandler = (error) => {
-      errorLog('Error in booking request', error);
-      setComfirmBooking(true);
-      setSelectRide(false);
-      toast.error(
-        error.message ||
-          'An error occurred while requesting a ride. Please try again.',
-      );
-      setIsBookingInProgress(false);
-      this.isBookingInProgress = false;
-    };
-
-    const driverAcceptedHandler = (response) => {
-      debugLog('Driver accepted', response);
-      setAcceptDriverDetail(response);
-      setDriverId(response.driver_id);
-      setRideStatus(2); // Driver is on the way
-      toast.success('A driver has accepted your ride request!');
-      setIsBookingInProgress(false);
-      this.isBookingInProgress = false;
-    };
-
-    const driverRejectedHandler = (response) => {
-      debugLog('Driver rejected', response);
-      toast.info(
-        'A driver declined your ride request. Finding another driver...',
-      );
-    };
-
-    // Register event handlers
-    const unsubscribeRequestSent = socketService.on(
-      socketEvents.REQUEST_SENT,
-      requestSentHandler,
-    );
-    const unsubscribeScheduleRequestSent = socketService.on(
-      socketEvents.SCHEDULE_REQUEST_SENT,
-      scheduleRequestSentHandler,
-    );
-    const unsubscribeNoDriverFound = socketService.on(
-      socketEvents.NO_DRIVER_FOUND,
-      noDriverFoundHandler,
-    );
-    const unsubscribeError = socketService.on(socketEvents.ERROR, errorHandler);
-    const unsubscribeDriverAccepted = socketService.on(
-      socketEvents.DRIVER_ACCEPTED,
-      driverAcceptedHandler,
-    );
-    const unsubscribeDriverRejected = socketService.on(
-      socketEvents.DRIVER_REJECTED,
-      driverRejectedHandler,
-    );
+    // Initialize the ride socket handler with state setters
+    rideSocketHandler.initialize(setStateFunctions);
 
     // Return cleanup function
     return () => {
-      unsubscribeRequestSent();
-      unsubscribeScheduleRequestSent();
-      unsubscribeNoDriverFound();
-      unsubscribeError();
-      unsubscribeDriverAccepted();
-      unsubscribeDriverRejected();
+      rideSocketHandler.cleanup();
     };
   }
 
@@ -267,9 +129,8 @@ class RideManagerService {
   async requestRide(rideData, router) {
     debugLog('Requesting ride', rideData);
 
-    // Check if a booking request is already in progress
     if (this.isBookingInProgress) {
-      toast.info('A booking request is already in progress. Please wait...');
+      toast.info('A booking request is already in progress');
       return;
     }
 
@@ -277,70 +138,78 @@ class RideManagerService {
       this.isBookingInProgress = true;
 
       const session = await getSession();
-      let paymentMethodId;
-
-      // Try to get payment method from session first
-      if (session?.user?.data?.default_payment_method?.payment_id) {
-        paymentMethodId = session.user.data.default_payment_method.payment_id;
-      } else {
-        // If not in session, try to get from localStorage
-        const lastAddedCard = localStorage.getItem('lastAddedCard');
-        if (lastAddedCard) {
-          const cardInfo = JSON.parse(lastAddedCard);
-          paymentMethodId = cardInfo.payment_id;
-        }
-      }
-
-      if (!paymentMethodId) {
-        toast.error(
-          'No payment method found. Please add a payment method first.',
-        );
-        router.push('/cards/add');
+      if (!session) {
+        toast.error('Please login to continue');
+        router.push('/login');
         return;
       }
 
-      // Add ride type to the payload
-      const bookingPayload = {
-        ...rideData,
-        ride_type: this.customerRideType,
-        payment_method: paymentMethodId,
-      };
+      const formData = new FormData();
 
-      debugLog('Sending booking request', bookingPayload);
+      // Add ride type to the form data
+      formData.append('ride_type', this.customerRideType);
 
-      // Set up event listeners for booking responses
-      const requestSentHandler = (response) => {
-        debugLog('Request sent successfully', response);
-        if (response && response.id) {
-          this.bookingRequestId = response.id;
-        }
-      };
+      // Add other ride data to the form
+      Object.keys(rideData).forEach((key) => {
+        formData.append(key, rideData[key]);
+      });
 
-      // Register event handler
-      const unsubscribeRequestSent = socketService.on(
-        socketEvents.REQUEST_SENT,
-        requestSentHandler,
-      );
+      const response = await api({
+        url: '/customers/new_ride_request',
+        method: 'POST',
+        data: formData,
+      });
 
-      // Set a timeout to clean up event listeners if no response is received
-      const cleanupTimeout = setTimeout(() => {
-        unsubscribeRequestSent();
+      if (response.status === true) {
+        const bookingPayload = {
+          customer_id: response.customer_id,
+          user_type: 'customer',
+          auth_token: response.token_code,
+          token_code: response.token_code,
+          pickup_lat: rideData.pickup_lat,
+          pickup_lng: rideData.pickup_lng,
+          drop_lat: rideData.drop_lat,
+          drop_lng: rideData.drop_lng,
+          pickup_address: rideData.pickup_address,
+          drop_address: rideData.drop_address,
+          car_type: rideData.car_type,
+          ride_type: this.customerRideType,
+        };
+
+        // Set up a cleanup timeout
+        const cleanupTimeout = setTimeout(() => {
+          if (this.isBookingInProgress) {
+            this.isBookingInProgress = false;
+            toast.error('Booking request timed out. Please try again.');
+          }
+        }, 60000); // 1 minute timeout
+
+        // Emit the booking request
+        socketHelpers
+          .requestSendBooking(bookingPayload)
+          .then((response) => {
+            debugLog('Booking request sent', response);
+            clearTimeout(cleanupTimeout);
+          })
+          .catch((error) => {
+            debugLog('Error sending booking request', error);
+            clearTimeout(cleanupTimeout);
+            toast.error('Failed to send booking request. Please try again.');
+            this.isBookingInProgress = false;
+          });
+      } else if (
+        response.status === 'FALSE' &&
+        response.message === 'Invalid token code'
+      ) {
+        toast.error(
+          'Your account has been logged in on another device. Please login again to continue.',
+        );
+        await signOut({ redirect: false });
+        router.push('/login');
+      } else {
+        toast.error(response.message || 'Failed to request ride');
         this.isBookingInProgress = false;
-      }, 60000); // 1 minute timeout
-
-      // Emit the booking request
-      socketHelpers
-        .requestSendBooking(bookingPayload)
-        .then((response) => {
-          debugLog('Booking request sent', response);
-          clearTimeout(cleanupTimeout);
-        })
-        .catch((error) => {
-          debugLog('Error sending booking request', error);
-          clearTimeout(cleanupTimeout);
-          toast.error('Failed to send booking request. Please try again.');
-          this.isBookingInProgress = false;
-        });
+      }
     } catch (error) {
       errorLog('Error in requestRide', error);
       toast.error(
@@ -535,55 +404,6 @@ class RideManagerService {
     }
   }
 
-  // Get schedule ride detail
-  async getScheduleRideDetail(userAuth, setStateFunctions) {
-    debugLog('Getting schedule ride detail');
-
-    const {
-      setLoading,
-      setSaveDateTime,
-      setSelectedDate,
-      setSelectedTime,
-      setScheduleRideStatus,
-    } = setStateFunctions;
-
-    try {
-      setLoading(true);
-      const formData = new FormData();
-      formData.append('customer_id', userAuth.customer_id);
-      formData.append('token_code', userAuth.token_code);
-
-      const response = await api({
-        url: '/customers/schedule_ride_detail',
-        method: 'POST',
-        data: formData,
-      });
-
-      if (response.code === 200 && response.status === true) {
-        setLoading(false);
-        setSaveDateTime(true);
-        setSelectedDate(
-          parse(
-            response.data[0].schedule_request_date,
-            'yyyy-MM-dd',
-            new Date(),
-          ),
-        );
-        setSelectedTime(
-          parse(response.data[0].schedule_request_time, 'HH:mm:ss', new Date()),
-        );
-        setScheduleRideStatus(true);
-      } else {
-        setLoading(false);
-        setScheduleRideStatus(false);
-      }
-    } catch (error) {
-      errorLog('Error in getScheduleRideDetail', error);
-      setLoading(false);
-      setScheduleRideStatus(false);
-    }
-  }
-
   // Cancel a ride
   async cancelRide(rideData, router) {
     debugLog('Canceling ride', rideData);
@@ -674,44 +494,6 @@ class RideManagerService {
     }
   }
 
-  // Apply a coupon
-  async applyCoupon(promoCodeValue, userAuth) {
-    debugLog('Applying coupon', promoCodeValue);
-
-    if (!promoCodeValue || promoCodeValue.trim() === '') {
-      toast.error('Please enter promo code');
-      return;
-    }
-
-    try {
-      const formData = new FormData();
-      formData.append('promo_code', promoCodeValue);
-      formData.append('customer_id', userAuth.customer_id);
-
-      const response = await api({
-        url: '/customers/promo_code_validation',
-        method: 'POST',
-        data: formData,
-      });
-
-      if (response.status === true) {
-        toast.success(response.message);
-      } else if (
-        response.status === 'FALSE' &&
-        (response.code === 2 || response.code === 4)
-      ) {
-        toast.error(response.message);
-      } else {
-        toast.error(response.message || 'Failed to validate promo code');
-      }
-    } catch (error) {
-      errorLog('Error in applyCoupon', error);
-      toast.error(
-        'An error occurred while applying the promo code. Please try again.',
-      );
-    }
-  }
-
   // Get all cars list
   async getAllCarsList(location, setStateFunctions) {
     debugLog('Getting all cars list', location);
@@ -790,6 +572,133 @@ class RideManagerService {
       setCurrentLocation(defaultLocation);
       console.error('Geolocation is not supported by this browser.');
     }
+  }
+
+  initializeSocket(userAuth) {
+    if (!userAuth) {
+      console.error('User authentication is required to initialize socket');
+      return;
+    }
+
+    try {
+      // Initialize socket connection with user authentication
+      socketService.initialize(userAuth);
+      console.log('Socket initialized successfully');
+    } catch (error) {
+      console.error('Error initializing socket:', error);
+      toast.error('Failed to initialize connection. Please try again.');
+    }
+  }
+
+  saveSocketInfo() {
+    try {
+      // Save socket information for persistence
+      socketService.saveSocketInfo();
+      console.log('Socket info saved successfully');
+    } catch (error) {
+      console.error('Error saving socket info:', error);
+    }
+  }
+
+  setupSocketEventListeners({
+    setComfirmBooking,
+    setSelectRide,
+    setInRRoute,
+    setIsBookingInProgress,
+    setBookingRequestId,
+    setAcceptDriverDetail,
+    setDriverId,
+    setRideStatus,
+    setShowReview,
+    setEndRideData,
+  }) {
+    // Set up event listeners for various socket events
+    const unsubscribeRequestSent = socketService.on(
+      socketEvents.REQUEST_SENT,
+      (response) => {
+        console.log('Request sent successfully:', response);
+        setComfirmBooking(false);
+        setSelectRide(false);
+        setInRRoute(true);
+        toast.success('Your ride request has been sent. Finding a driver...');
+
+        if (response && response.id) {
+          setBookingRequestId(response.id);
+        }
+      },
+    );
+
+    const unsubscribeNoDriverFound = socketService.on(
+      socketEvents.NO_DRIVER_FOUND,
+      () => {
+        console.log('No driver found');
+        setComfirmBooking(true);
+        setSelectRide(false);
+        toast.error('No drivers found in your area. Please try again later.');
+        setIsBookingInProgress(false);
+      },
+    );
+
+    const unsubscribeDriverAccepted = socketService.on(
+      socketEvents.DRIVER_ACCEPTED,
+      (response) => {
+        console.log('Driver accepted:', response);
+        setAcceptDriverDetail(response);
+        setDriverId(response.driver_id);
+        setRideStatus(2); // Driver is on the way
+        toast.success('A driver has accepted your ride request!');
+        setIsBookingInProgress(false);
+      },
+    );
+
+    const unsubscribeDriverRejected = socketService.on(
+      socketEvents.DRIVER_REJECTED,
+      () => {
+        console.log('Driver rejected');
+        toast.info(
+          'A driver declined your ride request. Finding another driver...',
+        );
+      },
+    );
+
+    const unsubscribeRideStarted = socketService.on(
+      socketEvents.RIDE_STARTED,
+      (response) => {
+        console.log('Ride started:', response);
+        setRideStatus(3); // Ride in progress
+        toast.success('Your ride has started!');
+      },
+    );
+
+    const unsubscribeRideCompleted = socketService.on(
+      socketEvents.RIDE_COMPLETED,
+      (response) => {
+        console.log('Ride completed:', response);
+        setRideStatus(4); // Ride completed
+        setShowReview(true);
+        setEndRideData(response);
+        toast.success('Your ride has been completed!');
+      },
+    );
+
+    const unsubscribeDriverLocation = socketService.on(
+      socketEvents.DRIVER_LOCATION,
+      (response) => {
+        console.log('Driver location updated:', response);
+        // Handle driver location updates
+      },
+    );
+
+    // Return cleanup function
+    return () => {
+      unsubscribeRequestSent();
+      unsubscribeNoDriverFound();
+      unsubscribeDriverAccepted();
+      unsubscribeDriverRejected();
+      unsubscribeRideStarted();
+      unsubscribeRideCompleted();
+      unsubscribeDriverLocation();
+    };
   }
 }
 

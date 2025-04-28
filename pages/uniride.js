@@ -9,7 +9,7 @@ import {
   socketEvents,
   socketHelpers,
   socketService,
-} from '@/components/presentation/Socket';
+} from '@/components/presentation/SocketEvents';
 import ThemeProvider from '@/theme/ThemeProvider';
 import { api } from '@/utils/api/register';
 import styled from '@emotion/styled';

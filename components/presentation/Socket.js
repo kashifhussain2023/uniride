@@ -42,6 +42,12 @@ class SocketService {
     this.connectionPromise = null;
     this.authToken = null;
     this.connectionErrors = [];
+    this.connectionHistory = [];
+    this.lastConnectionTime = null;
+    this.lastDisconnectionTime = null;
+    this.connectionDuration = 0;
+    this.eventHistory = [];
+    this.maxEventHistory = 100;
     debugLog('SocketService instance created');
     SocketService.instance = this;
   }
@@ -141,6 +147,12 @@ class SocketService {
       this.isConnected = true;
       this.connectionAttempts = 0;
       this.connectionErrors = [];
+      this.lastConnectionTime = new Date();
+      this.connectionHistory.push({
+        time: this.lastConnectionTime,
+        event: 'connect',
+        socketId: this.socket.id,
+      });
 
       // Resolve the connection promise if it exists
       if (this.connectionPromise) {
@@ -152,6 +164,19 @@ class SocketService {
     this.socket.on('disconnect', (reason) => {
       debugLog('Socket disconnected', reason);
       this.isConnected = false;
+      this.lastDisconnectionTime = new Date();
+      this.connectionHistory.push({
+        time: this.lastDisconnectionTime,
+        event: 'disconnect',
+        reason: reason,
+      });
+
+      if (this.lastConnectionTime) {
+        this.connectionDuration =
+          this.lastDisconnectionTime - this.lastConnectionTime;
+        debugLog(`Connection duration: ${this.connectionDuration}ms`);
+      }
+
       if (reason === 'io server disconnect') {
         // Server initiated disconnect, try to reconnect
         debugLog('Server initiated disconnect, attempting to reconnect');
@@ -164,6 +189,11 @@ class SocketService {
       this.connectionErrors.push({
         error: error.message || 'Unknown error',
         timestamp: new Date().toISOString(),
+      });
+      this.connectionHistory.push({
+        time: new Date(),
+        event: 'connect_error',
+        error: error.message || 'Unknown error',
       });
 
       // Reject the connection promise if it exists
@@ -178,6 +208,11 @@ class SocketService {
     });
     this.socket.on('error', (error) => {
       errorLog('Socket error', error);
+      this.connectionHistory.push({
+        time: new Date(),
+        event: 'error',
+        error: error.message || 'Unknown error',
+      });
 
       // Handle authentication errors specifically
       if (error.message && error.message.includes('No token provided')) {
@@ -189,6 +224,11 @@ class SocketService {
     this.socket.io.on('reconnect_attempt', (attemptNumber) => {
       debugLog(`Reconnection attempt #${attemptNumber}`);
       this.connectionAttempts = attemptNumber;
+      this.connectionHistory.push({
+        time: new Date(),
+        event: 'reconnect_attempt',
+        attemptNumber: attemptNumber,
+      });
 
       // Update query parameters with token on reconnection attempt
       if (this.authToken) {
@@ -203,12 +243,26 @@ class SocketService {
     });
     this.socket.io.on('reconnect_failed', () => {
       errorLog('Failed to reconnect after maximum attempts');
+      this.connectionHistory.push({
+        time: new Date(),
+        event: 'reconnect_failed',
+      });
     });
     this.socket.io.on('reconnect', (attemptNumber) => {
       debugLog(`Reconnected after ${attemptNumber} attempts`);
+      this.connectionHistory.push({
+        time: new Date(),
+        event: 'reconnect',
+        attemptNumber: attemptNumber,
+      });
     });
     this.socket.io.on('reconnect_error', (error) => {
       errorLog('Reconnection error', error);
+      this.connectionHistory.push({
+        time: new Date(),
+        event: 'reconnect_error',
+        error: error.message || 'Unknown error',
+      });
     });
     this.socket.io.on('ping', () => {
       debugLog('Ping sent to server');
@@ -305,6 +359,10 @@ class SocketService {
         }
       : data;
     debugLog(`Emitting event: ${event}`, eventData);
+
+    // Log event in history
+    this.logEvent('emit', event, eventData);
+
     if (!this.isConnected) {
       debugLog(`Socket not connected. Queuing event: ${event}`);
       this.getConnectionPromise()
@@ -332,7 +390,12 @@ class SocketService {
     }
     this.eventHandlers[event].push(handler);
     try {
-      this.socket.on(event, handler);
+      this.socket.on(event, (data) => {
+        // Log received event in history
+        this.logEvent('receive', event, data);
+        // Call the handler
+        handler(data);
+      });
     } catch (error) {
       errorLog(`Error registering handler for event ${event}`, error);
     }
@@ -393,7 +456,57 @@ class SocketService {
       connectionAttempts: this.connectionAttempts,
       connectionErrors: this.connectionErrors,
       socketId: this.socket ? this.socket.id : null,
+      lastConnectionTime: this.lastConnectionTime,
+      lastDisconnectionTime: this.lastDisconnectionTime,
+      connectionDuration: this.connectionDuration,
     };
+  }
+
+  // Log an event in the history
+  logEvent(type, event, data) {
+    this.eventHistory.push({
+      time: new Date(),
+      type: type,
+      event: event,
+      data: data,
+    });
+
+    // Trim history if it gets too long
+    if (this.eventHistory.length > this.maxEventHistory) {
+      this.eventHistory = this.eventHistory.slice(-this.maxEventHistory);
+    }
+  }
+
+  // Get event history
+  getEventHistory() {
+    return this.eventHistory;
+  }
+
+  // Get connection history
+  getConnectionHistory() {
+    return this.connectionHistory;
+  }
+
+  // Clear event history
+  clearEventHistory() {
+    this.eventHistory = [];
+    debugLog('Event history cleared');
+  }
+
+  // Clear connection history
+  clearConnectionHistory() {
+    this.connectionHistory = [];
+    debugLog('Connection history cleared');
+  }
+
+  // Save socket info
+  saveSocketInfo() {
+    debugLog('Saving socket info');
+    this.emit('saveSocketInfo', {
+      socketId: this.socket ? this.socket.id : null,
+      connected: this.isConnected,
+      timestamp: new Date().toISOString(),
+    });
   }
 }
 
@@ -452,6 +565,22 @@ const socketHelpers = {
   // Get connection status
   getConnectionStatus: () => {
     return socketService.getConnectionStatus();
+  },
+  // Get event history
+  getEventHistory: () => {
+    return socketService.getEventHistory();
+  },
+  // Get connection history
+  getConnectionHistory: () => {
+    return socketService.getConnectionHistory();
+  },
+  // Clear event history
+  clearEventHistory: () => {
+    socketService.clearEventHistory();
+  },
+  // Clear connection history
+  clearConnectionHistory: () => {
+    socketService.clearConnectionHistory();
   },
   // Get driver location
   getDriverLocation: (data) => {
@@ -668,6 +797,8 @@ const socketHelpers = {
           resolve(response);
         }
       };
+
+      console.log('socketService', socketService);
       socketService.on(socketEvents.SOCKET_SAVED, handler);
       socketService.emit(socketEvents.SAVE_SOCKET_INFO, data);
       // authorization token will be added automatically by the emit method
