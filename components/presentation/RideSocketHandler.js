@@ -64,22 +64,22 @@ class RideSocketHandler {
     this.stateSetters = {
       setBookingRequestId,
       setBookingState,
-      setDriverLocation,
       setDriverDetails,
+      setDriverLocation,
       setRideStatus,
-      setShowReviewPrompt,
-      setShowDriverArrivedPrompt,
-      setShowJourneyStartPrompt,
-      setShowJourneyEndPrompt,
-      setShowPaymentPrompt,
       setShowCancelPrompt,
-      setShowNoDriverFoundPrompt,
-      setShowDriverRejectedPrompt,
       setShowDriverAcceptedPrompt,
+      setShowDriverArrivedPrompt,
+      setShowDriverRejectedPrompt,
+      setShowErrorPrompt,
+      setShowJourneyEndPrompt,
+      setShowJourneyStartPrompt,
+      setShowNoDriverFoundPrompt,
+      setShowPaymentPrompt,
       setShowRequestSentPrompt,
+      setShowReviewPrompt,
       setShowScheduleRequestSentPrompt,
       setShowSocketSavedPrompt,
-      setShowErrorPrompt,
     };
 
     // Set up event handlers
@@ -92,66 +92,66 @@ class RideSocketHandler {
 
     // Car locations handler
     this.unsubscribeFunctions.push(
-      socketHelpers.onCarLocations((data) => {
+      socketHelpers.onCarLocations(data => {
         debugLog('Received car locations', data);
         this.handleCarLocations(data);
-      }),
+      })
     );
 
     // Driver accepted handler
     this.unsubscribeFunctions.push(
-      socketHelpers.onDriverAccepted((data) => {
+      socketHelpers.onDriverAccepted(data => {
         debugLog('Driver accepted ride', data);
         this.handleDriverAccepted(data);
-      }),
+      })
     );
 
     // Driver rejected handler
     this.unsubscribeFunctions.push(
-      socketHelpers.onDriverRejected((data) => {
+      socketHelpers.onDriverRejected(data => {
         debugLog('Driver rejected ride', data);
         this.handleDriverRejected(data);
-      }),
+      })
     );
 
     // Request sent handler
     this.unsubscribeFunctions.push(
-      socketHelpers.onRequestSent((data) => {
+      socketHelpers.onRequestSent(data => {
         debugLog('Request sent', data);
         this.handleRequestSent(data);
-      }),
+      })
     );
 
     // No driver found handler
     this.unsubscribeFunctions.push(
-      socketHelpers.onNoDriverFound((data) => {
+      socketHelpers.onNoDriverFound(data => {
         debugLog('No driver found', data);
         this.handleNoDriverFound(data);
-      }),
+      })
     );
 
     // Error handler
     this.unsubscribeFunctions.push(
-      socketHelpers.onError((data) => {
+      socketHelpers.onError(data => {
         debugLog('Socket error', data);
         this.handleError(data);
-      }),
+      })
     );
 
     // Schedule request sent handler
     this.unsubscribeFunctions.push(
-      socketHelpers.onScheduleRequestSent((data) => {
+      socketHelpers.onScheduleRequestSent(data => {
         debugLog('Schedule request sent', data);
         this.handleScheduleRequestSent(data);
-      }),
+      })
     );
 
     // Socket saved handler
     this.unsubscribeFunctions.push(
-      socketHelpers.onSocketSaved((data) => {
+      socketHelpers.onSocketSaved(data => {
         debugLog('Socket saved', data);
         this.handleSocketSaved(data);
-      }),
+      })
     );
   }
 
@@ -170,11 +170,8 @@ class RideSocketHandler {
   // Handle driver accepted
   handleDriverAccepted(data) {
     try {
-      const {
-        setDriverDetails,
-        setShowDriverAcceptedPrompt,
-        setShowNoDriverFoundPrompt,
-      } = this.stateSetters;
+      const { setDriverDetails, setShowDriverAcceptedPrompt, setShowNoDriverFoundPrompt } =
+        this.stateSetters;
 
       if (data && data.driver) {
         setDriverDetails(data.driver);
@@ -201,8 +198,7 @@ class RideSocketHandler {
   // Handle request sent
   handleRequestSent(data) {
     try {
-      const { setBookingRequestId, setShowRequestSentPrompt } =
-        this.stateSetters;
+      const { setBookingRequestId, setShowRequestSentPrompt } = this.stateSetters;
       if (data && data.requestId) {
         setBookingRequestId(data.requestId);
         setShowRequestSentPrompt(true);
@@ -250,7 +246,9 @@ class RideSocketHandler {
   handleSocketSaved(data) {
     try {
       const { setShowSocketSavedPrompt } = this.stateSetters;
-      setShowSocketSavedPrompt(true);
+      if (setShowSocketSavedPrompt && typeof setShowSocketSavedPrompt === 'function') {
+        setShowSocketSavedPrompt(true);
+      }
       toast.success('Socket connection established');
     } catch (error) {
       errorLog('Error handling socket saved', error);
@@ -260,7 +258,7 @@ class RideSocketHandler {
   // Clean up event handlers
   cleanup() {
     debugLog('Cleaning up event handlers');
-    this.unsubscribeFunctions.forEach((unsubscribe) => {
+    this.unsubscribeFunctions.forEach(unsubscribe => {
       try {
         unsubscribe();
       } catch (error) {

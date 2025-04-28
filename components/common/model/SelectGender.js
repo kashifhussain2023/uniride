@@ -14,7 +14,23 @@ const SelectGender = ({ open, handleGenderClose, proceedGenderModel }) => {
     setChecked(value);
   };
   const handleSelectGender = () => {
-    proceedGenderModel(checked);
+    try {
+      // Call proceedGenderModel and handle the result properly
+      const result = proceedGenderModel(checked);
+
+      // Only call .then() if result is a Promise
+      if (result && typeof result.then === 'function') {
+        result
+          .then(() => {
+            // Handle success if needed
+          })
+          .catch(error => {
+            console.error('Error in proceedGenderModel:', error);
+          });
+      }
+    } catch (error) {
+      console.error('Error in handleSelectGender:', error);
+    }
   };
   const handleClose = () => {
     handleGenderClose();

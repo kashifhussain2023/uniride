@@ -1,9 +1,8 @@
 import { api } from '@/utils/api/register';
-import { format } from 'date-fns';
 import { toast } from 'react-toastify';
 import { signOut } from 'next-auth/react';
 import { getSession } from 'next-auth/react';
-import { socketHelpers, socketEvents, socketService } from './SocketEvents';
+import { socketHelpers, socketService } from './SocketEvents';
 import rideSocketHandler from './RideSocketHandler';
 
 // Debug flag - set to true to enable detailed logging
@@ -66,17 +65,17 @@ class RideManagerService {
 
     if (response && response.length > 0) {
       // Update available drivers with the new locations
-      setAvailableDriver((prevDrivers) => {
+      setAvailableDriver(prevDrivers => {
         // Create a map of existing drivers for quick lookup
         const driverMap = new Map();
         if (prevDrivers && prevDrivers.length > 0) {
-          prevDrivers.forEach((driver) => {
+          prevDrivers.forEach(driver => {
             driverMap.set(driver.driver_id, driver);
           });
         }
 
         // Update or add new driver locations
-        response.forEach((location) => {
+        response.forEach(location => {
           if (driverMap.has(location.driver_id)) {
             // Update existing driver
             const updatedDriver = {
@@ -99,13 +98,13 @@ class RideManagerService {
 
   // Request driver locations
   requestDriverLocations(currentLocation, carTypeId) {
-    debugLog('Requesting driver locations', { currentLocation, carTypeId });
+    debugLog('Requesting driver locations', { carTypeId, currentLocation });
 
     if (currentLocation && carTypeId) {
       const requestData = {
+        car_type: carTypeId,
         pickup_lat: currentLocation.lat,
         pickup_lng: currentLocation.lng,
-        car_type: carTypeId,
       };
 
       socketHelpers.getDriverLocation(requestData);
@@ -150,30 +149,30 @@ class RideManagerService {
       formData.append('ride_type', this.customerRideType);
 
       // Add other ride data to the form
-      Object.keys(rideData).forEach((key) => {
+      Object.keys(rideData).forEach(key => {
         formData.append(key, rideData[key]);
       });
 
       const response = await api({
-        url: '/customers/new_ride_request',
-        method: 'POST',
         data: formData,
+        method: 'POST',
+        url: '/customers/new_ride_request',
       });
 
       if (response.status === true) {
         const bookingPayload = {
-          customer_id: response.customer_id,
-          user_type: 'customer',
           auth_token: response.token_code,
-          token_code: response.token_code,
-          pickup_lat: rideData.pickup_lat,
-          pickup_lng: rideData.pickup_lng,
+          car_type: rideData.car_type,
+          customer_id: response.customer_id,
+          drop_address: rideData.drop_address,
           drop_lat: rideData.drop_lat,
           drop_lng: rideData.drop_lng,
           pickup_address: rideData.pickup_address,
-          drop_address: rideData.drop_address,
-          car_type: rideData.car_type,
+          pickup_lat: rideData.pickup_lat,
+          pickup_lng: rideData.pickup_lng,
           ride_type: this.customerRideType,
+          token_code: response.token_code,
+          user_type: 'customer',
         };
 
         // Set up a cleanup timeout
@@ -187,22 +186,19 @@ class RideManagerService {
         // Emit the booking request
         socketHelpers
           .requestSendBooking(bookingPayload)
-          .then((response) => {
+          .then(response => {
             debugLog('Booking request sent', response);
             clearTimeout(cleanupTimeout);
           })
-          .catch((error) => {
+          .catch(error => {
             debugLog('Error sending booking request', error);
             clearTimeout(cleanupTimeout);
             toast.error('Failed to send booking request. Please try again.');
             this.isBookingInProgress = false;
           });
-      } else if (
-        response.status === 'FALSE' &&
-        response.message === 'Invalid token code'
-      ) {
+      } else if (response.status === 'FALSE' && response.message === 'Invalid token code') {
         toast.error(
-          'Your account has been logged in on another device. Please login again to continue.',
+          'Your account has been logged in on another device. Please login again to continue.'
         );
         await signOut({ redirect: false });
         router.push('/login');
@@ -212,9 +208,7 @@ class RideManagerService {
       }
     } catch (error) {
       errorLog('Error in requestRide', error);
-      toast.error(
-        'An error occurred while requesting a driver. Please try again.',
-      );
+      toast.error('An error occurred while requesting a driver. Please try again.');
       this.isBookingInProgress = false;
     }
   }
@@ -230,14 +224,14 @@ class RideManagerService {
       formData.append('ride_type', this.customerRideType);
 
       // Add other ride data to the form
-      Object.keys(rideData).forEach((key) => {
+      Object.keys(rideData).forEach(key => {
         formData.append(key, rideData[key]);
       });
 
       const response = await api({
-        url: '/customers/new_schedule_ride_request',
-        method: 'POST',
         data: formData,
+        method: 'POST',
+        url: '/customers/new_schedule_ride_request',
       });
 
       if (response.status === true) {
@@ -245,12 +239,9 @@ class RideManagerService {
         setTimeout(() => {
           window.location.reload();
         }, 3000);
-      } else if (
-        response.status === 'FALSE' &&
-        response.message === 'Invalid token code'
-      ) {
+      } else if (response.status === 'FALSE' && response.message === 'Invalid token code') {
         toast.error(
-          'Your account has been logged in on another device. Please login again to continue.',
+          'Your account has been logged in on another device. Please login again to continue.'
         );
         await signOut({ redirect: false });
         router.push('/login');
@@ -259,9 +250,7 @@ class RideManagerService {
       }
     } catch (error) {
       errorLog('Error in scheduleRide', error);
-      toast.error(
-        'An error occurred while scheduling your ride. Please try again.',
-      );
+      toast.error('An error occurred while scheduling your ride. Please try again.');
     }
   }
 
@@ -271,8 +260,8 @@ class RideManagerService {
 
     if (this.bookingRequestId) {
       socketHelpers.cancel_ride({
-        request_id: this.bookingRequestId,
         customer_id: userAuth.customer_id,
+        request_id: this.bookingRequestId,
         user_type: 'customer',
       });
       this.isBookingInProgress = false;
@@ -306,37 +295,31 @@ class RideManagerService {
       formData.append('token_code', userAuth.token_code);
 
       const response = await api({
-        url: '/customers/ride_completeness',
-        method: 'POST',
         data: formData,
+        method: 'POST',
+        url: '/customers/ride_completeness',
       });
 
-      if (
-        response.status === true &&
-        response.message === 'Tip is not given for this ride'
-      ) {
+      if (response.status === true && response.message === 'Tip is not given for this ride') {
         setShowReview(true);
         setLoading(false);
-      } else if (
-        response.status === true &&
-        response.message === 'Driver is not arrived'
-      ) {
+      } else if (response.status === true && response.message === 'Driver is not arrived') {
         setSelectRide(false);
         setComfirmBooking(false);
         setInRRoute(true);
         setCurrentLocation({
+          address: response.customer_destination_point_name,
           lat: parseFloat(response.customer_destination_point_lat),
           lng: parseFloat(response.customer_destination_point_long),
-          address: response.customer_destination_point_name,
         });
         setDriverLocation({
           lat: parseFloat(response.driver_latitude),
           lng: parseFloat(response.driver_longitude),
         });
         setDropLocation({
+          address: response.destination_name,
           lat: parseFloat(response.destination_latitude),
           lng: parseFloat(response.destination_longitude),
-          address: response.destination_name,
         });
         setAcceptDriverDetail(response);
         setRideStatus(2);
@@ -350,43 +333,40 @@ class RideManagerService {
         setComfirmBooking(false);
         setInRRoute(true);
         setCurrentLocation({
+          address: response.customer_destination_point_name,
           lat: parseFloat(response.customer_destination_point_lat),
           lng: parseFloat(response.customer_destination_point_long),
-          address: response.customer_destination_point_name,
         });
         setDriverLocation({
           lat: parseFloat(response.driver_latitude),
           lng: parseFloat(response.driver_longitude),
         });
         setDropLocation({
+          address: response.destination_name,
           lat: parseFloat(response.destination_latitude),
           lng: parseFloat(response.destination_longitude),
-          address: response.destination_name,
         });
         setAcceptDriverDetail(response);
         setRideStatus(3);
         setDriverId(response.driver_id);
         setLoading(false);
-      } else if (
-        response.status === true &&
-        response.message === 'Journey started'
-      ) {
+      } else if (response.status === true && response.message === 'Journey started') {
         setSelectRide(false);
         setComfirmBooking(false);
         setInRRoute(true);
         setCurrentLocation({
+          address: response.customer_destination_point_name,
           lat: parseFloat(response.customer_destination_point_lat),
           lng: parseFloat(response.customer_destination_point_long),
-          address: response.customer_destination_point_name,
         });
         setDriverLocation({
           lat: parseFloat(response.driver_latitude),
           lng: parseFloat(response.driver_longitude),
         });
         setDropLocation({
+          address: response.destination_name,
           lat: parseFloat(response.destination_latitude),
           lng: parseFloat(response.destination_longitude),
-          address: response.destination_name,
         });
         setAcceptDriverDetail(response);
         setRideStatus(4);
@@ -416,19 +396,19 @@ class RideManagerService {
       formData.append('token_code', rideData.token_code);
 
       const response = await api({
-        url: '/customers/customer_cancel',
-        method: 'POST',
         data: formData,
+        method: 'POST',
+        url: '/customers/customer_cancel',
       });
 
       if (response.status === true) {
         toast.success(response.message);
         const params = {
-          customer_id: rideData.customer_id,
-          user_type: 'customer',
-          request_id: rideData.request_id,
           auth_token: rideData.token_code,
+          customer_id: rideData.customer_id,
+          request_id: rideData.request_id,
           token_code: rideData.token_code,
+          user_type: 'customer',
         };
         socketHelpers.cancel_ride(params);
         setTimeout(() => {
@@ -439,9 +419,7 @@ class RideManagerService {
       }
     } catch (error) {
       errorLog('Error in cancelRide', error);
-      toast.error(
-        'An error occurred while canceling your ride. Please try again.',
-      );
+      toast.error('An error occurred while canceling your ride. Please try again.');
     }
   }
 
@@ -449,13 +427,8 @@ class RideManagerService {
   async endRunningRide(rideData, setStateFunctions) {
     debugLog('Ending running ride', rideData);
 
-    const {
-      setLoading,
-      setSelectRide,
-      setComfirmBooking,
-      setInRRoute,
-      setShowReview,
-    } = setStateFunctions;
+    const { setLoading, setSelectRide, setComfirmBooking, setInRRoute, setShowReview } =
+      setStateFunctions;
 
     try {
       setLoading(true);
@@ -469,9 +442,9 @@ class RideManagerService {
       formData.append('token_code', rideData.token_code);
 
       const response = await api({
-        url: '/customers/end_journey_by_customer',
-        method: 'POST',
         data: formData,
+        method: 'POST',
+        url: '/customers/end_journey_by_customer',
       });
 
       if (response.status === true) {
@@ -487,9 +460,7 @@ class RideManagerService {
       }
     } catch (error) {
       errorLog('Error in endRunningRide', error);
-      toast.error(
-        'An error occurred while ending your journey. Please try again.',
-      );
+      toast.error('An error occurred while ending your journey. Please try again.');
       setLoading(false);
     }
   }
@@ -504,11 +475,11 @@ class RideManagerService {
       setLoading(true);
 
       const response = await api({
-        url: '/customer/car-types',
-        method: 'GET',
         headers: {
           'x-login-method': `jwt`,
         },
+        method: 'GET',
+        url: '/customer/car-types',
       });
 
       setLoading(false);
@@ -527,16 +498,12 @@ class RideManagerService {
   getUserCurrentLocation(setStateFunctions) {
     debugLog('Getting user current location');
 
-    const {
-      setCurrentLocation,
-      setCenterMapLocation,
-      setMapLocationLabel,
-      getAllCarsList,
-    } = setStateFunctions;
+    const { setCurrentLocation, setCenterMapLocation, setMapLocationLabel, getAllCarsList } =
+      setStateFunctions;
 
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
-        async (position) => {
+        async position => {
           const userLocation = {
             lat: position.coords.latitude,
             lng: position.coords.longitude,
@@ -544,7 +511,7 @@ class RideManagerService {
 
           try {
             const response = await fetch(
-              `https://maps.googleapis.com/maps/api/geocode/json?latlng=${userLocation.lat},${userLocation.lng}&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`,
+              `https://maps.googleapis.com/maps/api/geocode/json?latlng=${userLocation.lat},${userLocation.lng}&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`
             );
             const data = await response.json();
             if (data.status === 'OK' && data.results.length > 0) {
@@ -560,9 +527,9 @@ class RideManagerService {
           setCenterMapLocation(userLocation);
           setMapLocationLabel('Pickup');
         },
-        (error) => {
+        error => {
           console.error('Error getting user location:', error);
-        },
+        }
       );
     } else {
       const defaultLocation = {
@@ -581,9 +548,18 @@ class RideManagerService {
     }
 
     try {
+      // Set the auth token from userAuth
+      if (userAuth.token_code) {
+        socketService.setAuthToken(userAuth.token_code);
+      }
+
       // Initialize socket connection with user authentication
       socketService.initialize(userAuth);
-      console.log('Socket initialized successfully');
+
+      // Explicitly connect to the socket after initialization
+      socketService.connect();
+
+      console.log('Socket initialized and connected successfully');
     } catch (error) {
       console.error('Error initializing socket:', error);
       toast.error('Failed to initialize connection. Please try again.');
@@ -593,112 +569,11 @@ class RideManagerService {
   saveSocketInfo() {
     try {
       // Save socket information for persistence
-      socketService.saveSocketInfo();
+      socketHelpers.saveSocketInfo();
       console.log('Socket info saved successfully');
     } catch (error) {
       console.error('Error saving socket info:', error);
     }
-  }
-
-  setupSocketEventListeners({
-    setComfirmBooking,
-    setSelectRide,
-    setInRRoute,
-    setIsBookingInProgress,
-    setBookingRequestId,
-    setAcceptDriverDetail,
-    setDriverId,
-    setRideStatus,
-    setShowReview,
-    setEndRideData,
-  }) {
-    // Set up event listeners for various socket events
-    const unsubscribeRequestSent = socketService.on(
-      socketEvents.REQUEST_SENT,
-      (response) => {
-        console.log('Request sent successfully:', response);
-        setComfirmBooking(false);
-        setSelectRide(false);
-        setInRRoute(true);
-        toast.success('Your ride request has been sent. Finding a driver...');
-
-        if (response && response.id) {
-          setBookingRequestId(response.id);
-        }
-      },
-    );
-
-    const unsubscribeNoDriverFound = socketService.on(
-      socketEvents.NO_DRIVER_FOUND,
-      () => {
-        console.log('No driver found');
-        setComfirmBooking(true);
-        setSelectRide(false);
-        toast.error('No drivers found in your area. Please try again later.');
-        setIsBookingInProgress(false);
-      },
-    );
-
-    const unsubscribeDriverAccepted = socketService.on(
-      socketEvents.DRIVER_ACCEPTED,
-      (response) => {
-        console.log('Driver accepted:', response);
-        setAcceptDriverDetail(response);
-        setDriverId(response.driver_id);
-        setRideStatus(2); // Driver is on the way
-        toast.success('A driver has accepted your ride request!');
-        setIsBookingInProgress(false);
-      },
-    );
-
-    const unsubscribeDriverRejected = socketService.on(
-      socketEvents.DRIVER_REJECTED,
-      () => {
-        console.log('Driver rejected');
-        toast.info(
-          'A driver declined your ride request. Finding another driver...',
-        );
-      },
-    );
-
-    const unsubscribeRideStarted = socketService.on(
-      socketEvents.RIDE_STARTED,
-      (response) => {
-        console.log('Ride started:', response);
-        setRideStatus(3); // Ride in progress
-        toast.success('Your ride has started!');
-      },
-    );
-
-    const unsubscribeRideCompleted = socketService.on(
-      socketEvents.RIDE_COMPLETED,
-      (response) => {
-        console.log('Ride completed:', response);
-        setRideStatus(4); // Ride completed
-        setShowReview(true);
-        setEndRideData(response);
-        toast.success('Your ride has been completed!');
-      },
-    );
-
-    const unsubscribeDriverLocation = socketService.on(
-      socketEvents.DRIVER_LOCATION,
-      (response) => {
-        console.log('Driver location updated:', response);
-        // Handle driver location updates
-      },
-    );
-
-    // Return cleanup function
-    return () => {
-      unsubscribeRequestSent();
-      unsubscribeNoDriverFound();
-      unsubscribeDriverAccepted();
-      unsubscribeDriverRejected();
-      unsubscribeRideStarted();
-      unsubscribeRideCompleted();
-      unsubscribeDriverLocation();
-    };
   }
 }
 

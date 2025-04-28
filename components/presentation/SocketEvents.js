@@ -1,5 +1,5 @@
 import io from 'socket.io-client';
-import { getSession } from 'next-auth/react';
+import { useSession } from 'next-auth/react';
 
 // Debug flag - set to true to enable detailed logging
 const DEBUG = true;
@@ -39,6 +39,8 @@ class SocketService {
     this.maxReconnectAttempts = 5;
     this.reconnectDelay = 5000;
     this.authToken = null;
+    this.isInitializing = false;
+    this.connectionPromise = null;
     debugLog('SocketService instance created');
     SocketService.instance = this;
   }
@@ -64,29 +66,42 @@ class SocketService {
 
   // Initialize the socket connection
   async initialize() {
+    // If already initialized, return the existing socket
     if (this.socket) {
       debugLog('Socket already initialized, returning existing instance');
       return this.socket;
     }
+
+    // If already initializing, wait for the initialization to complete
+    if (this.isInitializing) {
+      debugLog('Socket initialization already in progress, waiting for completion');
+      // Wait for a short time and check again
+      await new Promise(resolve => setTimeout(resolve, 100));
+      return this.initialize();
+    }
+
+    this.isInitializing = true;
     debugLog('Initializing socket connection');
 
     // Get the session to access the token
     try {
       debugLog('Fetching session data');
-      const session = await getSession();
-      debugLog('Session data received', session);
-      if (session && session.accessToken) {
-        this.authToken = session.accessToken;
-        debugLog('Initialized with token from session', this.authToken);
+      // Note: useSession is a React hook and can only be used in React components
+      // For this service class, we'll need to pass the session data from the component
+      // that uses this service
+      if (this.authToken) {
+        debugLog('Using provided auth token', this.authToken);
       } else {
-        debugLog('No access token found in session');
+        debugLog('No auth token available');
       }
     } catch (error) {
       errorLog('Error getting session', error);
+      this.isInitializing = false;
+      throw error;
     }
 
     // Socket configuration
-    const SOCKET_URL = `https://uniridesocket.24livehost.com/connect-socket`;
+    const SOCKET_URL = `https://uniridesocket.24livehost.com`;
     debugLog('Connecting to socket URL', SOCKET_URL);
     try {
       // Create query parameters with token
@@ -98,29 +113,25 @@ class SocketService {
 
       this.socket = io(SOCKET_URL, {
         autoConnect: false,
-        extraHeaders: this.authToken
-          ? {
-              authorization: `Bearer ${this.authToken}`,
-            }
-          : {},
-        path: '/socket.io',
+        path: '/connect-socket/socket.io',
         query: query,
         reconnection: true,
         reconnectionAttempts: this.maxReconnectAttempts,
         reconnectionDelay: this.reconnectDelay,
         timeout: 20000,
         transports: ['websocket', 'polling'],
-        withCredentials: true,
       });
 
       // Set up event listeners
       this.setupEventListeners();
 
-      // Connect to the socket
-      this.connect();
+      // Don't call connect() here to avoid circular dependency
+      // The caller should call connect() after initialize() if needed
+      this.isInitializing = false;
       return this.socket;
     } catch (error) {
       errorLog('Error creating socket instance', error);
+      this.isInitializing = false;
       throw error;
     }
   }
@@ -157,21 +168,87 @@ class SocketService {
 
   // Connect to the socket
   connect() {
-    if (!this.socket) {
-      debugLog('Socket not initialized, initializing now');
-      this.initialize();
+    // If already connected, return the existing socket
+    if (this.isConnected && this.socket) {
+      debugLog('Socket already connected, returning existing socket');
+      return this.socket;
     }
-    if (!this.isConnected) {
+
+    // If already connecting, return the promise
+    if (this.connectionPromise) {
+      debugLog('Socket connection already in progress, returning existing promise');
+      return this.connectionPromise;
+    }
+
+    // If socket doesn't exist, create a basic connection
+    if (!this.socket) {
+      debugLog('Socket not initialized, creating basic connection');
+      // Don't call initialize() here as it would create a circular dependency
+      // Instead, create a basic socket connection
+      const SOCKET_URL = `https://localhost:5103`;
+      debugLog('Creating basic socket connection to', SOCKET_URL);
+      try {
+        this.socket = io(SOCKET_URL, {
+          autoConnect: false,
+          path: '/connect-socket/socket.io',
+          reconnection: true,
+          reconnectionAttempts: this.maxReconnectAttempts,
+          reconnectionDelay: this.reconnectDelay,
+          timeout: 20000,
+          transports: ['websocket', 'polling'],
+          withCredentials: true,
+        });
+
+        // Set up event listeners
+        this.setupEventListeners();
+      } catch (error) {
+        errorLog('Error creating basic socket connection', error);
+        return null;
+      }
+    }
+
+    // Connect to the socket if not already connected
+    if (!this.isConnected && this.socket) {
       debugLog('Connecting to socket server');
       try {
-        this.socket.connect();
+        // Create a promise to track the connection
+        this.connectionPromise = new Promise((resolve, reject) => {
+          // Set up a one-time connect handler
+          const connectHandler = () => {
+            this.isConnected = true;
+            this.connectionAttempts = 0;
+            this.socket.off('connect', connectHandler);
+            this.socket.off('connect_error', errorHandler);
+            this.connectionPromise = null;
+            resolve(this.socket);
+          };
+
+          // Set up a one-time error handler
+          const errorHandler = error => {
+            this.socket.off('connect', connectHandler);
+            this.socket.off('connect_error', errorHandler);
+            this.connectionPromise = null;
+            reject(error);
+          };
+
+          // Add the handlers
+          this.socket.once('connect', connectHandler);
+          this.socket.once('connect_error', errorHandler);
+
+          // Connect the socket
+          this.socket.connect();
+        });
+
+        return this.connectionPromise;
       } catch (error) {
         errorLog('Error connecting to socket', error);
+        this.connectionPromise = null;
+        return null;
       }
     } else {
       debugLog('Socket already connected');
+      return this.socket;
     }
-    return this.socket;
   }
 
   // Retry connection with exponential backoff
@@ -249,6 +326,7 @@ class SocketService {
       try {
         this.socket.disconnect();
         this.isConnected = false;
+        this.connectionPromise = null;
       } catch (error) {
         errorLog('Error disconnecting socket', error);
       }
@@ -328,18 +406,6 @@ const socketHelpers = {
     return socketService.on(socketEvents.NO_DRIVER_FOUND, handler);
   },
 
-  // Request booking
-  requestSendBooking: payload => {
-    debugLog('Requesting booking', payload);
-    socketService.emit(socketEvents.REQUEST_BOOKING, payload);
-  },
-
-  // Save socket info
-  saveSocketInfo: data => {
-    debugLog('Saving socket info', data);
-    socketService.emit(socketEvents.SAVE_SOCKET_INFO, data);
-  },
-
   // Listen for request sent
   onRequestSent: handler => {
     debugLog('Registering handler for request sent');
@@ -356,6 +422,18 @@ const socketHelpers = {
   onSocketSaved: handler => {
     debugLog('Registering handler for socket saved');
     return socketService.on(socketEvents.SOCKET_SAVED, handler);
+  },
+
+  // Request booking
+  requestSendBooking: payload => {
+    debugLog('Requesting booking', payload);
+    socketService.emit(socketEvents.REQUEST_BOOKING, payload);
+  },
+
+  // Save socket info
+  saveSocketInfo: data => {
+    debugLog('Saving socket info', data);
+    socketService.emit(socketEvents.SAVE_SOCKET_INFO, data);
   },
 };
 
