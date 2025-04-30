@@ -298,50 +298,18 @@ export default function Dashboard() {
 
           // Store the request ID for future reference
           if (response && response.id) {
-            console.log('bookingRequestId', bookingRequestId);
+            console.log('response', response);
             setBookingRequestId(response.id);
           }
         };
-        // Register all event handlers
-        const unsubscribeRequestSent = socketService.on(
-          socketEvents.REQUEST_SENT,
-          requestSentHandler
-        );
-        // const unsubscribeScheduleRequestSent = socketService.on(socketEvents.SCHEDULE_REQUEST_SENT, scheduleRequestSentHandler);
-        // const unsubscribeNoDriverFound = socketService.on(socketEvents.NO_DRIVER_FOUND, noDriverFoundHandler);
-        // const unsubscribeError = socketService.on(socketEvents.ERROR, errorHandler);
-        // const unsubscribeDriverAccepted = socketService.on(socketEvents.DRIVER_ACCEPTED, driverAcceptedHandler);
-        // const unsubscribeDriverRejected = socketService.on(socketEvents.DRIVER_REJECTED, driverRejectedHandler);
 
-        // Set a timeout to clean up event listeners if no response is received
-        const cleanupTimeout = setTimeout(() => {
-          unsubscribeRequestSent();
-          // unsubscribeScheduleRequestSent();
-          // unsubscribeNoDriverFound();
-          // unsubscribeError();
-          // unsubscribeDriverAccepted();
-          // unsubscribeDriverRejected();
-          setIsBookingInProgress(false);
-        }, 60000); // 1 minute timeout
-
+        // Register the request sent handler
+        socketHelpers.onRequestSent(requestSentHandler);
         // Emit the booking request
-        socketHelpers
-          .requestSendBooking(bookingPayload)
-          .then(response => {
-            console.log('Booking request sent:', response);
-            clearTimeout(cleanupTimeout);
-          })
-          .catch(error => {
-            console.error('Error sending booking request:', error);
-            clearTimeout(cleanupTimeout);
-            setComfirmBooking(true);
-            setSelectRide(false);
-            toast.error('Failed to send booking request. Please try again.');
-            setIsBookingInProgress(false);
-          })
-          .finally(() => {
-            setLoading(false);
-          });
+        socketHelpers.requestBookingWithResponse(bookingPayload);
+
+        // Clean up on component unmount or when booking is complete
+        return () => {};
       } catch (error) {
         console.error('Error in proceedGenderModel:', error);
         toast.error('An error occurred while requesting a driver. Please try again.');
@@ -757,6 +725,17 @@ export default function Dashboard() {
 
     await rideManagerService.applyCoupon(couponCode, userAuth);
   };
+
+  useEffect(() => {
+    socketService.on('requestStatusChanged', function (data) {
+      console.log('Recieved Request status changed:', data);
+    });
+
+    socketService.on('noDriverFound', function (data) {
+      console.log('Recieved noDriverFound:', data);
+    });
+  }, []);
+
   console.log('availableDriver', availableDriver);
   return (
     <ThemeProvider>

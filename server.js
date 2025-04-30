@@ -9,11 +9,10 @@ const dev = process.env.NODE_ENV !== 'production';
 const app = next({ dev });
 const handle = app.getRequestHandler();
 
-// HTTPS configuration with existing certificates
+// HTTPS configuration with mkcert certificates
 const httpsOptions = {
-  // Correct key
-  cert: fs.readFileSync(path.join(__dirname, 'certs', 'uniride.frontend.pem')),
-  key: fs.readFileSync(path.join(__dirname, 'certs', 'uniride.frontend-key.pem')), // Correct cert
+  cert: fs.readFileSync(path.join(__dirname, 'certificates', 'localhost+2.pem')),
+  key: fs.readFileSync(path.join(__dirname, 'certificates', 'localhost+2-key.pem')),
 };
 
 // Prepare and start the HTTPS server
@@ -23,7 +22,7 @@ app.prepare().then(() => {
     handle(req, res, parsedUrl);
   }).listen(3000, err => {
     if (err) throw err;
-    console.log('> Ready on https://uniride.frontend:3000');
-    console.log('> HTTPS server running with custom certificates');
+    console.log('> Ready on https://localhost:3000');
+    console.log('> HTTPS server running with mkcert certificates');
   });
 });

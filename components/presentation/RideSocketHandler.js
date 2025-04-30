@@ -176,7 +176,7 @@ class RideSocketHandler {
       if (data && data.driver) {
         setDriverDetails(data.driver);
         setShowDriverAcceptedPrompt(true);
-        setShowNoDriverFoundPrompt(false);
+        //setShowNoDriverFoundPrompt(false);
         toast.success('Driver accepted your ride request!');
       }
     } catch (error) {
@@ -213,7 +213,7 @@ class RideSocketHandler {
   handleNoDriverFound(data) {
     try {
       const { setShowNoDriverFoundPrompt } = this.stateSetters;
-      setShowNoDriverFoundPrompt(true);
+      //setShowNoDriverFoundPrompt(true);
       toast.error('No drivers found in your area');
     } catch (error) {
       errorLog('Error handling no driver found', error);
@@ -223,8 +223,8 @@ class RideSocketHandler {
   // Handle error
   handleError(data) {
     try {
-      const { setShowErrorPrompt } = this.stateSetters;
-      setShowErrorPrompt(true);
+      // const { setShowErrorPrompt } = this.stateSetters;
+      // setShowErrorPrompt(true);
       toast.error(data.message || 'An error occurred');
     } catch (error) {
       errorLog('Error handling socket error', error);

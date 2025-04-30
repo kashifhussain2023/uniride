@@ -111,15 +111,24 @@ class SocketService {
           }
         : {};
 
-      this.socket = io(SOCKET_URL, {
-        autoConnect: false,
-        path: '/connect-socket/socket.io',
+      // this.socket = io(SOCKET_URL, {
+      //   auth: {
+      //     token: `${this.authToken}`,
+      //   },
+      //   autoConnect: false,
+      //   path: '/connect-socket/socket.io',
+      //   //query: query,
+      //   reconnection: true,
+      //   reconnectionAttempts: this.maxReconnectAttempts,
+      //   reconnectionDelay: this.reconnectDelay,
+      //   timeout: 20000,
+      //   transports: ['websocket', 'polling'],
+      // });
+
+      this.socket = io('https://uniridesocket.24livehost.com/connect-socket', {
+        path: '/socket.io',
         query: query,
-        reconnection: true,
-        reconnectionAttempts: this.maxReconnectAttempts,
-        reconnectionDelay: this.reconnectDelay,
-        timeout: 20000,
-        transports: ['websocket', 'polling'],
+        transports: ['polling'],
       });
 
       // Set up event listeners
@@ -187,16 +196,18 @@ class SocketService {
       // Instead, create a basic socket connection
       const SOCKET_URL = `https://localhost:5103`;
       debugLog('Creating basic socket connection to', SOCKET_URL);
+
+      const query = this.authToken
+        ? {
+            token: `Bearer ${this.authToken}`,
+          }
+        : {};
+
       try {
-        this.socket = io(SOCKET_URL, {
-          autoConnect: false,
-          path: '/connect-socket/socket.io',
-          reconnection: true,
-          reconnectionAttempts: this.maxReconnectAttempts,
-          reconnectionDelay: this.reconnectDelay,
-          timeout: 20000,
-          transports: ['websocket', 'polling'],
-          withCredentials: true,
+        this.socket = io('https://uniridesocket.24livehost.com/connect-socket', {
+          path: '/socket.io',
+          query: query,
+          transports: ['polling'],
         });
 
         // Set up event listeners
@@ -382,6 +393,11 @@ const socketHelpers = {
     return socketService.on(socketEvents.CAR_LOCATIONS, handler);
   },
 
+  onChangeRequestStatus: handler => {
+    debugLog('Registering handler for change request status');
+    return socketService.on(socketEvents.CHANGE_REQUEST_STATUS, handler);
+  },
+
   // Listen for driver accepted
   onDriverAccepted: handler => {
     debugLog('Registering handler for driver accepted');
@@ -422,6 +438,33 @@ const socketHelpers = {
   onSocketSaved: handler => {
     debugLog('Registering handler for socket saved');
     return socketService.on(socketEvents.SOCKET_SAVED, handler);
+  },
+
+  // Request booking with response handling
+  requestBookingWithResponse: payload => {
+    debugLog('Requesting booking with response handling', payload);
+    return new Promise((resolve, reject) => {
+      let resolved = false;
+      const timeoutId = setTimeout(() => {
+        if (!resolved) {
+          debugLog('Booking request timed out');
+          socketService.off(socketEvents.REQUEST_SENT, requestSentHandler);
+          reject(new Error('Request timed out'));
+        }
+      }, 30000); // 30 seconds timeout
+
+      const requestSentHandler = response => {
+        debugLog('Request sent successfully', response);
+        if (!resolved) {
+          resolved = true;
+          clearTimeout(timeoutId);
+          resolve(response);
+        }
+      };
+
+      socketService.on(socketEvents.REQUEST_SENT, requestSentHandler);
+      socketService.emit(socketEvents.REQUEST_BOOKING, payload);
+    });
   },
 
   // Request booking

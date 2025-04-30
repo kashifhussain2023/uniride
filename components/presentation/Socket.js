@@ -104,21 +104,10 @@ class SocketService {
             token: `Bearer ${this.authToken}`,
           }
         : {};
-      this.socket = io(SOCKET_URL, {
-        autoConnect: false,
-        extraHeaders: this.authToken
-          ? {
-              authorization: `Bearer ${this.authToken}`,
-            }
-          : {},
-        path: '/connect-socket/socket.io',
+      this.socket = io('https://uniridesocket.24livehost.com/connect-socket', {
+        path: '/socket.io',
         query: query,
-        reconnection: true,
-        reconnectionAttempts: this.maxReconnectAttempts,
-        reconnectionDelay: this.reconnectDelay,
-        timeout: 20000,
-        transports: ['websocket', 'polling'],
-        withCredentials: true,
+        transports: ['polling'],
       });
       debugLog('Socket instance created with options', {
         extraHeaders: this.socket.io.opts.extraHeaders,
@@ -551,16 +540,6 @@ const socketHelpers = {
     // authorization token will be added automatically by the emit method
   },
   // Handle driver's response to a ride request
-  changeRequestStatus: (requestId, status) => {
-    debugLog('Changing request status', {
-      requestId,
-      status,
-    });
-    socketService.emit(socketEvents.CHANGE_REQUEST_STATUS, {
-      request_id: requestId,
-      status: status,
-    });
-  },
 
   // Clear connection history
   clearConnectionHistory: () => {
