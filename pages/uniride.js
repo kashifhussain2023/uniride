@@ -307,7 +307,7 @@ export default function Dashboard({ userAuth }) {
             clearTimeout(cleanupTimeout);
             setComfirmBooking(true);
             setSelectRide(false);
-            toast.error("Failed to send booking request. Please try again.");
+            toast.error(error?.message || "Failed to send booking request. Please try again.");
             setIsBookingInProgress(false);
           })
           .finally(() => {

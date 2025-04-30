@@ -533,19 +533,19 @@ const socketHelpers = {
       //   }
       // };
       
-      // const errorHandler = (error) => {
-      //   debugLog("Error in booking request", error);
-      //   if (!resolved) {
-      //     resolved = true;
-      //     reject(error);
-      //   }
-      // };
+      const errorHandler = (error) => {
+        debugLog("Error in booking request", error);
+        if (!resolved) {
+          resolved = true;
+          reject(error);
+        }
+      };
       
       // // Register all event handlers
        socketService.on(socketEvents.REQUEST_SENT, requestSentHandler);
       socketService.on(socketEvents.SCHEDULE_REQUEST_SENT, scheduleRequestSentHandler);
       // socketService.on(socketEvents.NO_DRIVER_FOUND, noDriverFoundHandler);
-      // socketService.on(socketEvents.ERROR, errorHandler);
+      socketService.on(socketEvents.ERROR, errorHandler);
       
       // // Set a timeout for the request
       const timeoutId = setTimeout(() => {
@@ -555,7 +555,7 @@ const socketHelpers = {
           socketService.off(socketEvents.REQUEST_SENT, requestSentHandler);
           socketService.off(socketEvents.SCHEDULE_REQUEST_SENT, scheduleRequestSentHandler);
           // socketService.off(socketEvents.NO_DRIVER_FOUND, noDriverFoundHandler);
-          // socketService.off(socketEvents.ERROR, errorHandler);
+          socketService.off(socketEvents.ERROR, errorHandler);
           reject(new Error("Request timed out"));
         }
       }, 30000); // 30 seconds timeout to match server timeout
