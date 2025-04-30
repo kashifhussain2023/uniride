@@ -21,8 +21,8 @@ export default function SaveCards({ userAuth }) {
 
   const getCustomerCardList = async () => {
     const formData = new FormData();
-    formData.append("customer_id", userAuth.customer_id);
-    formData.append("token_code", userAuth.token_code);
+    formData.append("customer_id", userAuth?.customer_id);
+    formData.append("token_code", userAuth?.token_code);
 
     const response = await api({
       url: "/customer/payments/list",
@@ -44,11 +44,11 @@ export default function SaveCards({ userAuth }) {
   const handleMakeDefaultCard = async (value) => {
     setLoading(true);
     const formData = new FormData();
-    formData.append("customer_id", userAuth.customer_id);
-    formData.append("card_id", value);
-    formData.append("token_code", userAuth.token_code);
+    // formData.append("customer_id", userAuth.customer_id);
+    formData.append("payment_id", value);
+    // formData.append("token_code", userAuth.token_code);
     const response = await api({
-      url: "/customers/set_default_card",
+      url: "/customer/payments/set-default-card",
       method: "POST",
       data: formData,
     });
@@ -63,6 +63,7 @@ export default function SaveCards({ userAuth }) {
         if (session) {
           await sessionUpdate({
             user: {
+              
               ...session?.user,
               data: {
                 ...session?.user?.data,
@@ -96,9 +97,9 @@ export default function SaveCards({ userAuth }) {
   const handleDeleteCard = async (value) => {
     setLoading(true);
     const formData = new FormData();
-    formData.append("customer_id", userAuth.customer_id);
+    formData.append("customer_id", userAuth?.customer_id);
     formData.append("card_id", value);
-    formData.append("token_code", userAuth.token_code);
+    formData.append("token_code", userAuth?.token_code);
 
     const requestBody = {
       payment_id: value,
@@ -120,7 +121,7 @@ export default function SaveCards({ userAuth }) {
     ) {
       setLoading(false);
       toast.error(
-        "Your account has been logged in on another device.Please login again to continue."
+        "Your account has been logged in on another device. Please login again to continue."
       );
       await signOut({ redirect: false });
       router.push("/login");
@@ -132,7 +133,7 @@ export default function SaveCards({ userAuth }) {
 
   const handleAddCardClick = () => {
     // router.push("/addPaymentInfo");
-    router.push("/save-cards/add");
+    router.push("/cards/add");
   };
 
   useEffect(() => {
@@ -143,7 +144,7 @@ export default function SaveCards({ userAuth }) {
     <ThemeProvider>
       <Head>
         <title>Uniride</title>
-        <meta name="description" content="Uniride " />
+        <meta name="description" content="Uniride" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
@@ -157,7 +158,6 @@ export default function SaveCards({ userAuth }) {
                 subtitle="Cards"
                 images_icon={"../cards.png"}
               />
-
               <Button
                 variant="contained"
                 color="primary"

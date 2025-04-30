@@ -96,6 +96,7 @@ class SocketService {
 
     // Socket configuration
     const SOCKET_URL = `https://uniridesocket.24livehost.com/connect-socket`;
+    // const SOCKET_URL = `https://uniridesocket.24livehost.com`;
     debugLog("Connecting to socket URL", SOCKET_URL);
 
     try {
@@ -104,13 +105,16 @@ class SocketService {
       
       this.socket = io(SOCKET_URL, {
         withCredentials: true,
-        transports: ["websocket", "polling"],
+        // transports: ["websocket", "polling"],
+        transports: ["polling"],
         reconnection: true,
         reconnectionAttempts: this.maxReconnectAttempts,
         reconnectionDelay: this.reconnectDelay,
         timeout: 20000,
-        autoConnect: false,
+        // autoConnect: false,
+        autoConnect: true,
         path: "/socket.io",
+        // path: "/connect-socket/socket.io",
         rejectUnauthorized: false,
         query: query,
         extraHeaders: this.authToken
@@ -513,13 +517,13 @@ const socketHelpers = {
         }
       };
       
-      // const scheduleRequestSentHandler = (response) => {
-      //   debugLog("Schedule request sent successfully", response);
-      //   if (!resolved) {
-      //     resolved = true;
-      //     resolve(response);
-      //   }
-      // };
+      const scheduleRequestSentHandler = (response) => {
+        debugLog("Schedule request sent successfully", response);
+        if (!resolved) {
+          resolved = true;
+          resolve(response);
+        }
+      };
       
       // const noDriverFoundHandler = (response) => {
       //   debugLog("No driver found", response);
@@ -539,7 +543,7 @@ const socketHelpers = {
       
       // // Register all event handlers
        socketService.on(socketEvents.REQUEST_SENT, requestSentHandler);
-      // socketService.on(socketEvents.SCHEDULE_REQUEST_SENT, scheduleRequestSentHandler);
+      socketService.on(socketEvents.SCHEDULE_REQUEST_SENT, scheduleRequestSentHandler);
       // socketService.on(socketEvents.NO_DRIVER_FOUND, noDriverFoundHandler);
       // socketService.on(socketEvents.ERROR, errorHandler);
       
@@ -549,7 +553,7 @@ const socketHelpers = {
           debugLog("Booking request timed out");
           // Clean up event listeners
           socketService.off(socketEvents.REQUEST_SENT, requestSentHandler);
-          // socketService.off(socketEvents.SCHEDULE_REQUEST_SENT, scheduleRequestSentHandler);
+          socketService.off(socketEvents.SCHEDULE_REQUEST_SENT, scheduleRequestSentHandler);
           // socketService.off(socketEvents.NO_DRIVER_FOUND, noDriverFoundHandler);
           // socketService.off(socketEvents.ERROR, errorHandler);
           reject(new Error("Request timed out"));

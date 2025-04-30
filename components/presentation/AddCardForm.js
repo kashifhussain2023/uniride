@@ -18,14 +18,6 @@ import { api } from "@/utils/api/common";
 import { toast } from "react-toastify";
 import { useRouter } from "next/router";
 import SpinnerLoader from "../common/SpinnerLoader";
-import { setCookie } from "nookies";
-const Item = styled(Paper)(({ theme }) => ({
-  backgroundColor: theme.palette.mode === "dark" ? "#1A2027" : "#fff",
-  ...theme.typography.body2,
-  padding: theme.spacing(1),
-  textAlign: "center",
-  color: theme.palette.text.secondary,
-}));
 
 export default function AddCardForm({ userAuth }) {
   const router = useRouter();
@@ -33,7 +25,6 @@ export default function AddCardForm({ userAuth }) {
   const elements = useElements();
   const { data: session, update: sessionUpdate } = useSession();
   const [loading, setLoading] = useState(false);
-  const [age, setAge] = useState("");
   const [responseError, setResponseError] = useState("");
   const [removeErrors, setRemoveErrors] = useState(false);
   const [cardError, setCardError] = useState("");
@@ -48,11 +39,6 @@ export default function AddCardForm({ userAuth }) {
 
   const [errors, setErrors] = useState({
     card_holder: "",
-    // card_number: "",
-    // card_type: "",
-    // cvv: "",
-    // expiration_month: "",
-    // expiration_year: "",
   });
 
   const handleCardDetail = (event) => {
@@ -135,26 +121,7 @@ export default function AddCardForm({ userAuth }) {
 
         if (response.status === true) {
           toast.success(response.message || "Card added successfully");
-          
-          // Fetch updated profile data to get the latest default_payment_method status
-         
-          
-          // if (profileResponse.status === true) {
-          //   // Update session with new payment method status
-          //   if (session) {
-          //     await sessionUpdate({
-          //       user: {
-          //         ...session?.user,
-          //         data: {
-          //           ...session?.user?.data,
-          //           default_payment_method: profileResponse.data.default_payment_method
-          //         }
-          //       },
-          //     });
-          //   }
-          // }
-
-         
+                  
           setTimeout(async () => {
             const profileResponse = await api({
               url: "/customer/get-profile-details",

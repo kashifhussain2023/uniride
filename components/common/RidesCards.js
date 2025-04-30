@@ -15,8 +15,6 @@ export default function RidesCards({
   duration,
 }) {
   // const { carsList } = useCarContext();
-
-  console.log({"carsList": carsList, "type": type});
   
   // Filter cars based on type
   const filterCarList = type === "regular" 

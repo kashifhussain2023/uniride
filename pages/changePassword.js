@@ -5,6 +5,7 @@ import ThemeProvider from "@/theme/ThemeProvider";
 import Layout from "@/components/common/Layout";
 import styled from "@emotion/styled";
 import { toast } from "react-toastify";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 import {
   Button,
@@ -12,10 +13,11 @@ import {
   InputAdornment,
   TextField,
   Typography,
+  IconButton,
 } from "@mui/material";
 import { Lock } from "@mui/icons-material";
 import { validateChangePassword } from "@/utils/change-password";
-import { getSession, useSession, signOut } from "next-auth/react";
+import { signOut } from "next-auth/react";
 import { api } from "@/utils/api/common";
 import SpinnerLoader from "@/components/common/SpinnerLoader";
 
@@ -27,14 +29,24 @@ export default function ChangePassword({ userAuth }) {
     new_password: "",
     confirm_password: "",
   });
-
   const [inputs, setInputs] = useState({
     old_password: "",
     new_password: "",
     confirm_password: "",
   });
-
   const [removeErrors, setRemoveErrors] = useState(false);
+  const [showPassword, setShowPassword] = useState({
+    old_password: false,
+    new_password: false,
+    confirm_password: false,
+  });
+
+  const handleClickShowPassword = (field) => {
+    setShowPassword((prev) => ({
+      ...prev,
+      [field]: !prev[field],
+    }));
+  };
 
   const handleInputChange = ({ target }) => {
     setInputs((inputs) => ({
@@ -71,14 +83,14 @@ export default function ChangePassword({ userAuth }) {
       const formData = new FormData();
       formData.append("old_password", inputs.old_password);
       formData.append("new_password", inputs.new_password);
-      formData.append("customer_id", userAuth.customer_id);
-      formData.append("token_code", userAuth.token_code);
+      formData.append("customer_id", userAuth?.customer_id);
+      formData.append("token_code", userAuth?.token_code);
 
       const requestBody = {
         old_password: inputs.old_password,
         new_password: inputs.new_password,
         confirm_password: inputs.confirm_password,
-      }
+      };
 
       const response = await api({
         url: "/customer/change-password",
@@ -133,7 +145,7 @@ export default function ChangePassword({ userAuth }) {
                 <TextField
                   id="outlined-start-adornment"
                   fullWidth
-                  type="password"
+                  type={showPassword.old_password ? "text" : "password"}
                   name="old_password"
                   value={inputs.old_password}
                   onChange={handleInputChange}
@@ -141,6 +153,23 @@ export default function ChangePassword({ userAuth }) {
                     startAdornment: (
                       <InputAdornment position="start">
                         <Lock />
+                      </InputAdornment>
+                    ),
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          onClick={() =>
+                            handleClickShowPassword("old_password")
+                          }
+                          edge="end"
+                          aria-label="toggle password visibility"
+                        >
+                          {showPassword.old_password ? (
+                            <Visibility />
+                          ) : (
+                            <VisibilityOff />
+                          )}
+                        </IconButton>
                       </InputAdornment>
                     ),
                   }}
@@ -152,7 +181,7 @@ export default function ChangePassword({ userAuth }) {
                 <TextField
                   id="outlined-start-adornment"
                   fullWidth
-                  type="password"
+                  type={showPassword.new_password ? "text" : "password"}
                   name="new_password"
                   value={inputs.new_password}
                   onChange={handleInputChange}
@@ -162,6 +191,23 @@ export default function ChangePassword({ userAuth }) {
                         <Lock />
                       </InputAdornment>
                     ),
+                    endAdornment:(
+                      <InputAdornment position="end">
+                        <IconButton
+                          onClick={() =>
+                            handleClickShowPassword("new_password")
+                          }
+                          edge="end"
+                          aria-label="toggle password visibility"
+                        >
+                          {showPassword.new_password ? (
+                            <Visibility />
+                          ) : (
+                            <VisibilityOff />
+                          )}
+                        </IconButton>
+                      </InputAdornment>
+                    )
                   }}
                   helperText={errors && errors.new_password}
                 />
@@ -171,7 +217,7 @@ export default function ChangePassword({ userAuth }) {
                 <TextField
                   id="outlined-start-adornment"
                   fullWidth
-                  type="password"
+                  type={showPassword.confirm_password ? "text" : "password"}
                   name="confirm_password"
                   value={inputs.confirm_password}
                   onChange={handleInputChange}
@@ -181,6 +227,17 @@ export default function ChangePassword({ userAuth }) {
                         <Lock />
                       </InputAdornment>
                     ),
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton onClick={()=>handleClickShowPassword("confirm_password")} edge="end" aria-label="toggle password visibility">
+                          {showPassword.confirm_password ? (
+                            <Visibility />
+                          ) : (
+                            <VisibilityOff />
+                          )}
+                        </IconButton>
+                      </InputAdornment>
+                    )
                   }}
                   helperText={errors && errors.confirm_password}
                 />

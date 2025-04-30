@@ -79,8 +79,6 @@ export default function Login() {
       }
 
       const userData = session.user.data;
-      
-      console.log("userData", userData);
 
       const userProfile = {
         name: userData.name,
@@ -115,7 +113,7 @@ export default function Login() {
 
         if(userData.default_payment_method===null){
           toast.success("Please add your card details to complete registration.");
-          router.push("/add-card");
+          router.push("/cards");
         }else{
           router.push("/uniride");
         }
@@ -238,7 +236,6 @@ export default function Login() {
                 <TextField
                   id="outlined-start-adornment"
                   fullWidth
-                  // type="password"
                   type={showPassword ? "text" : "password"}
                   name="password"
                   value={inputs.password}
