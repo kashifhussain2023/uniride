@@ -16,6 +16,3 @@ export const MessageModel = dynamic(() => import('@/components/common/model/Mess
 // Presentation Components
 export const InnerContent = dynamic(() => import('@/components/presentation/InnerContent'));
 export const AddCardForm = dynamic(() => import('@/components/presentation/AddCardForm'));
-export const Socket = dynamic(() => import('@/components/presentation/Socket'), {
-  ssr: false,
-});
