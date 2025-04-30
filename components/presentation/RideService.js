@@ -3,7 +3,7 @@ import { format } from 'date-fns';
 import { toast } from 'react-toastify';
 import { signOut } from 'next-auth/react';
 import { getSession } from 'next-auth/react';
-import { socketHelpers, socketEvents, socketService } from './Socket';
+import { socketEvents, socketHelpers, socketService } from './SocketEvents';
 import { parse } from 'date-fns';
 
 // Debug flag - set to true to enable detailed logging
@@ -206,24 +206,14 @@ class RideService {
     };
 
     // Register event handlers
-    const unsubscribeRequestSent = socketService.on(socketEvents.REQUEST_SENT, requestSentHandler);
-    const unsubscribeScheduleRequestSent = socketService.on(
-      socketEvents.SCHEDULE_REQUEST_SENT,
+    const unsubscribeRequestSent = socketHelpers.onRequestSent(requestSentHandler);
+    const unsubscribeScheduleRequestSent = socketHelpers.onScheduleRequestSent(
       scheduleRequestSentHandler
     );
-    const unsubscribeNoDriverFound = socketService.on(
-      socketEvents.NO_DRIVER_FOUND,
-      noDriverFoundHandler
-    );
-    const unsubscribeError = socketService.on(socketEvents.ERROR, errorHandler);
-    const unsubscribeDriverAccepted = socketService.on(
-      socketEvents.DRIVER_ACCEPTED,
-      driverAcceptedHandler
-    );
-    const unsubscribeDriverRejected = socketService.on(
-      socketEvents.DRIVER_REJECTED,
-      driverRejectedHandler
-    );
+    const unsubscribeNoDriverFound = socketHelpers.onNoDriverFound(noDriverFoundHandler);
+    const unsubscribeError = socketHelpers.onError(errorHandler);
+    const unsubscribeDriverAccepted = socketHelpers.onDriverAccepted(driverAcceptedHandler);
+    const unsubscribeDriverRejected = socketHelpers.onDriverRejected(driverRejectedHandler);
 
     // Return cleanup function
     return () => {
@@ -294,7 +284,7 @@ class RideService {
       debugLog('Booking payload', bookingPayload);
 
       // Emit the booking request
-      return socketHelpers.requestSendBooking(bookingPayload);
+      return socketHelpers.requestBookingWithResponse(bookingPayload);
     } catch (error) {
       errorLog('Error requesting ride', error);
       this.isBookingInProgress = false;
@@ -362,15 +352,11 @@ class RideService {
     debugLog('Canceling booking request', this.bookingRequestId);
 
     if (this.bookingRequestId) {
-      const params = {
-        auth_token: userAuth.token_code,
+      socketHelpers.cancelRide({
         customer_id: userAuth.customer_id,
         request_id: this.bookingRequestId,
-        token_code: userAuth.token_code,
         user_type: 'customer',
-      };
-
-      socketHelpers.cancel_ride(params);
+      });
       this.isBookingInProgress = false;
       this.bookingRequestId = null;
       toast.info('Booking request canceled');

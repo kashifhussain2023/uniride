@@ -365,6 +365,7 @@ const socketEvents = {
   REQUEST_RIDE_COMPLETENESS: 'requestRideCompleteness',
   REQUEST_SCHEDULE_RIDE_DETAILS: 'requestScheduleRideDetails',
   REQUEST_SENT: 'requestSent',
+  REQUEST_STATUS_CHANGED: 'requestStatusChanged',
   REQUEST_TIMEOUT: 'requestTimeOut',
   RIDE_COMPLETENESS_RESPONSE: 'rideCompletenessResponse',
   SAVE_SOCKET_INFO: 'saveSocketInfo',

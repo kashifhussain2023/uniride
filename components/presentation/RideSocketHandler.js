@@ -1,4 +1,4 @@
-import { socketEvents, socketHelpers } from './SocketEvents';
+import { socketEvents, socketHelpers, socketService } from './SocketEvents';
 import { toast } from 'react-toastify';
 
 // Debug flag - set to true to enable detailed logging
@@ -29,12 +29,8 @@ const errorLog = (message, error = null) => {
 
 class RideSocketHandler {
   constructor() {
-    if (RideSocketHandler.instance) {
-      return RideSocketHandler.instance;
-    }
     this.unsubscribeFunctions = [];
-    debugLog('RideSocketHandler instance created');
-    RideSocketHandler.instance = this;
+    this.stateSetters = null;
   }
 
   // Initialize socket event handlers
@@ -258,18 +254,9 @@ class RideSocketHandler {
   // Clean up event handlers
   cleanup() {
     debugLog('Cleaning up event handlers');
-    this.unsubscribeFunctions.forEach(unsubscribe => {
-      try {
-        unsubscribe();
-      } catch (error) {
-        errorLog('Error unsubscribing from event', error);
-      }
-    });
+    this.unsubscribeFunctions.forEach(unsubscribe => unsubscribe());
     this.unsubscribeFunctions = [];
   }
 }
 
-// Create a singleton instance
-const rideSocketHandler = new RideSocketHandler();
-
-export default rideSocketHandler;
+export default new RideSocketHandler();

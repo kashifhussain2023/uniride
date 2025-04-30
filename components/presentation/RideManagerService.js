@@ -1,8 +1,8 @@
-import { api } from '@/utils/api/register';
+import { socketEvents, socketHelpers, socketService } from './SocketEvents';
 import { toast } from 'react-toastify';
 import { signOut } from 'next-auth/react';
 import { getSession } from 'next-auth/react';
-import { socketHelpers, socketService } from './SocketEvents';
+import { api } from '@/utils/api/register';
 import rideSocketHandler from './RideSocketHandler';
 
 // Debug flag - set to true to enable detailed logging

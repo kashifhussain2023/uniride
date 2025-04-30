@@ -727,11 +727,11 @@ export default function Dashboard() {
   };
 
   useEffect(() => {
-    socketService.on('requestStatusChanged', function (data) {
+    socketService.on(socketEvents.REQUEST_STATUS_CHANGED, function (data) {
       console.log('Recieved Request status changed:', data);
     });
 
-    socketService.on('noDriverFound', function (data) {
+    socketService.on(socketEvents.NO_DRIVER_FOUND, function (data) {
       console.log('Recieved noDriverFound:', data);
     });
   }, []);
