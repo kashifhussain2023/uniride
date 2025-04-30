@@ -27,7 +27,6 @@
         "varsIgnorePattern": "^_"
       }
     ],
-    "no-console": "warn",
     "prefer-const": "error",
     "no-var": "error",
     "eqeqeq": "error",

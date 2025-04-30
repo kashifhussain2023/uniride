@@ -1,21 +1,11 @@
 import { GoogleMap, LoadScript, MarkerF } from '@react-google-maps/api';
-import { useEffect, useState } from 'react';
 
-const LocationMapImage = props => {
-  const mapContainerStyle = {
-    height: '150px',
-    // Set a specific height
-    width: '100%',
-  };
-  const defaultCenter = {
-    lat: parseFloat(props.locationLat) || 0,
-    lng: parseFloat(props.locationLng) || 0,
-  };
+export default function MapView({ centerMapLocation, mapContainerStyle }) {
   return (
     <LoadScript googleMapsApiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}>
       <GoogleMap
         mapContainerStyle={mapContainerStyle}
-        center={defaultCenter}
+        center={centerMapLocation}
         zoom={15}
         options={{
           fullscreenControl: false,
@@ -24,9 +14,8 @@ const LocationMapImage = props => {
           zoomControl: false,
         }}
       >
-        {defaultCenter && <MarkerF position={defaultCenter} />}
+        {centerMapLocation && <MarkerF position={centerMapLocation} />}
       </GoogleMap>
     </LoadScript>
   );
-};
-export default LocationMapImage;
+}

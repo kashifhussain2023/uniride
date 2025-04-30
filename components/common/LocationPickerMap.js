@@ -15,10 +15,10 @@ const LocationPickerMap = ({
   comfirmBooking,
   selectRide,
   availableDriver,
+  distance,
+  duration,
 }) => {
   const [directions, setDirections] = useState(null);
-  const [distance, setDistance] = useState(null);
-  const [duration, setDuration] = useState(null);
   const [directionsKey, setDirectionsKey] = useState(0);
   const resetMap = () => {
     // Increment the key to force remounting the map
@@ -76,13 +76,6 @@ const LocationPickerMap = ({
       (result, status) => {
         if (status === window.google.maps.DirectionsStatus.OK) {
           setDirections(result);
-          // Extract and set distance and duration
-          const route = result.routes[0];
-          if (route && route.legs && route.legs.length > 0) {
-            const leg = route.legs[0];
-            setDistance(leg.distance.text);
-            setDuration(leg.duration.text);
-          }
         } else {
           console.error('Directions request failed:', status);
         }
@@ -105,13 +98,6 @@ const LocationPickerMap = ({
       (result, status) => {
         if (status === window.google.maps.DirectionsStatus.OK) {
           setDirections(result);
-          // Extract and set distance and duration
-          const route = result.routes[0];
-          if (route && route.legs && route.legs.length > 0) {
-            const leg = route.legs[0];
-            setDistance(leg.distance.text);
-            setDuration(leg.duration.text);
-          }
         } else {
           console.error('Directions request failed:', status);
         }
@@ -120,10 +106,8 @@ const LocationPickerMap = ({
   };
   useEffect(() => {
     const cleanup = () => {
-      // Reset directions, distance, and duration when the component unmounts
+      // Reset directions when the component unmounts
       setDirections(null);
-      setDistance(null);
-      setDuration(null);
     };
     if (rideStatus) {
       calculateDirections(driverLocation);
@@ -135,16 +119,14 @@ const LocationPickerMap = ({
     }
     return cleanup;
   }, [
-    //driverLocation,
+    driverLocation,
     dropCustomerLocation,
     currentLocation,
     comfirmBooking,
     rideStatus,
+    distance,
+    duration,
   ]);
-  console.log({
-    distance: distance,
-    duration: duration,
-  });
   return (
     <LoadScript
       googleMapsApiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}
@@ -175,14 +157,13 @@ const LocationPickerMap = ({
           <DirectionsRenderer
             directions={directions}
             options={{
-              // Suppress default markers (A and B)
               suppressMarkers: true,
             }}
           />
         )}
 
         {(comfirmBooking || selectRide) && centerMapLocation && (
-          <MarkerF position={centerMapLocation} text={'Google Map'} />
+          <MarkerF position={centerMapLocation} />
         )}
 
         {comfirmBooking && currentLocation && <MarkerF position={currentLocation} />}
@@ -234,7 +215,7 @@ const LocationPickerMap = ({
             }}
           />
         )}
-        {/* Display distance and duration on the map  */}
+        {/* Display distance and duration on the map */}
         {distance && duration && (
           <DistanceDurationOverlay>
             <Typography>Distance: {distance}</Typography>

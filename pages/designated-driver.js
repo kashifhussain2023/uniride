@@ -6,8 +6,6 @@ import SpinnerLoader from '@/components/common/SpinnerLoader';
 import LocationValueModel from '@/components/common/model/LocationValueModel';
 import MessageModel from '@/components/common/model/MessageModel';
 import InnerContent from '@/components/presentation/InnerContent';
-import rideManagerService from '@/components/presentation/RideManagerService';
-import rideSocketHandler from '@/components/presentation/RideSocketHandler';
 import { socketEvents, socketHelpers, socketService } from '@/components/presentation/SocketEvents';
 import ThemeProvider from '@/theme/ThemeProvider';
 import { api } from '@/utils/api/register';
@@ -174,7 +172,7 @@ export default function Dashboard() {
   };
 
   const applyCoupon = async () => {
-    await rideManagerService.applyCoupon(couponCode, userAuth);
+    await socketHelpers.applyCoupon(couponCode, userAuth);
   };
 
   const dropPickLocationType = type => {
@@ -364,28 +362,17 @@ export default function Dashboard() {
 
     try {
       setLoading(true);
-      const formData = new FormData();
-      formData.append('request_id', acceptDriverDetail.request_id);
-      formData.append('ride_id', acceptDriverDetail.ride_id);
-      formData.append('customer_id', userAuth.customer_id);
-      formData.append('token_code', userAuth.token_code);
-      const response = await api({
-        data: formData,
-        method: 'POST',
-        url: '/customers/customer_cancel',
-      });
-      if (response.status === true) {
-        setLoading(false);
-        setSelectRide(true);
-        setComfirmBooking(false);
-        setInRRoute(false);
-        toast.info(response.message);
-        window.location.reload();
-      } else if (response.status === 'FALSE') {
-        toast.info(response.message);
-      } else {
-        toast.info(response.message);
-      }
+      await socketHelpers.cancelRide(
+        {
+          request_id: acceptDriverDetail.request_id,
+          ride_id: acceptDriverDetail.ride_id,
+        },
+        router
+      );
+      setLoading(false);
+      setSelectRide(true);
+      setComfirmBooking(false);
+      setInRRoute(false);
     } catch (error) {
       console.error('Error in handleRideCancelModel:', error);
       toast.error('An error occurred while canceling your ride. Please try again.');
@@ -495,14 +482,14 @@ export default function Dashboard() {
 
   const getAllCarsList = async location => {
     setLoading(true);
-    await rideManagerService.getAllCarsList(location, {
+    await socketHelpers.getAllCarsList(location, {
       setCarStatus,
       setCarsList,
       setLoading,
     });
   };
   const getUserCurrentLoacation = () => {
-    rideManagerService.getUserCurrentLocation({
+    socketHelpers.getUserCurrentLocation({
       getAllCarsList,
       setCenterMapLocation,
       setCurrentLocation,
@@ -511,7 +498,7 @@ export default function Dashboard() {
   };
 
   const getCurrentRideStatus = async () => {
-    await rideManagerService.getCurrentRideStatus(userAuth, {
+    await socketHelpers.getCurrentRideStatus(userAuth, {
       _setDriverId,
       setAcceptDriverDetail,
       setComfirmBooking,
@@ -527,7 +514,7 @@ export default function Dashboard() {
   };
 
   const getScheduleRideDetail = async () => {
-    await rideManagerService.getScheduleRideDetail(userAuth, {
+    await socketHelpers.getScheduleRideDetail(userAuth, {
       setLoading,
       setSaveDateTime,
       setScheduleRideStatus,
@@ -537,15 +524,15 @@ export default function Dashboard() {
   };
   useEffect(() => {
     // Set the ride type to designated
-    rideManagerService.setCustomerRideType('designated');
+    socketHelpers.setCustomerRideType('designated');
 
     // Only initialize socket and fetch data if userAuth is available
     if (userAuth) {
       // Initialize socket connection
-      rideManagerService.initializeSocket(userAuth);
+      socketHelpers.initializeSocket(userAuth);
 
       // Save socket info
-      rideManagerService.saveSocketInfo();
+      socketHelpers.saveSocketInfo();
 
       // Get user's current location
       getUserCurrentLoacation();
@@ -557,7 +544,7 @@ export default function Dashboard() {
       getScheduleRideDetail();
 
       // Set up socket event listeners
-      const cleanup = rideManagerService.setupSocketEventListeners({
+      const cleanup = socketHelpers.setupSocketEventListeners({
         _setDriverId,
         _setEndRideData,
         setAcceptDriverDetail,
@@ -582,7 +569,7 @@ export default function Dashboard() {
 
       // Request driver locations when component mounts and when currentLocation or carTypeId changes
       if (currentLocation && carTypeId) {
-        rideManagerService.requestDriverLocations(currentLocation, carTypeId);
+        socketHelpers.requestDriverLocations(currentLocation, carTypeId);
       }
 
       // Clean up socket event listeners when component unmounts
@@ -596,7 +583,7 @@ export default function Dashboard() {
   // Add a separate effect to handle location and car type changes
   useEffect(() => {
     if (userAuth && currentLocation && carTypeId) {
-      rideManagerService.requestDriverLocations(currentLocation, carTypeId);
+      socketHelpers.requestDriverLocations(currentLocation, carTypeId);
     }
   }, [currentLocation, carTypeId, userAuth]);
 
