@@ -11,6 +11,8 @@ import { Button, Typography } from '@mui/material';
 import { api } from '@/utils/api/common';
 import { toast } from 'react-toastify';
 import { parseCookies } from 'nookies';
+import SafeImage from '@/components/common/SafeImage';
+
 export default function Verification({ userAuth }) {
   const router = useRouter();
   const { data: session, update: sessionUpdate } = useSession();
@@ -133,10 +135,10 @@ export default function Verification({ userAuth }) {
         <LoginContainer>
           <Box>
             <LeftSide>
-              <img src="../loginimg.png" />
+              <SafeImage src="../loginimg.png" alt="Login Background" width={704} height={704} />
               <LoginDesc>
                 <Welcome>Welcome to</Welcome>
-                <img src="../logo1.png" />
+                <SafeImage src="../logo1.png" alt="Logo" width={196} height={75} />
                 <Typography variant="h4">
                   Our professionally trained drivers will make sure that the customers enjoy a safe
                   and reliable ride.
@@ -144,13 +146,12 @@ export default function Verification({ userAuth }) {
               </LoginDesc>
 
               <MobilePhone>
-                {' '}
-                <img src="../mobile.png" />
+                <SafeImage src="../mobile.png" alt="Mobile Phone" width={300} height={300} />
               </MobilePhone>
             </LeftSide>
             <RightSide>
               <SignInHead>
-                <img src="../loginIcon.png" />
+                <SafeImage src="../loginIcon.png" alt="Login Icon" width={40} height={40} />
                 <Typography
                   variant="h1"
                   sx={{

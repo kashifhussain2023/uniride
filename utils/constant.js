@@ -1,3 +1,5 @@
+import SafeImage from '@/components/common/SafeImage';
+
 export const mainMenuItems = [
   {
     icon: 'DashboardOutlined',
@@ -15,47 +17,70 @@ export const profileMenus = [
 ];
 export const menuIcons = [
   {
-    icon: '../icon/profileIcon.png',
+    icon: <SafeImage src="../icon/profileIcon.png" alt="Profile" width={24} height={24} />,
     label: 'Profile',
     path: '/profile',
   },
   {
-    icon: '../icon/favoriteLocationIcon.png',
+    icon: (
+      <SafeImage
+        src="../icon/favoriteLocationIcon.png"
+        alt="Favorite Location"
+        width={24}
+        height={24}
+      />
+    ),
     label: 'Favorite Location',
     path: '/favoriteDestination',
   },
   {
-    icon: '../icon/corporateProfileIcon.png',
+    icon: (
+      <SafeImage
+        src="../icon/corporateProfileIcon.png"
+        alt="Corporate Profile"
+        width={24}
+        height={24}
+      />
+    ),
     label: 'Corporate Profile',
     path: '/corporate-profile',
   },
   {
-    icon: '../icon/emergencyContactIcon.png',
+    icon: (
+      <SafeImage
+        src="../icon/emergencyContactIcon.png"
+        alt="Emergency Contact"
+        width={24}
+        height={24}
+      />
+    ),
     label: 'Emergency Contact',
     path: '/emergency-contact',
   },
   {
-    icon: '../icon/paymentIcon.png',
+    icon: <SafeImage src="../icon/paymentIcon.png" alt="Payment" width={24} height={24} />,
     label: 'Payment',
     path: '/cards',
   },
   {
-    icon: '../icon/riderHistoryIcon.png',
+    icon: (
+      <SafeImage src="../icon/riderHistoryIcon.png" alt="Rider History" width={24} height={24} />
+    ),
     label: 'Rider History',
     path: 'riderHistory',
   },
   {
-    icon: '../icon/helpIcon.png',
+    icon: <SafeImage src="../icon/helpIcon.png" alt="Help" width={24} height={24} />,
     label: 'Help',
     path: '/help',
   },
   {
-    icon: '../icon/LegalIcon.png',
+    icon: <SafeImage src="../icon/LegalIcon.png" alt="Legal" width={24} height={24} />,
     label: 'Legal',
     path: '/legal',
   },
   {
-    icon: '../icon/privacyIcon.png',
+    icon: <SafeImage src="../icon/privacyIcon.png" alt="Privacy Policy" width={24} height={24} />,
     label: 'Privacy Policy',
     path: '/privacyPolicy',
   },

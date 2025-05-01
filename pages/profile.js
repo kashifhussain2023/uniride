@@ -21,6 +21,7 @@ import ThemeProvider from '@/theme/ThemeProvider';
 
 import { api } from '@/utils/api/common';
 import { validateProfileCustomer } from '@/utils/profile';
+import SafeImage from '@/components/common/SafeImage';
 
 const Profile = () => {
   const router = useRouter();
@@ -267,19 +268,23 @@ const Profile = () => {
               </ProfileHead>
 
               <ProfileImg>
-                <img
+                <SafeImage
                   src={
                     profileImage
                       ? URL.createObjectURL(profileImage)
                       : inputs.profile_picture || '/avatar-photo.png'
                   }
+                  alt="Profile Picture"
+                  width={130}
+                  height={130}
+                  className="rounded-full"
                   id="preview"
                 />
                 <span>
                   {!disabled && (
                     <BrowseButn>
                       <Button>
-                        <img src="../edit.png" />
+                        <SafeImage src="../edit.png" alt="Edit" width={22} height={22} />
                       </Button>
                       <input
                         type="file"

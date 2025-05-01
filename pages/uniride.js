@@ -191,136 +191,86 @@ export default function Dashboard() {
       return;
     }
 
-    if (selectedDate !== null && selectedTime !== null) {
+    const resolvePaymentMethodId = () => {
+      const defaultPaymentId = userAuth?.data?.default_payment_method?.payment_id;
+      if (defaultPaymentId) return defaultPaymentId;
+
+      const lastAddedCard = localStorage.getItem('lastAddedCard');
+      return lastAddedCard ? JSON.parse(lastAddedCard)?.payment_id : null;
+    };
+
+    const paymentMethodId = resolvePaymentMethodId();
+
+    if (!paymentMethodId) {
+      toast.error('No payment method found. Please add a payment method first.');
+      router.push('/cards/add');
+      return;
+    }
+
+    const createBookingPayload = isScheduled => ({
+      car_type: carTypeId,
+      city_name: currentLocation.city,
+      customer_id: userAuth.customer_id,
+      distance,
+      dropoff_lat: String(dropLocation.lat),
+      dropoff_lng: String(dropLocation.lng),
+      dropoff_name: String(dropLocation.address),
+      gender,
+      payment_method: paymentMethodId,
+      pickup_lat: String(currentLocation.lat),
+      pickup_lng: String(currentLocation.lng),
+      pickup_name: String(currentLocation.address),
+      promo_code: couponCode,
+      promotion_id: promotionId,
+      ride_type: customerRideType,
+      ...(isScheduled && {
+        schedule_date: format(new Date(selectedDate), 'yyyy-MM-dd'),
+        schedule_time: format(new Date(selectedTime), 'HH:mm:ss'),
+      }),
+      time: duration,
+    });
+
+    const requestSentHandler = response => {
+      console.log('Request sent successfully:', response);
+      setComfirmBooking(false);
+      setSelectRide(false);
+      //setInRRoute(true);
+      toast.success('Your ride request has been sent. Finding a driver...');
+      if (response?.id) {
+        setBookingRequestId(response.id);
+      }
+    };
+
+    const emitBookingRequest = async payload => {
       try {
         setLoading(true);
         setGenderModelOpen(false);
-        const formData = new FormData();
-        if (couponActive) {
-          formData.append('promo_code', couponCode);
-          formData.append('promotion_id', promotionId);
-        }
-        formData.append('car_type', carTypeId);
-        formData.append('schedule_date', format(new Date(selectedDate), 'yyyy-MM-dd'));
-        formData.append('schedule_time', format(new Date(selectedTime), 'HH:mm:ss'));
-        formData.append('destination_Location_Name', dropLocation.address);
-        formData.append('destination_point_lat', dropLocation.lat);
-        formData.append('destination_point_long', dropLocation.lng);
-        formData.append('picking_Location_Name', currentLocation.address);
-        formData.append('picking_point_lat', currentLocation.lat);
-        formData.append('picking_point_long', currentLocation.lng);
-        formData.append('ride_type', 'regular');
-        formData.append('gender', gender);
-        formData.append('payment_type', 1);
-        formData.append('customer_id', userAuth.customer_id);
-        const response = await api({
-          data: formData,
-          method: 'POST',
-          url: '/customers/new_schedule_ride_request',
-        });
-        if (response.status === true) {
-          toast.success(response.message);
-          setTimeout(() => {
-            window.location.reload();
-          }, 3000);
-        } else if (response.status === 'FALSE' && response.message === 'Invalid token code') {
-          toast.error(
-            'Your account has been logged in on another device. Please login again to continue.'
-          );
-          await signOut({
-            redirect: false,
-          });
-          router.push('/login');
-        } else {
-          toast.error(response.message || 'Failed to schedule ride');
-        }
+        socketHelpers.onRequestSent(requestSentHandler);
+        await socketHelpers.requestRide(payload);
+        setLoading(true);
       } catch (error) {
-        console.error('Error in proceedGenderModel:', error);
+        console.error('Error during ride request:', error);
         toast.error('An error occurred while scheduling your ride. Please try again.');
       } finally {
         setLoading(false);
       }
+    };
+
+    if (selectedDate && selectedTime) {
+      await emitBookingRequest(createBookingPayload(true));
     } else {
-      // Check if a booking request is already in progress
       if (isBookingInProgress) {
         toast.info('A booking request is already in progress. Please wait...');
         return;
       }
-      try {
-        setLoading(true);
-        setGenderModelOpen(false);
-        setIsBookingInProgress(true);
-        let paymentMethodId;
 
-        // Try to get payment method from userAuth first
-        if (userAuth?.data?.default_payment_method?.payment_id) {
-          paymentMethodId = userAuth.data.default_payment_method.payment_id;
-        } else {
-          // If not in userAuth, try to get from localStorage
-          const lastAddedCard = localStorage.getItem('lastAddedCard');
-          if (lastAddedCard) {
-            const cardInfo = JSON.parse(lastAddedCard);
-            paymentMethodId = cardInfo.payment_id;
-          }
-        }
-        console.log('paymentMethodId', paymentMethodId);
-        if (!paymentMethodId) {
-          toast.error('No payment method found. Please add a payment method first.');
-          router.push('/cards/add');
-          return;
-        }
-        const bookingPayload = {
-          car_type: carTypeId,
-          city_name: currentLocation.city,
-          customer_id: userAuth.customer_id,
-          distance: distance,
-          dropoff_lat: String(dropLocation.lat),
-          dropoff_lng: String(dropLocation.lng),
-          dropoff_name: String(dropLocation.address),
-          gender: gender,
-          payment_method: paymentMethodId,
-          pickup_lat: String(currentLocation.lat),
-          pickup_lng: String(currentLocation.lng),
-          pickup_name: String(currentLocation.address),
-          promo_code: couponCode,
-          promotion_id: promotionId,
-          ride_type: customerRideType,
-          time: duration,
-        };
-        console.log('bookingPayload', bookingPayload);
-
-        // Set up event listeners for booking responses
-        const requestSentHandler = response => {
-          console.log('Request sent successfully:', response);
-          setComfirmBooking(false);
-          setSelectRide(false);
-          setInRRoute(true);
-          toast.success('Your ride request has been sent. Finding a driver...');
-
-          // Store the request ID for future reference
-          if (response && response.id) {
-            console.log('response', response);
-            setBookingRequestId(response.id);
-          }
-        };
-
-        // Register the request sent handler
-        socketHelpers.onRequestSent(requestSentHandler);
-        // Emit the booking request
-        await socketHelpers.requestRide(bookingPayload);
-
-        // Clean up on component unmount or when booking is complete
-        return () => {};
-      } catch (error) {
-        console.error('Error in proceedGenderModel:', error);
-        toast.error('An error occurred while requesting a driver. Please try again.');
-        setLoading(false);
-        setIsBookingInProgress(false);
-      }
+      setIsBookingInProgress(true);
+      await emitBookingRequest(createBookingPayload(false));
+      setIsBookingInProgress(false);
     }
   };
   const handleInRoute = () => {
-    setInRRoute(true);
+    //setInRRoute(true);
   };
   const handleRideCancelModel = async () => {
     try {

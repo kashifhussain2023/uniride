@@ -20,7 +20,7 @@ const nextConfig = {
     NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: 'AIzaSyAOtGKS-WQKCVSgJgqXKdmorgzVrh-2JYM',
     NEXT_PUBLIC_NEXTAUTH_SECRET: 'vZm2zMbZ6nDsns1Eik4fAg59yayyRa8L6/5FLmsje3c=',
     NEXT_PUBLIC_STRIPE_PUBLIC_KEY: 'pk_test_yDgZEShai3aN7mhuouM2hUPG00Tyk0KRtu',
-    NEXTAUTH_URL: 'https://localhost:3000',
+    NEXTAUTH_URL: 'https://uniride.frontend:3000',
   },
   eslint: {
     // Warning: This allows production builds to successfully complete even if

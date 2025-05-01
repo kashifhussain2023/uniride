@@ -86,7 +86,7 @@ const LIBRARIES = ['places'];
 export default LocationMapArrived;
 const DistanceDurationOverlay = styled.div`
   position: absolute;
-  top: 10px;
+  top: 85%;
   left: 10px;
   background-color: white;
   padding: 10px;

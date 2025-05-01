@@ -137,26 +137,8 @@ class SocketService {
     this.isInitializing = true;
     debugLog('Initializing socket connection');
 
-    // Get the session to access the token
-    try {
-      debugLog('Fetching session data');
-      // Note: useSession is a React hook and can only be used in React components
-      // For this service class, we'll need to pass the session data from the component
-      // that uses this service
-      if (this.authToken) {
-        debugLog('Using provided auth token', this.authToken);
-      } else {
-        debugLog('No auth token available');
-      }
-    } catch (error) {
-      errorLog('Error getting session', error);
-      this.isInitializing = false;
-      throw error;
-    }
-
     // Socket configuration
-    const SOCKET_URL = `https://uniridesocket.24livehost.com`;
-    debugLog('Connecting to socket URL', SOCKET_URL);
+    debugLog('Connecting to socket URL', 'https://pattisonedutechstore.24livehost.com/');
     try {
       // Create query parameters with token
       const query = this.authToken
@@ -165,21 +147,7 @@ class SocketService {
           }
         : {};
 
-      // this.socket = io(SOCKET_URL, {
-      //   auth: {
-      //     token: `${this.authToken}`,
-      //   },
-      //   autoConnect: false,
-      //   path: '/connect-socket/socket.io',
-      //   //query: query,
-      //   reconnection: true,
-      //   reconnectionAttempts: this.maxReconnectAttempts,
-      //   reconnectionDelay: this.reconnectDelay,
-      //   timeout: 20000,
-      //   transports: ['websocket', 'polling'],
-      // });
-
-      this.socket = io('https://uniridesocket.24livehost.com/connect-socket', {
+      this.socket = io('https://pattisonedutechstore.24livehost.com', {
         path: '/socket.io',
         query: query,
         transports: ['polling'],
@@ -258,7 +226,7 @@ class SocketService {
         : {};
 
       try {
-        this.socket = io('https://uniridesocket.24livehost.com/connect-socket', {
+        this.socket = io('https://pattisonedutechstore.24livehost.com/connect-socket', {
           path: '/socket.io',
           query: query,
           transports: ['polling'],
@@ -336,7 +304,7 @@ class SocketService {
     const eventData = this.authToken
       ? {
           ...data,
-          token: this.authToken,
+          token: `Bearer ${this.authToken}`,
         }
       : data;
     debugLog(`Emitting event: ${event}`, eventData);
@@ -802,17 +770,25 @@ const socketHelpers = {
 
       // Create a new connection promise
       socketConnectionPromise = new Promise((resolve, reject) => {
-        // Set auth token
-        if (userAuth && userAuth.token_code) {
-          debugLog('Setting auth token', userAuth.token_code);
-          socketService.setAuthToken(userAuth.token_code);
-        } else {
-          console.warn('No access token found in session');
-          if (userAuth && userAuth.token_code) {
-            debugLog('Using token_code as fallback', userAuth.token_code);
-            socketService.setAuthToken(userAuth.token_code);
-          }
+        // Validate and set auth token
+        if (!userAuth) {
+          const error = new Error('User authentication data is required');
+          errorLog('Authentication error', error);
+          reject(error);
+          return;
         }
+
+        const token = userAuth.token_code;
+        if (!token) {
+          const error = new Error('Authentication token is required');
+          errorLog('Authentication error', error);
+          reject(error);
+          return;
+        }
+
+        // Set auth token
+        debugLog('Setting auth token');
+        socketService.setAuthToken(token);
 
         // Set up connection event handlers
         const onConnect = () => {
@@ -840,6 +816,13 @@ const socketHelpers = {
           isSocketConnecting = false;
           socketService.off('connect', onConnect);
           socketService.off('connect_error', onConnectError);
+
+          // Handle authentication errors
+          if (error.message.includes('authentication') || error.message.includes('token')) {
+            errorLog('Authentication failed', error);
+            // You might want to trigger a re-authentication flow here
+          }
+
           reject(error);
         };
 
@@ -847,8 +830,11 @@ const socketHelpers = {
         socketService.on('connect', onConnect);
         socketService.on('connect_error', onConnectError);
 
-        // Initialize socket connection
-        socketService.initialize(userAuth);
+        // Initialize the socket
+        socketService.initialize().catch(error => {
+          errorLog('Socket initialization error', error);
+          reject(error);
+        });
       });
 
       return await socketConnectionPromise;
