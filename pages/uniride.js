@@ -5,7 +5,7 @@ import RiderInfo from '@/components/common/RiderInfo';
 import SpinnerLoader from '@/components/common/SpinnerLoader';
 import LocationValueModel from '@/components/common/model/LocationValueModel';
 import InnerContent from '@/components/presentation/InnerContent';
-import { socketEvents, socketHelpers } from '@/components/presentation/SocketEvents';
+import { socketHelpers } from '@/components/presentation/SocketEvents';
 import ThemeProvider from '@/theme/ThemeProvider';
 import { api } from '@/utils/api/register';
 import styled from '@emotion/styled';
@@ -247,7 +247,6 @@ export default function Dashboard() {
         setGenderModelOpen(false);
         socketHelpers.onRequestSent(requestSentHandler);
         await socketHelpers.requestRide(payload);
-        setLoading(true);
       } catch (error) {
         console.error('Error during ride request:', error);
         toast.error('An error occurred while scheduling your ride. Please try again.');
@@ -456,11 +455,11 @@ export default function Dashboard() {
 
       // Set up socket event listeners
       socketHelpers.setupSocketEventListeners({
-        _setDriverId,
-        _setEndRideData,
         setAcceptDriverDetail,
         setBookingRequestId,
         setComfirmBooking,
+        setDriverId,
+        setEndRideData,
         setInRRoute,
         setIsBookingInProgress,
         setRideStatus,

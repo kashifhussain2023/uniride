@@ -410,16 +410,19 @@ class SocketService {
 
       // Set up request status changed handler
       const requestStatusHandler = data => {
-        debugLog('Request status changed:', data);
+        //debugLog('Request status changed:', data);
+
+        console.log('Request status changed:', data);
+
         if (data) {
-          setRideStatus(data.status);
-          if (data.status === 2) {
+          setRideStatus(data.data.ride_status_value);
+          if (data.data.ride_status_value === 1) {
             // Driver accepted
             setSelectRide(false);
             setComfirmBooking(false);
             setInRRoute(true);
-            setAcceptDriverDetail(data);
-            setDriverId(data.driver_id);
+            setAcceptDriverDetail(data.data.driver_info);
+            setDriverId(data.data.driver_info.driver_id);
           }
         }
       };

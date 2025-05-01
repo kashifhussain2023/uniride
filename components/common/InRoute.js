@@ -133,7 +133,7 @@ export default function InRoute({
           <DriverLeft>
             <Typography variant="subtitle2">{acceptDriverDetail?.driver_name}</Typography>
             <Typography variant="h2" component="h2">
-              {acceptDriverDetail?.vehicle_number}
+              {acceptDriverDetail?.vehicle_no}
             </Typography>
             <Typography
               variant="subtitle2"
@@ -141,12 +141,12 @@ export default function InRoute({
                 mt: 0,
               }}
             >
-              {acceptDriverDetail?.vehicle_color} {acceptDriverDetail?.vehicle_make}{' '}
-              {acceptDriverDetail?.vehicle_model} {acceptDriverDetail?.vehicle_type}
+              {acceptDriverDetail?.vehicle_make} {acceptDriverDetail?.vehicle_model}
+              {acceptDriverDetail?.vehicle_type}
             </Typography>
 
             <RatingStar>
-              <StarIcon /> {acceptDriverDetail?.rating}
+              <StarIcon /> {acceptDriverDetail?.driver_rating}
             </RatingStar>
           </DriverLeft>
           {
