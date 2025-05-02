@@ -1,21 +1,20 @@
-import { useState } from "react";
-import { LoadScript, StandaloneSearchBox } from "@react-google-maps/api";
-import { signOut } from "next-auth/react";
-import { useRouter } from "next/router";
-import PageTitle from "@/components/common/PageTitle";
-import CustomFormControl from "@/theme/CustomFormControl";
-import { validateAddLocation } from "@/utils/add-location";
-import { api } from "@/utils/api/common";
-import CloseIcon from "@mui/icons-material/Close";
-import Button from "@mui/material/Button";
-import Dialog from "@mui/material/Dialog";
-import DialogContent from "@mui/material/DialogContent";
-import IconButton from "@mui/material/IconButton";
-import InputLabel from "@mui/material/InputLabel";
-import { styled } from "@mui/material/styles";
-import { toast } from "react-toastify";
-import SpinnerLoader from "../SpinnerLoader";
-
+import PageTitle from '@/components/common/PageTitle';
+import CustomFormControl from '@/theme/CustomFormControl';
+import { validateAddLocation } from '@/utils/add-location';
+import { api } from '@/utils/api/common';
+import CloseIcon from '@mui/icons-material/Close';
+import Button from '@mui/material/Button';
+import Dialog from '@mui/material/Dialog';
+import DialogContent from '@mui/material/DialogContent';
+import IconButton from '@mui/material/IconButton';
+import InputLabel from '@mui/material/InputLabel';
+import { styled } from '@mui/material/styles';
+import { LoadScript, StandaloneSearchBox } from '@react-google-maps/api';
+import { signOut } from 'next-auth/react';
+import { useRouter } from 'next/router';
+import { useState } from 'react';
+import { toast } from 'react-toastify';
+import SpinnerLoader from '../SpinnerLoader';
 const AddLocation = ({ open, handleClose, userAuth, getFavoriteList }) => {
   const router = useRouter();
   const [searchPickupBox, setSearchPickupBox] = useState(null);
@@ -23,23 +22,27 @@ const AddLocation = ({ open, handleClose, userAuth, getFavoriteList }) => {
   const [location, setLocation] = useState(null);
   const [removeErrors, setRemoveErrors] = useState(false);
   const [errors, setErrors] = useState({
-    tag: "",
-    address: "",
+    address: '',
+    tag: '',
   });
   const [loading, setLoading] = useState(false);
-  const [inputs, setInputs] = useState({});
-
+  const [inputs, setInputs] = useState({
+    address: '',
+    tag: '',
+  });
   const handleInputChange = ({ target }) => {
-    if (target.name == "address") {
-      setLoacationAddress("");
+    if (target.name === 'address') {
+      setLoacationAddress('');
     }
-    setInputs((inputs) => ({
+    setInputs(inputs => ({
       ...inputs,
       [target.name]: target.value,
     }));
     if (removeErrors) {
-      var data = { ...inputs, [target.name]: target.value };
-
+      const data = {
+        ...inputs,
+        [target.name]: target.value,
+      };
       setErrors({
         ...validateAddLocation({
           ...data,
@@ -47,63 +50,54 @@ const AddLocation = ({ open, handleClose, userAuth, getFavoriteList }) => {
       });
     }
   };
-
   const handleLocation = () => {
     const places = searchPickupBox.getPlaces();
-
     if (places.length > 0) {
       const place = places[0];
       setLoacationAddress(place.formatted_address);
-      setInputs((inputs) => ({
+      setInputs(inputs => ({
         ...inputs,
-        ["address"]: place.formatted_address,
+        ['address']: place.formatted_address,
       }));
-      errors.address = "";
+      errors.address = '';
       setLocation({
         lat: place.geometry.location.lat(),
         lng: place.geometry.location.lng(),
       });
     }
   };
-
-  const handlePickupSearchBoxLoad = (ref) => {
+  const handlePickupSearchBoxLoad = ref => {
     setSearchPickupBox(ref);
   };
-
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault();
-
-    let inputForValidation = {
-      tag: inputs.tag,
+    const inputForValidation = {
       address: loactionAddress,
+      tag: inputs.tag,
     };
-
     const validationErrors = validateAddLocation(inputForValidation);
     const noErrors = Object.keys(validationErrors).length === 0;
     setRemoveErrors(true);
     if (noErrors) {
       setLoading(true);
       const formData = new FormData();
-      formData.append("address", loactionAddress);
-      formData.append("lat", location.lat);
-      formData.append("long", location.lng);
-      formData.append("tag", inputs.tag);
-      formData.append("customer_id", userAuth.customer_id);
-      formData.append("token_code", userAuth.token_code);
-
+      formData.append('address', loactionAddress);
+      formData.append('lat', location.lat);
+      formData.append('long', location.lng);
+      formData.append('tag', inputs.tag);
+      formData.append('customer_id', userAuth.customer_id);
+      formData.append('token_code', userAuth.token_code);
       const requestBody = {
         address: loactionAddress,
         lat: location.lat,
         lng: location.lng,
         name: inputs.tag,
       };
-
       const response = await api({
-        url: "/customer/address/add-adddress",
-        method: "POST",
         data: requestBody,
+        method: 'POST',
+        url: '/customer/address/add-adddress',
       });
-
       if (response.status === true) {
         toast.success(response.message);
         setLoading(false);
@@ -113,11 +107,13 @@ const AddLocation = ({ open, handleClose, userAuth, getFavoriteList }) => {
       } else if (response.status === false) {
         setLoading(false);
         toast.error(response.message);
-        await signOut({ redirect: false });
-        router.push("/login");
+        await signOut({
+          redirect: false,
+        });
+        router.push('/login');
       } else {
-        setLoading(false); 
-        toast.error("Internal Server Error");
+        setLoading(false);
+        toast.error('Internal Server Error');
       }
     } else {
       setErrors(validationErrors);
@@ -140,10 +136,10 @@ const AddLocation = ({ open, handleClose, userAuth, getFavoriteList }) => {
           aria-label="close"
           onClick={handleClose}
           sx={{
-            position: "absolute",
+            color: theme => theme.palette.grey[500],
+            position: 'absolute',
             right: 8,
             top: 8,
-            color: (theme) => theme.palette.grey[500],
           }}
         >
           <CloseIcon />
@@ -156,7 +152,7 @@ const AddLocation = ({ open, handleClose, userAuth, getFavoriteList }) => {
             <PageTitle
               title="My"
               subtitle="Location"
-              images_icon={"../AddLocationIcon.png"}
+              images_icon={'../AddLocationIcon.png'}
             ></PageTitle>
 
             <FormControl>
@@ -165,11 +161,17 @@ const AddLocation = ({ open, handleClose, userAuth, getFavoriteList }) => {
                 fullWidth
                 type="text"
                 placeholder="Enter address label"
-                value={inputs.tag || ""}
+                value={inputs.tag || ''}
                 name="tag"
                 onChange={handleInputChange}
               />
-              <span style={{ color: "red" }}>{errors && errors.tag}</span>
+              <span
+                style={{
+                  color: 'red',
+                }}
+              >
+                {errors && errors.tag}
+              </span>
             </FormControl>
 
             <FormControl>
@@ -186,7 +188,13 @@ const AddLocation = ({ open, handleClose, userAuth, getFavoriteList }) => {
                   onChange={handleInputChange}
                 />
               </StandaloneSearchBox>
-              <span style={{ color: "red" }}>{errors && errors.address}</span>
+              <span
+                style={{
+                  color: 'red',
+                }}
+              >
+                {errors && errors.address}
+              </span>
             </FormControl>
             <Button variant="contained" fullWidth onClick={handleSubmit}>
               Save Location
@@ -197,42 +205,36 @@ const AddLocation = ({ open, handleClose, userAuth, getFavoriteList }) => {
     </LoadScript>
   );
 };
-const LIBRARIES = ["places"];
+const LIBRARIES = ['places'];
 export default AddLocation;
-
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
-  "&.MuiModal-root": {
-    zIndex: 10,
-  },
-
-  "& .MuiPaper-root": {
-    maxWidth: 750,
-    borderRadius: 24,
+  '& .MuiDialogActions-root': {
     padding: theme.spacing(1),
   },
-
-  "& .MuiDialogContent-root": {
-    padding: theme.spacing(2),
+  '& .MuiDialogContent-root': {
+    alignItems: 'center',
     background: theme.colors.palette.lightGrey,
     borderRadius: 24,
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
+    display: 'flex',
+    justifyContent: 'space-between',
+    padding: theme.spacing(2),
   },
-
-  "& .MuiIconButton-root": {
-    right: 24,
-    top: 25,
+  '& .MuiIconButton-root': {
     color: theme.colors.palette.black,
     fontSize: 30,
+    right: 24,
+    top: 25,
   },
-
-  "& .MuiDialogActions-root": {
+  '& .MuiPaper-root': {
+    borderRadius: 24,
+    maxWidth: 750,
     padding: theme.spacing(1),
   },
+  '&.MuiModal-root': {
+    zIndex: 10,
+  },
 }));
-
-const LeftSection = styled("div")`
+const LeftSection = styled('div')`
   ${({ theme }) => `
     width: 50%;
     display: none;
@@ -241,7 +243,7 @@ const LeftSection = styled("div")`
     }
   `}
 `;
-const RightSection = styled("div")`
+const RightSection = styled('div')`
   ${({ theme }) => `
     width: 100%;
     background-color: #fff;
@@ -252,8 +254,7 @@ const RightSection = styled("div")`
     }
   `}
 `;
-
-const FormControl = styled("div")`
+const FormControl = styled('div')`
   ${({ theme }) => `
     margin-bottom: 10px;
     .MuiInputBase-input {

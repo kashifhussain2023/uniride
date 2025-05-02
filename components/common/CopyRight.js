@@ -1,7 +1,5 @@
-import * as React from "react";
-import styled from "@emotion/styled";
-import { Typography } from "@mui/material";
-
+import styled from '@emotion/styled';
+import { Typography } from '@mui/material';
 export default function CopyRight() {
   return (
     <Container>
@@ -9,7 +7,6 @@ export default function CopyRight() {
     </Container>
   );
 }
-
 const Container = styled.div`
   ${({ theme }) => `
     padding: ${theme.spacing(2, 4)};

@@ -1,10 +1,7 @@
-import React from "react";
-import styled from "@emotion/styled";
-
+import styled from '@emotion/styled';
 export default function InnerContent({ children }) {
   return <Container>{children}</Container>;
 }
-
 const Container = styled.div`
   ${({ theme }) => `
     padding: ${theme.spacing(3)};

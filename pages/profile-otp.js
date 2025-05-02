@@ -1,29 +1,25 @@
-import { useState } from "react";
-import Head from "next/head";
-import { useSession, getSession } from "next-auth/react";
-import ThemeProvider from "@/theme/ThemeProvider";
-import Layout from "@/components/common/Layout";
-import styled from "@emotion/styled";
-import CustomFormControl from "@/theme/CustomFormControl";
-import { useRouter } from "next/router";
-import SpinnerLoader from "@/components/common/SpinnerLoader";
-import {
-  Button,
-  FormControl as MuiFormControl,
-  Typography,
-} from "@mui/material";
-import { api } from "@/utils/api/common";
-import { toast } from "react-toastify";
-import { parseCookies } from "nookies";
+import { useState, useRef } from 'react';
+import Head from 'next/head';
+import { useSession } from 'next-auth/react';
+import ThemeProvider from '@/theme/ThemeProvider';
+import Layout from '@/components/common/Layout';
+import styled from '@emotion/styled';
+import CustomFormControl from '@/theme/CustomFormControl';
+import { useRouter } from 'next/router';
+import SpinnerLoader from '@/components/common/SpinnerLoader';
+import { Button, Typography } from '@mui/material';
+import { api } from '@/utils/api/common';
+import { toast } from 'react-toastify';
+import { parseCookies } from 'nookies';
+import SafeImage from '@/components/common/SafeImage';
 
 export default function Verification({ userAuth }) {
   const router = useRouter();
   const { data: session, update: sessionUpdate } = useSession();
   const [loading, setLoading] = useState(false);
-  const [otpError, setOtpError] = useState("");
-  const [otp, setOtp] = useState(["", "", "", ""]);
-  const [removeErrors, setRemoveErrors] = useState(false);
-
+  const [otpError, setOtpError] = useState('');
+  const [otp, setOtp] = useState(['', '', '', '']);
+  const otpBoxReference = useRef([]);
   const handleChange = (e, index) => {
     const value = e.target.value;
 
@@ -42,9 +38,9 @@ export default function Verification({ userAuth }) {
       }
     }
   };
-  const handlePaste = (e) => {
+  const handlePaste = e => {
     e.preventDefault();
-    const pastedData = e.clipboardData.getData("text/plain").split("");
+    const pastedData = e.clipboardData.getData('text/plain').split('');
     const newOtp = [];
 
     // Allow only numeric input and limit the length to 1
@@ -53,38 +49,34 @@ export default function Verification({ userAuth }) {
         newOtp[index] = digit;
       }
     });
-
     setOtp(newOtp);
 
     // Focus on the first empty input field
-    const firstEmptyIndex = newOtp.findIndex((digit) => digit === "");
+    const firstEmptyIndex = newOtp.findIndex(digit => digit === '');
     if (firstEmptyIndex !== -1) {
-      inputRefs.current[firstEmptyIndex].focus();
+      otpBoxReference.current[firstEmptyIndex].focus();
     }
   };
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault();
-
-    var noErrors = true;
-    const isOtpValid = otp.every((digit) => digit !== "");
+    let noErrors = true;
+    const isOtpValid = otp.every(digit => digit !== '');
     if (isOtpValid === false) {
       noErrors = false;
-      setOtpError("Otp field is required");
+      setOtpError('Otp field is required');
     }
-
     if (noErrors) {
       setLoading(true);
-      const enteredOtp = otp.join("");
+      const enteredOtp = otp.join('');
       const formData = new FormData();
-      formData.append("customer_id", userAuth.customer_id);
-      formData.append("otp", enteredOtp);
-      formData.append("mobile_number", userAuth.mobile_number);
+      formData.append('customer_id', userAuth.customer_id);
+      formData.append('otp', enteredOtp);
+      formData.append('mobile_number', userAuth.mobile_number);
       const response = await api({
-        url: "/customers/otp_verification",
-        method: "POST",
         data: formData,
+        method: 'POST',
+        url: '/customers/otp_verification',
       });
-
       if (response.status === true) {
         if (session) {
           session.user.token_code = response.token_code;
@@ -98,41 +90,38 @@ export default function Verification({ userAuth }) {
         setLoading(false);
         toast.success(response.message);
         setTimeout(() => {
-          router.push("/profile");
+          router.push('/profile');
         }, 2000);
-      } else if (response.status === "FALSE") {
+      } else if (response.status === 'FALSE') {
         setLoading(false);
         toast.error(response.message);
       } else {
         setLoading(false);
-        toast.error("Internal Server Error");
+        toast.error('Internal Server Error');
       }
     }
   };
   const handleResendOtp = async () => {
     setLoading(true);
     const formData = new FormData();
-    formData.append("customer_id", userAuth.customer_id);
-    formData.append("mobile_number", userAuth.mobile_number);
+    formData.append('customer_id', userAuth.customer_id);
+    formData.append('mobile_number', userAuth.mobile_number);
     const response = await api({
-      url: "/customers/resend_otp",
-      method: "POST",
       data: formData,
+      method: 'POST',
+      url: '/customers/resend_otp',
     });
-
     if (response.status === true) {
       setLoading(false);
       toast.success(response.message);
-    } else if (response.status === "FALSE") {
+    } else if (response.status === 'FALSE') {
       setLoading(false);
       toast.error(response.message);
     } else {
       setLoading(false);
-      toast.error("Internal Server Error");
+      toast.error('Internal Server Error');
     }
   };
-  const noErrors = 1;
-
   return (
     <ThemeProvider>
       <Head>
@@ -146,36 +135,49 @@ export default function Verification({ userAuth }) {
         <LoginContainer>
           <Box>
             <LeftSide>
-              <img src="../loginimg.png" />
+              <SafeImage src="../loginimg.png" alt="Login Background" width={704} height={704} />
               <LoginDesc>
                 <Welcome>Welcome to</Welcome>
-                <img src="../logo1.png" />
+                <SafeImage src="../logo1.png" alt="Logo" width={196} height={75} />
                 <Typography variant="h4">
-                  Our professionally trained drivers will make sure that the
-                  customers enjoy a safe and reliable ride.
+                  Our professionally trained drivers will make sure that the customers enjoy a safe
+                  and reliable ride.
                 </Typography>
               </LoginDesc>
 
               <MobilePhone>
-                {" "}
-                <img src="../mobile.png" />
+                <SafeImage src="../mobile.png" alt="Mobile Phone" width={300} height={300} />
               </MobilePhone>
             </LeftSide>
             <RightSide>
               <SignInHead>
-                <img src="../loginIcon.png" />
-                <Typography variant="h1" sx={{ mb: 3 }}>
+                <SafeImage src="../loginIcon.png" alt="Login Icon" width={40} height={40} />
+                <Typography
+                  variant="h1"
+                  sx={{
+                    mb: 3,
+                  }}
+                >
                   Verification
                 </Typography>
               </SignInHead>
 
-              <Typography variant="h3" sx={{ mb: 1 }}>
-                Hello, {userAuth.name || ""}
+              <Typography
+                variant="h3"
+                sx={{
+                  mb: 1,
+                }}
+              >
+                Hello, {userAuth.name || ''}
               </Typography>
-              <Typography variant="subtitle1" sx={{ mb: 3 }}>
-                We have sent a text with your verification code to{" "}
-                {userAuth.mobile_number || ""}, please enter it to complete your
-                profile
+              <Typography
+                variant="subtitle1"
+                sx={{
+                  mb: 3,
+                }}
+              >
+                We have sent a text with your verification code to {userAuth.mobile_number || ''},
+                please enter it to complete your profile
               </Typography>
               <OtpArea>
                 <div>
@@ -188,11 +190,9 @@ export default function Verification({ userAuth }) {
                         type="text"
                         placeholder=""
                         value={digit}
-                        onChange={(e) => handleChange(e, index)}
+                        onChange={e => handleChange(e, index)}
                         onPaste={handlePaste}
-                        ref={(reference) =>
-                          (otpBoxReference.current[index] = reference)
-                        }
+                        ref={reference => (otpBoxReference.current[index] = reference)}
                       />
                     );
                   })}
@@ -201,21 +201,25 @@ export default function Verification({ userAuth }) {
               <Typography component="span" className="text-danger">
                 {otpError}
               </Typography>
-              <Typography variant="subtitle1" sx={{ mb: 3 }} align="center">
-                I haven't received the code, please{" "}
-                <ResenButton
-                  onClick={handleResendOtp}
-                  color="primary"
-                  variant="text"
-                >
+              <Typography
+                variant="subtitle1"
+                sx={{
+                  mb: 3,
+                }}
+                align="center"
+              >
+                I haven&apos;t received the code, please{' '}
+                <ResenButton onClick={handleResendOtp} color="primary" variant="text">
                   re-send
-                </ResenButton>{" "}
+                </ResenButton>{' '}
                 it
               </Typography>
               <div align="center">
                 <Button
                   variant="contained"
-                  sx={{ mb: 5 }}
+                  sx={{
+                    mb: 5,
+                  }}
                   onClick={handleSubmit}
                 >
                   Next
@@ -232,16 +236,14 @@ export async function getServerSideProps(context) {
   const cookies = parseCookies(context);
   const otpCookie = cookies?.profileOtp || false;
   const otpCookieParsed = JSON.parse(otpCookie);
-
   if (!otpCookieParsed && Object.keys(otpCookieParsed).length === 0) {
     return {
       redirect: {
-        destination: "/login",
+        destination: '/login',
         permanent: false,
       },
     };
   }
-
   return {
     props: {
       userAuth: otpCookieParsed || null,
@@ -259,7 +261,6 @@ const LoginContainer = styled.div`
     
   `}
 `;
-
 const Box = styled.div`
   ${({ theme }) => `
 
@@ -273,7 +274,6 @@ box-shadow: 0px 0px 15px -1px rgba(0,0,0,0.10);  overflow:hidden;
       overflow:inherit;}
   `}
 `;
-
 const LeftSide = styled.div`
   ${({ theme }) => `
 width:50%;
@@ -305,7 +305,6 @@ img{ width:100%; height:100%; }
     
   `}
 `;
-
 const MobilePhone = styled.div`
   ${({ theme }) => `
 position:absolute; right:-120px; top:50px; display:none;
@@ -330,7 +329,6 @@ img{ width:100%; height:100%;
 
   `}
 `;
-
 const LoginDesc = styled.div`
   ${({ theme }) => `
     position: absolute;
@@ -353,7 +351,6 @@ const LoginDesc = styled.div`
     }
   `}
 `;
-
 const Welcome = styled.div`
   ${({ theme }) => `
     font-size: 24px;
@@ -362,7 +359,6 @@ const Welcome = styled.div`
     margin-bottom: 10px;
   `}
 `;
-
 const RightSide = styled.div`
   ${({ theme }) => `
     width: 100%;
@@ -403,15 +399,13 @@ const RightSide = styled.div`
     }
   `}
 `;
-
 const SignInHead = styled.div`
-  ${({ theme }) => `
+  ${() => `
     text-align: center;
   `}
 `;
-
 const OtpArea = styled.div`
-  ${({ theme }) => `
+  ${() => `
     display: flex;
     justify-content: center;
     margin-bottom: 20px;
@@ -425,7 +419,6 @@ const OtpArea = styled.div`
     }
   `}
 `;
-
 const ResenButton = styled(Button)`
   &.MuiButton-text {
     min-width: inherit;

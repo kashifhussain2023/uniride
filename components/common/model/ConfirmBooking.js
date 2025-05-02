@@ -1,31 +1,13 @@
-import React from "react";
-import Button from "@mui/material/Button";
-import { styled } from "@mui/material/styles";
-import Dialog from "@mui/material/Dialog";
-import DialogContent from "@mui/material/DialogContent";
-import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
-import ListItemButton from "@mui/material/ListItemButton";
-import ListItemText from "@mui/material/ListItemText";
-import Checkbox from "@mui/material/Checkbox";
-import css from "styled-jsx/css";
-
+import Button from '@mui/material/Button';
+import Checkbox from '@mui/material/Checkbox';
+import Dialog from '@mui/material/Dialog';
+import DialogContent from '@mui/material/DialogContent';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemButton from '@mui/material/ListItemButton';
+import ListItemText from '@mui/material/ListItemText';
+import { styled } from '@mui/material/styles';
 const ConfirmBooking = ({ open, handleClose }) => {
-  const [checked, setChecked] = React.useState([0]);
-
-  const handleToggle = (value) => () => {
-    const currentIndex = checked.indexOf(value);
-    const newChecked = [...checked];
-
-    if (currentIndex === -1) {
-      newChecked.push(value);
-    } else {
-      newChecked.splice(currentIndex, 1);
-    }
-
-    setChecked(newChecked);
-  };
-
   return (
     <BootstrapDialog
       onClose={handleClose}
@@ -64,39 +46,33 @@ const ConfirmBooking = ({ open, handleClose }) => {
     </BootstrapDialog>
   );
 };
-
 export default ConfirmBooking;
-
 const BootstrapDialog = styled(Dialog)(({ theme }) => ({
-  "& .MuiPaper-root": {
-    maxWidth: 750,
-    borderRadius: 24,
+  '& .MuiDialogActions-root': {
     padding: theme.spacing(1),
   },
-
-  "& .MuiDialogContent-root": {
-    padding: theme.spacing(2),
+  '& .MuiDialogContent-root': {
+    alignItems: 'center',
     background: theme.colors.palette.lightGrey,
     borderRadius: 24,
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
+    display: 'flex',
+    justifyContent: 'space-between',
+    padding: theme.spacing(2),
   },
-
-  "& .MuiIconButton-root": {
-    right: -15,
-    top: -25,
+  '& .MuiIconButton-root': {
     color: theme.colors.palette.black,
     fontSize: 30,
+    right: -15,
+    top: -25,
     zIndex: 999,
   },
-
-  "& .MuiDialogActions-root": {
+  '& .MuiPaper-root': {
+    borderRadius: 24,
+    maxWidth: 750,
     padding: theme.spacing(1),
   },
 }));
-
-const LeftSection = styled("div")`
+const LeftSection = styled('div')`
   ${({ theme }) => `
     width: 50%;
     display: none;
@@ -105,7 +81,7 @@ const LeftSection = styled("div")`
     }
   `}
 `;
-const RightSection = styled("div")`
+const RightSection = styled('div')`
   ${({ theme }) => `
   width:100%; background-color:#fff; border-radius:12px; padding:20px;
   @media (min-width: ${theme.breakpoints.values.md}px) {           
@@ -127,25 +103,4 @@ const RightSection = styled("div")`
     }
 
 `}
-`;
-
-const FormControl = styled("div")`
-  ${({ theme }) => `
-    margin-bottom: 10px;
-    .MuiInputBase-input {
-      font-size: 16px;
-      height: 30px;
-      padding: 5px 10px;
-      border-radius: 6px;
-    }
-    .MuiInputLabel-root {
-      margin-top: 0px;
-      display: block;
-      margin-bottom: 5px;
-      color: ${theme.colors.palette.darkGrey};
-      span {
-        color: ${theme.colors.palette.red};
-      }
-    }
-  `}
 `;

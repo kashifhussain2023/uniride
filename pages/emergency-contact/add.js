@@ -1,47 +1,48 @@
-import CountrySelect from "@/components/common/CountrySelect";
-import Layout from "@/components/common/Layout";
-import PageTitle from "@/components/common/PageTitle";
-import SpinnerLoader from "@/components/common/SpinnerLoader";
-import SmallContent from "@/components/presentation/SmallContent";
-import CustomFormControl from "@/theme/CustomFormControl";
-import ThemeProvider from "@/theme/ThemeProvider";
-import { api } from "@/utils/api/common";
-import { validateEmergencyContact } from "@/utils/emergency-contact";
-import styled from "@emotion/styled";
-import { Button, Typography } from "@mui/material";
-import InputLabel from "@mui/material/InputLabel";
-import { getSession, signOut } from "next-auth/react";
-import Head from "next/head";
-import { useRouter } from "next/router";
-import { useState } from "react";
-import { toast } from "react-toastify";
-
+import CountrySelect from '@/components/common/CountrySelect';
+import Layout from '@/components/common/Layout';
+import PageTitle from '@/components/common/PageTitle';
+import SpinnerLoader from '@/components/common/SpinnerLoader';
+import SmallContent from '@/components/presentation/SmallContent';
+import CustomFormControl from '@/theme/CustomFormControl';
+import ThemeProvider from '@/theme/ThemeProvider';
+import { api } from '@/utils/api/common';
+import { validateEmergencyContact } from '@/utils/emergency-contact';
+import styled from '@emotion/styled';
+import { Button, Typography } from '@mui/material';
+import InputLabel from '@mui/material/InputLabel';
+import { signOut } from 'next-auth/react';
+import Head from 'next/head';
+import { useRouter } from 'next/router';
+import { useState } from 'react';
+import { toast } from 'react-toastify';
 export default function EmergencyContactAdd() {
   const router = useRouter();
-  const [countrycode, setCountryCode] = useState("+1");
+  const [countrycode, setCountryCode] = useState('+1');
   const [loading, setLoading] = useState(false);
   const [inputs, setInputs] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    country_code: "",
+    country_code: '',
+    email: '',
+    name: '',
+    phone: '',
   });
   const [errors, setErrors] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    country_code: "",
+    country_code: '',
+    email: '',
+    name: '',
+    phone: '',
   });
   const [removeErrors, setRemoveErrors] = useState(false);
   const handleInputChange = ({ target }) => {
     // Handle other input types
-    setInputs((inputs) => ({
+    setInputs(inputs => ({
       ...inputs,
       [target.name]: target.value,
     }));
-
     if (removeErrors) {
-      var data = { ...inputs, [target.name]: target.value };
+      const data = {
+        ...inputs,
+        [target.name]: target.value,
+      };
       setErrors({
         ...validateEmergencyContact({
           ...data,
@@ -49,50 +50,47 @@ export default function EmergencyContactAdd() {
       });
     }
   };
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault();
-
-    let inputForValidation = {
+    const inputForValidation = {
       email: inputs.email,
       name: inputs.name,
       phone: inputs.phone,
     };
-
     const validationErrors = validateEmergencyContact(inputForValidation);
     const noErrors = Object.keys(validationErrors).length === 0;
     setRemoveErrors(true);
 
     //set All data to form data
     const formData = new FormData();
-    formData.append("name", inputs.name);
-    formData.append("email", inputs.email);
-    formData.append("phone", inputs.phone);
-    formData.append("country_code", countrycode);
-
-
+    formData.append('name', inputs.name);
+    formData.append('email', inputs.email);
+    formData.append('phone', inputs.phone);
+    formData.append('country_code', countrycode);
     const requestBody = {
-      name: inputs.name,
       email: inputs.email,
+      name: inputs.name,
       phone: inputs.phone,
       phone_code: countrycode,
     };
-
     if (noErrors) {
       setLoading(true);
       const response = await api({
-        url: "/customer/emergency/add-contact",
-        method: "POST",
         data: requestBody,
+        method: 'POST',
+        url: '/customer/emergency/add-contact',
       });
       if (response.status === true) {
         setLoading(false);
         toast.success(response.message);
-        router.push("/emergency-contact");
+        router.push('/emergency-contact');
       } else if (response.status === false) {
         setLoading(false);
         toast.error(response.message);
-        await signOut({ redirect: false });
-        router.push("/login");
+        await signOut({
+          redirect: false,
+        });
+        router.push('/login');
       } else {
         setLoading(false);
         toast.error(response.message);
@@ -101,10 +99,9 @@ export default function EmergencyContactAdd() {
       setErrors(validationErrors);
     }
   };
-  const handleCountryCode = (value) => {
-    setCountryCode("+" + value);
+  const handleCountryCode = value => {
+    setCountryCode('+' + value);
   };
-
   return (
     <ThemeProvider>
       <Head>
@@ -119,12 +116,19 @@ export default function EmergencyContactAdd() {
           <EmergencyContact>
             <LeftSection>
               <PageTitle
-                sx={{ mb: 0 }}
+                sx={{
+                  mb: 0,
+                }}
                 title="Emergency"
                 subtitle="Contact"
-                images_icon={"../iconInRoute.png"}
+                images_icon={'../iconInRoute.png'}
               ></PageTitle>
-              <Typography variant="h3" sx={{ mb: 1 }}>
+              <Typography
+                variant="h3"
+                sx={{
+                  mb: 1,
+                }}
+              >
                 Please add your contact info
               </Typography>
               <FormControl>
@@ -134,7 +138,7 @@ export default function EmergencyContactAdd() {
                   type="text"
                   placeholder="Enter name"
                   name="name"
-                  value={inputs.name || ""}
+                  value={inputs.name || ''}
                   onChange={handleInputChange}
                 />
                 <span className="text-danger">{errors && errors.name}</span>
@@ -146,7 +150,7 @@ export default function EmergencyContactAdd() {
                   type="text"
                   placeholder="Enter email"
                   name="email"
-                  value={inputs.email || ""}
+                  value={inputs.email || ''}
                   onChange={handleInputChange}
                 />
                 <span className="text-danger">{errors && errors.email}</span>
@@ -154,16 +158,13 @@ export default function EmergencyContactAdd() {
               <FormControl>
                 <InputLabel>Phone Number</InputLabel>
                 <CountryMobile>
-                  <CountrySelect
-                    onCountryCode={handleCountryCode}
-                    countrycode={countrycode}
-                  />
+                  <CountrySelect onCountryCode={handleCountryCode} countrycode={countrycode} />
                   <CustomFormControl
                     fullWidth
                     type="text"
                     placeholder="Enter mobile"
                     name="phone"
-                    value={inputs.phone || ""}
+                    value={inputs.phone || ''}
                     onChange={handleInputChange}
                   />
                 </CountryMobile>
@@ -182,8 +183,6 @@ export default function EmergencyContactAdd() {
     </ThemeProvider>
   );
 }
-
-
 const EmergencyContact = styled.div`
   ${({ theme }) => `
     border-radius: 16px 0px 16px 16px;
@@ -209,14 +208,12 @@ const EmergencyContact = styled.div`
     }
   `}
 `;
-
 const LeftSection = styled.div`
-  ${({ theme }) => `
+  ${() => `
     width: 100%;
     margin-right: 20px;
   `}
 `;
-
 const RightSection = styled.div`
   ${({ theme }) => `
     width: 100%;
@@ -227,7 +224,6 @@ const RightSection = styled.div`
     }
   `}
 `;
-
 const FormControl = styled.div`
   ${({ theme }) => `
     margin-bottom: 16px;
@@ -248,7 +244,6 @@ const FormControl = styled.div`
     }
   `}
 `;
-
 const CountryMobile = styled.div`
   ${({ theme }) => `
     display: flex;

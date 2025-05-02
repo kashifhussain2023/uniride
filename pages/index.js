@@ -1,5 +1,3 @@
-import { useRouter } from 'next/router';
-
 function Index() {
   return (
     <div>
@@ -8,19 +6,15 @@ function Index() {
     </div>
   );
 }
-
-export async function getServerSideProps({ req, res }) {
+export async function getServerSideProps() {
   // Check if the user is authenticated, e.g., by checking a session or token
-  const isAuthenticated = /* Perform your authentication check here */ false;
 
-    // If the user is not authenticated, redirect to the login page
-    return {
-      redirect: {
-        destination: '/login',
-        permanent: false, // Set to true if the redirection is not temporary
-      },
-    };
-  }
-
-
+  // If the user is not authenticated, redirect to the login page
+  return {
+    redirect: {
+      destination: '/login',
+      permanent: false, // Set to true if the redirection is not temporary
+    },
+  };
+}
 export default Index;

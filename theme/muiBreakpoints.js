@@ -1,12 +1,11 @@
 const muiBreakpoints = {
-  keys: ["xs", "sm", "md", "lg", "xl"],
+  keys: ['xs', 'sm', 'md', 'lg', 'xl'],
   values: {
-    xs: 0,
-    sm: 600,
-    md: 960,
     lg: 1280,
-    xl: 1920
-  }
+    md: 960,
+    sm: 600,
+    xl: 1920,
+    xs: 0,
+  },
 };
-
 export default muiBreakpoints;

@@ -1,8 +1,7 @@
-import * as React from "react";
-import Image from "next/image";
-import styled from "@emotion/styled";
-import { IconButton, Typography } from "@mui/material";
-import curveLine from "../../public/curve-line.png";
+import styled from '@emotion/styled';
+import { IconButton, Typography } from '@mui/material';
+import curveLine from '../../public/curve-line.png';
+import SafeImage from '../common/SafeImage';
 
 export default function StatusTile({ bgColor, number, statusType, icon }) {
   return (
@@ -14,15 +13,14 @@ export default function StatusTile({ bgColor, number, statusType, icon }) {
         <Typography component="h3">{statusType}</Typography>
       </Status>
       <MuiIconButton>
-        <Image src={icon} alt="Icon" priority />
+        <SafeImage src={icon} alt="Status Icon" priority />
       </MuiIconButton>
       <CurveLine>
-        <Image src={curveLine} alt="Icon" priority />
+        <SafeImage src={curveLine} alt="Curve Line" priority />
       </CurveLine>
     </Container>
   );
 }
-
 const Container = styled.div`
   ${({ theme, bgColor }) => `
     padding: ${theme.spacing(4, 3)};
@@ -45,14 +43,12 @@ const Container = styled.div`
     }
   `}
 `;
-
 const CurveLine = styled.div`
   position: absolute;
   left: 0;
   right: 0;
   bottom: 15px;
 `;
-
 const Status = styled.div`
   ${({ theme }) => `
      .MuiTypography-root {
@@ -64,7 +60,6 @@ const Status = styled.div`
      }
   `}
 `;
-
 const MuiIconButton = styled(IconButton)`
   ${({ theme }) => `
     &.MuiIconButton-root {

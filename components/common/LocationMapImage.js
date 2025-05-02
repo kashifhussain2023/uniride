@@ -1,34 +1,32 @@
-import React from "react";
-import { GoogleMap, LoadScript, MarkerF } from "@react-google-maps/api";
+import { GoogleMap, LoadScript, MarkerF } from '@react-google-maps/api';
+import { useEffect, useState } from 'react';
 
-const LocationMapImage = (props) => {
+const LocationMapImage = props => {
   const mapContainerStyle = {
-    width: "100%",
-    height: "150px", // Set a specific height
+    height: '150px',
+    // Set a specific height
+    width: '100%',
   };
-
   const defaultCenter = {
     lat: parseFloat(props.locationLat) || 0,
     lng: parseFloat(props.locationLng) || 0,
   };
-
   return (
     <LoadScript googleMapsApiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}>
       <GoogleMap
         mapContainerStyle={mapContainerStyle}
         center={defaultCenter}
-        zoom={5}
+        zoom={15}
         options={{
-          zoomControl: false,
-          streetViewControl: false,
-          mapTypeControl: false,
           fullscreenControl: false,
+          mapTypeControl: false,
+          streetViewControl: false,
+          zoomControl: false,
         }}
       >
-        {defaultCenter && <MarkerF position={defaultCenter} label="Location" />}
+        {defaultCenter && <MarkerF position={defaultCenter} />}
       </GoogleMap>
     </LoadScript>
   );
 };
-
 export default LocationMapImage;

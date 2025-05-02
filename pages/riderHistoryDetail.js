@@ -1,41 +1,38 @@
-import { useEffect, useState } from "react";
-import Image from "next/image";
-import Head from "next/head";
-import styled from "@emotion/styled";
-import { List, ListItem, Rating, Typography } from "@mui/material";
-import Layout from "@/components/common/Layout";
-import PageTitle from "@/components/common/PageTitle";
-import LargeInnerContent from "@/components/presentation/LargeInnerContent";
-import ThemeProvider from "@/theme/ThemeProvider";
-import { api } from "@/utils/api/common";
+import { useEffect, useState } from 'react';
+import Head from 'next/head';
+import styled from '@emotion/styled';
+import { List, ListItem, Rating, Typography } from '@mui/material';
+import Layout from '@/components/common/Layout';
+import PageTitle from '@/components/common/PageTitle';
+import LargeInnerContent from '@/components/presentation/LargeInnerContent';
+import ThemeProvider from '@/theme/ThemeProvider';
+import { api } from '@/utils/api/common';
+import { signOut } from 'next-auth/react';
+import { useRouter } from 'next/router';
+import SafeImage from '@/components/common/SafeImage';
 
-export default function riderHistoryDetail() {
+export default function RiderHistoryDetail() {
+  const router = useRouter();
   const [value, setValue] = useState(0);
   const [historyDetailData, setHistoryDetailData] = useState([]);
-  const [loading, setLoading] = useState(true);
-
   const getRideHistoryDetail = async () => {
     const response = await api({
+      method: 'GET',
       url: `/customer/booking/ride-history-details?request_id=${738}`,
-      method: "GET",
     });
-
     if (response.status === true) {
-      setLoading(false);
       setHistoryDetailData(response.data);
       setValue(response.data.rated || 0);
-    } else if (response.message === "Invalid token code") {
-      await signOut({ redirect: false });
-      router.push("/login");
-    } else {
-      setLoading(false);
+    } else if (response.message === 'Invalid token code') {
+      await signOut({
+        redirect: false,
+      });
+      router.push('/login');
     }
   };
-
   useEffect(() => {
     getRideHistoryDetail();
   }, []);
-
   return (
     <ThemeProvider>
       <Head>
@@ -47,22 +44,24 @@ export default function riderHistoryDetail() {
       <Layout>
         <LargeInnerContent>
           <Box>
-            <PageTitle
-              title="Rider"
-              subtitle="History Detail"
-              images_icon={"../history.png"}
-            />
+            <PageTitle title="Rider" subtitle="History Detail" images_icon={'../history.png'} />
 
             <HistoryImage>
-              <Image
-                src={historyDetailData.path_image || "/map.png"}
+              <SafeImage
+                src={historyDetailData.path_image || '/map.png'}
                 alt="Map Image Uniride"
-                layout="fill"
-                objectFit="cover"
+                width={800}
+                height={400}
+                style={{ height: '100%', objectFit: 'cover', width: '100%' }}
               />
             </HistoryImage>
             <RiderName variant="h3">{historyDetailData.driver_name}</RiderName>
-            <InfoList disablePadding style={{ marginBottom: 30 }}>
+            <InfoList
+              disablePadding
+              style={{
+                marginBottom: 30,
+              }}
+            >
               <ListItem>
                 <Typography color="error">PICKUP LOCATION</Typography>
                 <Right>
@@ -87,12 +86,10 @@ export default function riderHistoryDetail() {
                 <Typography>Trip Time</Typography>
                 <Right>
                   <Typography>
-                    {new Date(
-                      historyDetailData.trip_date_time
-                    ).toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                      second: "2-digit",
+                    {new Date(historyDetailData.trip_date_time).toLocaleTimeString([], {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      second: '2-digit',
                     })}
                   </Typography>
                 </Right>
@@ -101,9 +98,7 @@ export default function riderHistoryDetail() {
                 <Typography>Trip Date</Typography>
                 <Right>
                   <Typography>
-                    {new Date(
-                      historyDetailData.trip_date_time
-                    ).toLocaleDateString()}
+                    {new Date(historyDetailData.trip_date_time).toLocaleDateString()}
                   </Typography>
                 </Right>
               </ListItem>
@@ -150,7 +145,6 @@ export default function riderHistoryDetail() {
     </ThemeProvider>
   );
 }
-
 const Box = styled.div`
   ${({ theme }) => `
     background-color: ${theme.colors.palette.white};
@@ -159,7 +153,6 @@ const Box = styled.div`
     padding: 24px;
   `}
 `;
-
 const HistoryImage = styled.div`
   ${({ theme }) => `
     width: 100%;
@@ -175,14 +168,12 @@ const HistoryImage = styled.div`
     }
   `}
 `;
-
 const RiderName = styled(Typography)`
   ${({ theme }) => `
     text-transform: uppercase;
     padding: ${theme.spacing(1, 0)};
   `}
 `;
-
 const InfoList = styled(List)`
   &.MuiList-root {
     .MuiListItem-root {
@@ -193,7 +184,6 @@ const InfoList = styled(List)`
     }
   }
 `;
-
 const Right = styled.div`
   flex: 0 0 50%;
   max-width: 50%;

@@ -1,47 +1,45 @@
-import React, { useState, useEffect } from "react";
-import { getSession, signOut, useSession } from "next-auth/react";
-import Head from "next/head";
-import ThemeProvider from "@/theme/ThemeProvider";
-import Layout from "@/components/common/Layout";
-import SmallContent from "@/components/presentation/SmallContent";
-import styled from "@emotion/styled";
-import PageTitle from "@/components/common/PageTitle";
-import { Button } from "@mui/material";
-import CardsList from "@/components/common/CardList";
-import { api } from "@/utils/api/common";
-import { toast } from "react-toastify";
-import { useRouter } from "next/router";
-import SpinnerLoader from "@/components/common/SpinnerLoader";
-
+import React, { useState, useEffect } from 'react';
+import { getSession, signOut, useSession } from 'next-auth/react';
+import Head from 'next/head';
+import ThemeProvider from '@/theme/ThemeProvider';
+import Layout from '@/components/common/Layout';
+import SmallContent from '@/components/presentation/SmallContent';
+import styled from '@emotion/styled';
+import PageTitle from '@/components/common/PageTitle';
+import { Button } from '@mui/material';
+import CardsList from '@/components/common/CardList';
+import { api } from '@/utils/api/common';
+import { toast } from 'react-toastify';
+import { useRouter } from 'next/router';
+import SpinnerLoader from '@/components/common/SpinnerLoader';
 export default function SaveCards({ userAuth }) {
   const [cardList, setCardList] = useState([]);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const { data: session, update: sessionUpdate } = useSession();
-
   const getCustomerCardList = async () => {
     const formData = new FormData();
     formData.append("customer_id", userAuth?.customer_id);
     formData.append("token_code", userAuth?.token_code);
 
     const response = await api({
-      url: "/customer/payments/list",
-      method: "POST",
       data: formData,
+      method: 'POST',
+      url: '/customer/payments/list',
     });
-
     if (response.status === true) {
       setCardList(response.data);
-    } else if (response.message == "Invalid token code") {
+    } else if (response.message === 'Invalid token code') {
       toast.error(
-        "Your account has been logged in on another device.Please login again to continue."
+        'Your account has been logged in on another device.Please login again to continue.'
       );
-      await signOut({ redirect: false });
-      router.push("/login");
+      await signOut({
+        redirect: false,
+      });
+      router.push('/login');
     }
   };
-
-  const handleMakeDefaultCard = async (value) => {
+  const handleMakeDefaultCard = async value => {
     setLoading(true);
     const formData = new FormData();
     // formData.append("customer_id", userAuth.customer_id);
@@ -51,14 +49,14 @@ export default function SaveCards({ userAuth }) {
       url: "/customer/payments/set-default-card",
       method: "POST",
       data: formData,
+      method: 'POST',
+      url: '/customers/set_default_card',
     });
-
     if (response.status === true) {
       const profileResponse = await api({
-        url: "/customer/get-profile-details",
-        method: "GET",
+        method: 'GET',
+        url: '/customer/get-profile-details',
       });
-
       if (profileResponse.status === true) {
         if (session) {
           await sessionUpdate({
@@ -67,34 +65,30 @@ export default function SaveCards({ userAuth }) {
               ...session?.user,
               data: {
                 ...session?.user?.data,
-                default_payment_method:
-                  profileResponse.data.default_payment_method,
+                default_payment_method: profileResponse.data.default_payment_method,
               },
             },
           });
         }
       }
-
       setLoading(false);
       toast.success(response.message);
       getCustomerCardList();
-    } else if (
-      response.status === false &&
-      response.message === "Invalid token code"
-    ) {
+    } else if (response.status === false && response.message === 'Invalid token code') {
       setLoading(false);
       toast.error(
-        "Your account has been logged in on another device. Please login again to continue."
+        'Your account has been logged in on another device. Please login again to continue.'
       );
-      await signOut({ redirect: false });
-      router.push("/login");
+      await signOut({
+        redirect: false,
+      });
+      router.push('/login');
     } else {
       setLoading(false);
       toast.success(response.message);
     }
   };
-
-  const handleDeleteCard = async (value) => {
+  const handleDeleteCard = async value => {
     setLoading(true);
     const formData = new FormData();
     formData.append("customer_id", userAuth?.customer_id);
@@ -104,42 +98,36 @@ export default function SaveCards({ userAuth }) {
     const requestBody = {
       payment_id: value,
     };
-
     const response = await api({
-      url: "/customer/payments/remove-card",
-      method: "POST",
       data: requestBody,
+      method: 'POST',
+      url: '/customer/payments/remove-card',
     });
-
     if (response.status === true) {
       setLoading(false);
       toast.success(response.message);
       getCustomerCardList();
-    } else if (
-      response.status === false &&
-      response.message === "Invalid token code"
-    ) {
+    } else if (response.status === false && response.message === 'Invalid token code') {
       setLoading(false);
       toast.error(
         "Your account has been logged in on another device. Please login again to continue."
       );
-      await signOut({ redirect: false });
-      router.push("/login");
+      await signOut({
+        redirect: false,
+      });
+      router.push('/login');
     } else {
       setLoading(false);
       toast.success(response.message);
     }
   };
-
   const handleAddCardClick = () => {
     // router.push("/addPaymentInfo");
     router.push("/cards/add");
   };
-
   useEffect(() => {
     getCustomerCardList();
   }, []);
-
   return (
     <ThemeProvider>
       <Head>
@@ -178,25 +166,6 @@ export default function SaveCards({ userAuth }) {
   );
 }
 
-export async function getServerSideProps(context) {
-  const session = await getSession(context);
-
-  if (!session) {
-    return {
-      redirect: {
-        destination: "/login",
-        permanent: false,
-      },
-    };
-  }
-
-  return {
-    props: {
-      userAuth: session.user || null,
-    },
-  };
-}
-
 const SaveCardsBox = styled.div`
   ${({ theme }) => `
     border-radius: 16px 0px 16px 16px;
@@ -214,7 +183,6 @@ const SaveCardsBox = styled.div`
     }
   `}
 `;
-
 const SaveCardHead = styled.div`
   ${({ theme }) => `
     display: flex;

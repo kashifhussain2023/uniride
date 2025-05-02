@@ -4,34 +4,35 @@
 
 // Routes that require authentication
 export const authRoutes = {
-    uniride: '/uniride',
-    addCard: '/cards/add',
-    profile: '/profile',
-    rides: '/rides',
-    settings: '/settings',
-    corporateVerification: '/corporate-verification'
+  addCard: '/cards/add',
+  corporateVerification: '/corporate-verification',
+  profile: '/profile',
+  rides: '/rides',
+  settings: '/settings',
+  uniride: '/uniride',
+  designatedDriver: '/designated-driver',
 };
 
 // Public routes (including login/register pages)
 export const publicRoutes = {
-    home: '/',
-    login: '/login',
-    register: '/register',
-    verification: '/verification',
-    about: '/about',
-    contact: '/contact',
-    terms: '/terms',
-    privacy: '/privacy',
-    forgotPassword: '/forgot-password',
-    resetPassword: '/reset-password'
+  about: '/about',
+  contact: '/contact',
+  forgotPassword: '/forgot-password',
+  home: '/',
+  login: '/login',
+  privacy: '/privacy',
+  register: '/register',
+  resetPassword: '/reset-password',
+  terms: '/terms',
+  verification: '/verification',
 };
 
 // Route groups for middleware checks
 export const routeGroups = {
-    // Routes that require authentication
-    auth: Object.values(authRoutes),
-    // Routes that are publicly accessible
-    public: Object.values(publicRoutes)
+  // Routes that require authentication
+  auth: Object.values(authRoutes),
+  // Routes that are publicly accessible
+  public: Object.values(publicRoutes),
 };
 
 /**
@@ -40,7 +41,7 @@ export const routeGroups = {
  * @returns {boolean}
  */
 export const isAuthRoute = (pathname) => {
-    return routeGroups.auth.includes(pathname);
+  return routeGroups.auth.includes(pathname);
 };
 
 /**
@@ -49,7 +50,7 @@ export const isAuthRoute = (pathname) => {
  * @returns {boolean}
  */
 export const isPublicRoute = (pathname) => {
-    return routeGroups.public.includes(pathname);
+  return routeGroups.public.includes(pathname);
 };
 
 /**
@@ -57,7 +58,7 @@ export const isPublicRoute = (pathname) => {
  * @returns {string}
  */
 export const getDefaultAuthRedirect = () => {
-    return authRoutes.uniride;
+  return authRoutes.uniride;
 };
 
 /**
@@ -65,5 +66,5 @@ export const getDefaultAuthRedirect = () => {
  * @returns {string}
  */
 export const getLoginPath = () => {
-    return publicRoutes.login;
-}; 
+  return publicRoutes.login;
+};

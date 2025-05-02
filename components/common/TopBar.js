@@ -1,8 +1,7 @@
-import React, { useState } from "react";
-import { signOut, useSession } from "next-auth/react";
-import Image from "next/image";
-import { useRouter } from "next/router";
-import styled from "@emotion/styled";
+import React, { useState } from 'react';
+import { signOut, useSession } from 'next-auth/react';
+import { useRouter } from 'next/router';
+import styled from '@emotion/styled';
 import {
   Avatar,
   Divider,
@@ -16,21 +15,14 @@ import {
   Tooltip,
   Typography,
   Box,
-  Link,
-} from "@mui/material";
-import {
-  Close,
-  ExpandMore,
-  Logout,
-  AccountCircle,
-  PersonAdd,
-  Settings,
-} from "@mui/icons-material";
-import { menuIcons, headerIcons } from "@/utils/constant";
+} from '@mui/material';
+import { Close, ExpandMore, Logout, AccountCircle, PersonAdd, Settings } from '@mui/icons-material';
+import { menuIcons, headerIcons } from '@/utils/constant';
+import SafeImage from './SafeImage';
 
 export const icons = {
-  Logout,
   AccountCircle,
+  Logout,
   PersonAdd,
   Settings,
 };
@@ -40,55 +32,45 @@ export default function TopBar({ setOpenDelete }) {
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
   const { data: session } = useSession();
-
   const [state, setState] = useState({
     left: false,
   });
-
-  const toggleDrawer = (anchor, open) => (event) => {
-    if (
-      event.type === "keydown" &&
-      (event.key === "Tab" || event.key === "Shift")
-    ) {
+  const toggleDrawer = (anchor, open) => event => {
+    if (event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
       return;
     }
-
-    setState({ ...state, [anchor]: open });
+    setState({
+      ...state,
+      [anchor]: open,
+    });
   };
-
-  const handleClick = (event) => {
+  const handleClick = event => {
     setAnchorEl(event.currentTarget);
   };
-
   const handleClose = () => {
     setAnchorEl(null);
   };
-
-  const handleSignOut = async (e) => {
-    await signOut({ redirect: false });
-    router.push("/login");
+  const handleSignOut = async () => {
+    await signOut({
+      redirect: false,
+    });
+    router.push('/login');
   };
-
   const openDelete = () => {
     setOpenDelete(true);
   };
-
-  const list = (anchor) => (
+  const list = anchor => (
     <Box
-      sx={{ width: anchor === "top" || anchor === "bottom" ? "auto" : 405 }}
+      sx={{
+        width: anchor === 'top' || anchor === 'bottom' ? 'auto' : 405,
+      }}
       role="presentation"
       onClick={toggleDrawer(anchor, false)}
       onKeyDown={toggleDrawer(anchor, false)}
     >
       <SidebarTop>
         <Logo>
-          <Image
-            src="/logo.jpg"
-            layout="responsive"
-            alt="logo"
-            width={112}
-            height={43}
-          />
+          <SafeImage src="/logo.jpg" alt="logo" width={112} height={43} />
         </Logo>
         <DrawerBtn onClick={toggleDrawer(anchor, true)}>
           <Close />
@@ -105,13 +87,7 @@ export default function TopBar({ setOpenDelete }) {
                 onClick={() => router.push(path)}
               >
                 <ListItemIcon>
-                  <Image
-                    src={`/${icon}`}
-                    layout="responsive"
-                    alt="logo"
-                    width={30}
-                    height={30}
-                  />
+                  <SafeImage src={`/${icon}`} alt={label} width={30} height={30} />
                 </ListItemIcon>
                 {label}
               </MenuItem>
@@ -119,10 +95,9 @@ export default function TopBar({ setOpenDelete }) {
           })}
           <MenuItem key="delete" onClick={openDelete}>
             <ListItemIcon>
-              <Image
+              <SafeImage
                 src="/icon/deleteAccountIcon.png"
-                layout="responsive"
-                alt="logo"
+                alt="Delete Account"
                 width={30}
                 height={30}
               />
@@ -138,13 +113,7 @@ export default function TopBar({ setOpenDelete }) {
               return (
                 <MenuItem key={label} onClick={() => router.push(path)}>
                   <ListItemIcon>
-                    <Image
-                      src={`/${icon}`}
-                      layout="responsive"
-                      alt="logo"
-                      width={30}
-                      height={30}
-                    />
+                    <SafeImage src={`/${icon}`} alt={label} width={30} height={30} />
                   </ListItemIcon>
                   {label}
                 </MenuItem>
@@ -155,37 +124,20 @@ export default function TopBar({ setOpenDelete }) {
       </DrawerMenu>
     </Box>
   );
-
   return (
     <Header>
       <Container>
         <LeftBar>
           <Logo>
-            <Image
-              src="/logo.jpg"
-              layout="responsive"
-              alt="logo"
-              width={112}
-              height={43}
-            />
+            <SafeImage src="/logo.jpg" alt="logo" width={112} height={43} />
           </Logo>
           <div>
-            {["left"].map((anchor) => (
+            {['left'].map(anchor => (
               <React.Fragment key={anchor}>
                 <DrawerBtn onClick={toggleDrawer(anchor, true)}>
-                  <Image
-                    src="/menu-icon.png"
-                    layout="responsive"
-                    alt="logo"
-                    width={27}
-                    height={19}
-                  />
+                  <SafeImage src="/menu-icon.png" alt="Menu" width={27} height={19} />
                 </DrawerBtn>
-                <Drawer
-                  anchor={anchor}
-                  open={state[anchor]}
-                  onClose={toggleDrawer(anchor, false)}
-                >
+                <Drawer anchor={anchor} open={state[anchor]} onClose={toggleDrawer(anchor, false)}>
                   {list(anchor)}
                 </Drawer>
               </React.Fragment>
@@ -212,20 +164,23 @@ export default function TopBar({ setOpenDelete }) {
             <IconButton
               onClick={handleClick}
               size="small"
-              sx={{ ml: 2 }}
-              aria-controls={open ? "account-menu" : undefined}
+              sx={{
+                ml: 2,
+              }}
+              aria-controls={open ? 'account-menu' : undefined}
               aria-haspopup="true"
-              aria-expanded={open ? "true" : undefined}
+              aria-expanded={open ? 'true' : undefined}
               disableRipple
             >
               <Avatar
-                sx={{ width: 40, height: 40 }}
-                alt="Mani Sharp"
-                src={session?.user?.customer_image || "../avatar-photo.png"}
+                sx={{
+                  height: 40,
+                  width: 40,
+                }}
+                alt="User Avatar"
+                src={session?.user?.customer_image || '/avatar.png'}
               />
-              <Typography component="span">
-                {session?.user?.name || ""}
-              </Typography>
+              <Typography component="span">{session?.user?.name || ''}</Typography>
               <ExpandMore />
             </IconButton>
           </AccountTooltip>
@@ -238,25 +193,31 @@ export default function TopBar({ setOpenDelete }) {
             PaperProps={{
               elevation: 0,
               sx: {
-                overflow: "visible",
-                filter: "drop-shadow(0px 2px 8px rgba(0,0,0,0.32))",
-                mt: 1.5,
-                "&:before": {
+                '&:before': {
+                  bgcolor: 'background.paper',
                   content: '""',
-                  display: "block",
-                  position: "absolute",
-                  top: 0,
-                  right: 14,
-                  width: 10,
+                  display: 'block',
                   height: 10,
-                  bgcolor: "background.paper",
-                  transform: "translateY(-50%) rotate(45deg)",
+                  position: 'absolute',
+                  right: 14,
+                  top: 0,
+                  transform: 'translateY(-50%) rotate(45deg)',
+                  width: 10,
                   zIndex: 0,
                 },
+                filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
+                mt: 1.5,
+                overflow: 'visible',
               },
             }}
-            transformOrigin={{ horizontal: "right", vertical: "top" }}
-            anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
+            transformOrigin={{
+              horizontal: 'right',
+              vertical: 'top',
+            }}
+            anchorOrigin={{
+              horizontal: 'right',
+              vertical: 'bottom',
+            }}
           >
             <MenuItem onClick={handleSignOut}>
               <ListItemIcon>
@@ -270,7 +231,6 @@ export default function TopBar({ setOpenDelete }) {
     </Header>
   );
 }
-
 const Header = styled.div`
   ${({ theme }) => `
     padding-top: calc(${theme.spacing(2)} - 5px);
@@ -288,7 +248,6 @@ const Header = styled.div`
     }
   `}
 `;
-
 const Container = styled.div`
   ${({ theme }) => `
     display: flex;
@@ -298,7 +257,6 @@ const Container = styled.div`
     padding: 0px ${theme.spacing(2)};
   `}
 `;
-
 const DrawerBtn = styled.button`
   ${({ theme }) => `
     padding: 0px !important;
@@ -309,12 +267,10 @@ const DrawerBtn = styled.button`
     width: 22px;
   `}
 `;
-
 const RightBar = styled.div`
   display: flex;
   align-items: center;
 `;
-
 const Logo = styled.div`
   ${({ theme }) => `
     width: 112px;
@@ -323,12 +279,10 @@ const Logo = styled.div`
     margin-right: ${theme.spacing(2)};
   `}
 `;
-
 const LeftBar = styled.div`
   display: flex;
   align-items: center;
 `;
-
 const MainMenu = styled.div`
   ${({ theme }) => `
     li {
@@ -380,7 +334,6 @@ const MainMenu = styled.div`
     }
   `}
 `;
-
 const AccountTooltip = styled(Tooltip)`
   ${({ theme }) => `
     &.MuiIconButton-root {
@@ -411,7 +364,6 @@ const AccountTooltip = styled(Tooltip)`
     }
   `}
 `;
-
 const DrawerMenu = styled(Tooltip)`
   ${({ theme }) => `
     .MuiMenuItem-root {
@@ -454,7 +406,6 @@ const DrawerMenu = styled(Tooltip)`
     }
   `}
 `;
-
 const MenuHeader = styled(Tooltip)`
   ${({ theme }) => `  
     display: block;
@@ -464,7 +415,6 @@ const MenuHeader = styled(Tooltip)`
     }
   `}
 `;
-
 const SidebarTop = styled.div`
   ${({ theme }) => ` 
     display: flex;

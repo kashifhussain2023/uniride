@@ -1,70 +1,115 @@
-export const mainMenuItems = [
-  { label: "Dashboard", path: "/uniride", icon: "DashboardOutlined" },
-];
+import SafeImage from '@/components/common/SafeImage';
 
+export const mainMenuItems = [
+  {
+    icon: 'DashboardOutlined',
+    label: 'Dashboard',
+    path: '/uniride',
+  },
+];
 export const profileMenus = [
   // { label: "Profile", path: "/", icon: "AccountCircle" },
-  { label: "Logout", path: "/login", icon: "Logout" },
+  {
+    icon: 'Logout',
+    label: 'Logout',
+    path: '/login',
+  },
 ];
-
 export const menuIcons = [
-  { label: "Profile", path: "/profile", icon: "../icon/profileIcon.png" },
   {
-    label: "Favorite Location",
-    path: "/favoriteDestination",
-    icon: "../icon/favoriteLocationIcon.png",
+    icon: <SafeImage src="../icon/profileIcon.png" alt="Profile" width={24} height={24} />,
+    label: 'Profile',
+    path: '/profile',
   },
   {
-    label: "Corporate Profile",
-    path: "/corporate-profile",
-    icon: "../icon/corporateProfileIcon.png",
+    icon: (
+      <SafeImage
+        src="../icon/favoriteLocationIcon.png"
+        alt="Favorite Location"
+        width={24}
+        height={24}
+      />
+    ),
+    label: 'Favorite Location',
+    path: '/favoriteDestination',
   },
   {
-    label: "Emergency Contact",
-    path: "/emergency-contact",
-    icon: "../icon/emergencyContactIcon.png",
+    icon: (
+      <SafeImage
+        src="../icon/corporateProfileIcon.png"
+        alt="Corporate Profile"
+        width={24}
+        height={24}
+      />
+    ),
+    label: 'Corporate Profile',
+    path: '/corporate-profile',
   },
-  { label: "Payment", path: "/cards", icon: "../icon/paymentIcon.png" },
   {
-    label: "Rider History",
-    path: "riderHistory",
-    icon: "../icon/riderHistoryIcon.png",
+    icon: (
+      <SafeImage
+        src="../icon/emergencyContactIcon.png"
+        alt="Emergency Contact"
+        width={24}
+        height={24}
+      />
+    ),
+    label: 'Emergency Contact',
+    path: '/emergency-contact',
   },
-  { label: "Help", path: "/help", icon: "../icon/helpIcon.png" },
-  { label: "Legal", path: "/legal", icon: "../icon/LegalIcon.png" },
   {
-    label: "Privacy Policy",
-    path: "/privacyPolicy",
-    icon: "../icon/privacyIcon.png",
+    icon: <SafeImage src="../icon/paymentIcon.png" alt="Payment" width={24} height={24} />,
+    label: 'Payment',
+    path: '/cards',
+  },
+  {
+    icon: (
+      <SafeImage src="../icon/riderHistoryIcon.png" alt="Rider History" width={24} height={24} />
+    ),
+    label: 'Rider History',
+    path: 'riderHistory',
+  },
+  {
+    icon: <SafeImage src="../icon/helpIcon.png" alt="Help" width={24} height={24} />,
+    label: 'Help',
+    path: '/help',
+  },
+  {
+    icon: <SafeImage src="../icon/LegalIcon.png" alt="Legal" width={24} height={24} />,
+    label: 'Legal',
+    path: '/legal',
+  },
+  {
+    icon: <SafeImage src="../icon/privacyIcon.png" alt="Privacy Policy" width={24} height={24} />,
+    label: 'Privacy Policy',
+    path: '/privacyPolicy',
   },
   // { label: "Delete Account", path: "", icon: "../icon/deleteAccountIcon.png" },
 ];
-
 export const headerIcons = [
   {
-    label: "Request A Ride ",
-    path: "/uniride",
-    icon: "../icon/profileIcon.png",
+    icon: '../icon/profileIcon.png',
+    label: 'Request A Ride ',
+    path: '/uniride',
   },
   {
-    label: "Request For Designated Driver",
-    path: "/designated-driver",
-    icon: "../icon/favoriteLocationIcon.png",
+    icon: '../icon/favoriteLocationIcon.png',
+    label: 'Request For Designated Driver',
+    path: '/designated-driver',
   },
   {
-    label: "Schedule Ride",
-    path: "/schedule-ride",
-    icon: "../icon/corporateProfileIcon.png",
+    icon: '../icon/corporateProfileIcon.png',
+    label: 'Schedule Ride',
+    path: '/schedule-ride',
   },
 ];
-
 export const scheduleRideList = [
   {
-    startPoint:
-      "Shop No.40. Mira Marg Shopping Center, Sector Ward Number 43, Sector 101, Mansarovar, Jaipur, Rajasthan 302020, India",
+    date: '2023 Dec 23',
     endPoint:
-      "INTERNATIONAL SC OO O INFORMATICS & MANAGEMENT, Mahaveer Marg. Sector 12, Mansarovar, Jaipur, Rajasthan 302020, India",
-    date: "2023 Dec 23",
-    time: "06:25 PM",
+      'INTERNATIONAL SC OO O INFORMATICS & MANAGEMENT, Mahaveer Marg. Sector 12, Mansarovar, Jaipur, Rajasthan 302020, India',
+    startPoint:
+      'Shop No.40. Mira Marg Shopping Center, Sector Ward Number 43, Sector 101, Mansarovar, Jaipur, Rajasthan 302020, India',
+    time: '06:25 PM',
   },
 ];

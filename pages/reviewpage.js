@@ -1,47 +1,46 @@
-import React, { useState, useEffect } from "react";
-import { useRouter } from "next/router";
-import { api } from "@/utils/api/common";
-import { getSession } from "next-auth/react";
-import Head from "next/head";
-import ThemeProvider from "@/theme/ThemeProvider";
-import Layout from "@/components/common/Layout";
-import styled from "@emotion/styled";
-import PageTitle from "@/components/common/PageTitle";
-import { Button, Typography } from "@mui/material";
-import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
-import ListItemText from "@mui/material/ListItemText";
-import ListItemAvatar from "@mui/material/ListItemAvatar";
-import Avatar from "@mui/material/Avatar";
-import StarIcon from "@mui/icons-material/Star";
-import StarBorderIcon from "@mui/icons-material/StarBorder";
-import StarHalfIcon from "@mui/icons-material/StarHalf";
-import TextareaAutosize from "@mui/material/TextareaAutosize";
-import InnerContent from "@/components/presentation/InnerContent";
-
-export default function ReviewPage({ userAuth }) {
+import Layout from '@/components/common/Layout';
+import PageTitle from '@/components/common/PageTitle';
+import InnerContent from '@/components/presentation/InnerContent';
+import ThemeProvider from '@/theme/ThemeProvider';
+import styled from '@emotion/styled';
+import StarIcon from '@mui/icons-material/Star';
+import StarBorderIcon from '@mui/icons-material/StarBorder';
+import StarHalfIcon from '@mui/icons-material/StarHalf';
+import { Button, Typography } from '@mui/material';
+import Avatar from '@mui/material/Avatar';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemAvatar from '@mui/material/ListItemAvatar';
+import ListItemText from '@mui/material/ListItemText';
+import TextareaAutosize from '@mui/material/TextareaAutosize';
+import { getSession } from 'next-auth/react';
+import Head from 'next/head';
+import { useRouter } from 'next/router';
+import React from 'react';
+export default function ReviewPage() {
   const router = useRouter();
   const { rideType } = router.query;
-  const [reviewPageDetail, setReviewPageDetail] = useState();
-  const getReviewPageDetail = async () => {
-    const formData = new FormData();
-    formData.append("user_type", "rider");
-    formData.append("ride_type", rideType);
-    formData.append("customer_id", userAuth.customer_id);
-    formData.append("token_code", userAuth.token_code);
-    const response = await api({
-      url: "/common/get_rating_questions",
-      method: "POST",
-      data: formData,
-    });
-    if (response.status === "1") {
-      setReviewPageDetail(response.data);
-    }
-  };
-  useEffect(() => {
-    getReviewPageDetail();
-  }, []);
+  console.log(rideType);
 
+  // const [reviewPageDetail, setReviewPageDetail] = useState();
+  // const getReviewPageDetail = async () => {
+  //   const formData = new FormData();
+  //   formData.append('user_type', 'rider');
+  //   formData.append('ride_type', rideType);
+  //   formData.append('customer_id', userAuth.customer_id);
+  //   formData.append('token_code', userAuth.token_code);
+  //   const response = await api({
+  //     data: formData,
+  //     method: 'POST',
+  //     url: '/common/get_rating_questions',
+  //   });
+  //   if (response.status === '1') {
+  //     setReviewPageDetail(response.data);
+  //   }
+  // };
+  // useEffect(() => {
+  //   getReviewPageDetail();
+  // }, []);
   return (
     <ThemeProvider>
       <Head>
@@ -57,7 +56,7 @@ export default function ReviewPage({ userAuth }) {
               <PageTitle
                 title="Customer"
                 subtitle="Review"
-                images_icon={"../review.png"}
+                images_icon={'../review.png'}
               ></PageTitle>
               <RouteDetail>
                 <ReviewHead>
@@ -74,23 +73,22 @@ export default function ReviewPage({ userAuth }) {
                 <ActiveLocation>
                   <Typography variant="h4">Apparel Park Industrial</Typography>
                   <Typography variant="subtitle3" component="p">
-                    Area, CP4-228/229, Mahal Road, Jagatpura, Jaipur, Shri
-                    Kishanpura, Rajasthan 302017
+                    Area, CP4-228/229, Mahal Road, Jagatpura, Jaipur, Shri Kishanpura, Rajasthan
+                    302017
                   </Typography>
                 </ActiveLocation>
                 <PreviousLocation>
                   <Typography variant="h4">Apparel Park Industrial</Typography>
                   <Typography variant="subtitle3" component="p">
-                    Area, CP4-228/229, Mahal Road, Jagatpura, Jaipur, Shri
-                    Kishanpura, Rajasthan 302017
+                    Area, CP4-228/229, Mahal Road, Jagatpura, Jaipur, Shri Kishanpura, Rajasthan
+                    302017
                   </Typography>
                 </PreviousLocation>
               </RouteDetail>
               <TipYourDriver>
                 <Typography variant="h4">Tip Your Driver</Typography>
                 <Typography variant="subtitle3" component="p">
-                  Thank your driver by leaving them a Tip. 100% of the Tip will
-                  go to your driver.
+                  Thank your driver by leaving them a Tip. 100% of the Tip will go to your driver.
                 </Typography>
                 <List>
                   <ListItem>
@@ -166,10 +164,7 @@ export default function ReviewPage({ userAuth }) {
                   </ListItem>
                   <ListItem alignItems="flex-start">
                     <ListItemAvatar>
-                      <Avatar
-                        alt="Cleanliness and Hygiene"
-                        src="/Hygiene.png"
-                      />
+                      <Avatar alt="Cleanliness and Hygiene" src="/Hygiene.png" />
                     </ListItemAvatar>
                     <ListItemText
                       primary="Cleanliness and Hygiene"
@@ -201,18 +196,32 @@ export default function ReviewPage({ userAuth }) {
               </Rating>
               <ReviewArea>
                 <ReviewComment>
-                  <Typography variant="h4" sx={{ mb: 2 }}>
+                  <Typography
+                    variant="h4"
+                    sx={{
+                      mb: 2,
+                    }}
+                  >
                     Comments
                   </Typography>
                   <TextareaAutosize
                     aria-label="empty textarea"
                     placeholder="Start typing..."
-                    style={{ width: "100%", height: "290px" }}
+                    style={{
+                      height: '290px',
+                      width: '100%',
+                    }}
                   />
                 </ReviewComment>
               </ReviewArea>
               <CommentFooter>
-                <Button variant="contained" color="primary" sx={{ mt: 2 }}>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  sx={{
+                    mt: 2,
+                  }}
+                >
                   Submit
                 </Button>
               </CommentFooter>
@@ -226,17 +235,15 @@ export default function ReviewPage({ userAuth }) {
 export async function getServerSideProps(context) {
   // You can access the session and user information here.
   const session = await getSession(context);
-
   if (!session) {
     // Handle unauthenticated access
     return {
       redirect: {
-        destination: "/login",
+        destination: '/login',
         permanent: false,
       },
     };
   }
-
   return {
     props: {
       userAuth: session.user || null,
@@ -254,7 +261,6 @@ const ReviewArea = styled.div`
     }
   `}
 `;
-
 const Rating = styled.div`
   ${({ theme }) => `
     width: 100%;
@@ -264,7 +270,6 @@ const Rating = styled.div`
     }
   `}
 `;
-
 const ReviewComment = styled.div`
   ${({ theme }) => `
     width: 100%;
@@ -279,7 +284,6 @@ const ReviewComment = styled.div`
     }
   `}
 `;
-
 const PannelSection = styled.div`
   ${({ theme }) => `
     display: flex;
@@ -291,7 +295,6 @@ const PannelSection = styled.div`
     }
   `}
 `;
-
 const LeftPannel = styled.div`
   ${({ theme }) => `
     background-color: ${theme.colors.palette.white};
@@ -318,7 +321,6 @@ const LeftPannel = styled.div`
     }
   `}
 `;
-
 const RightPannel = styled.div`
   ${({ theme }) => `
   position:relative;
@@ -371,14 +373,13 @@ const RightPannel = styled.div`
   `}
 `;
 const RouteDetail = styled.div`
-  ${({ theme }) => `
+  ${() => `
     border: 1px solid #e9e9e9;
     border-radius: 6px;
     padding: 20px 15px;
     margin-bottom: 24px;
   `}
 `;
-
 const ReviewHead = styled.div`
   ${({ theme }) => `
     display: flex;
@@ -397,7 +398,6 @@ const BookingLabel = styled.div`
     flex: 0 0 100px;
   `}
 `;
-
 const Details = styled.div`
   ${({ theme }) => `
     width: 100%;
@@ -406,7 +406,6 @@ const Details = styled.div`
     text-align: right;
   `}
 `;
-
 const Price = styled.div`
   ${({ theme }) => `
     font-size: 24px;
@@ -414,9 +413,8 @@ const Price = styled.div`
     font-weight: 700;
   `}
 `;
-
 const ActiveLocation = styled.div`
-  ${({ theme }) => `
+  ${() => `
     background-color: #f0fbf5;
     border-radius: 6px;
     padding: 10px 10px 10px 30px;
@@ -439,7 +437,7 @@ const ActiveLocation = styled.div`
   `}
 `;
 const PreviousLocation = styled.div`
-  ${({ theme }) => `
+  ${() => `
     background-color: #fcfcfc;
     border-radius: 6px;
     padding: 10px 10px 10px 30px;
@@ -460,7 +458,6 @@ const PreviousLocation = styled.div`
     }
   `}
 `;
-
 const TipYourDriver = styled.div`
   ${({ theme }) => `
     .MuiList-root {
@@ -494,7 +491,6 @@ const TipYourDriver = styled.div`
     }
   `}
 `;
-
 const RideInfo = styled.div`
   ${({ theme }) => `
     .MuiList-root {
@@ -517,9 +513,8 @@ const RideInfo = styled.div`
     }
   `}
 `;
-
 const CommentFooter = styled.div`
-  ${({ theme }) => `
+  ${() => `
     text-align: right;
   `}
 `;

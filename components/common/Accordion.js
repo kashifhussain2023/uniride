@@ -1,10 +1,8 @@
-import * as React from "react";
-import Accordion from "@mui/material/Accordion";
-import AccordionSummary from "@mui/material/AccordionSummary";
-import AccordionDetails from "@mui/material/AccordionDetails";
-import Typography from "@mui/material/Typography";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import Accordion from '@mui/material/Accordion';
+import AccordionDetails from '@mui/material/AccordionDetails';
+import AccordionSummary from '@mui/material/AccordionSummary';
+import Typography from '@mui/material/Typography';
 export default function FaqAccordion() {
   return (
     <>
@@ -15,18 +13,17 @@ export default function FaqAccordion() {
           id="panel1a-header"
         >
           <Typography variant="h3">
-            {" "}
+            {' '}
             <span>Q</span>Can customer pay using cash method after taking rid
           </Typography>
         </AccordionSummary>
         <AccordionDetails>
           <Typography>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam
-            sagittis venenatis elit, elementum consectetur mauris ullamcorper
-            ullamcorper. Class aptent taciti sociosqu ad litora torquent per
-            conubia nostra, per inceptos himenaeos. Nulla sed mauris eget urna
-            ultricies sagittis sed sed lectus. Nulla commodo est vel lorem
-            viverra, vitae gravida dolor vehicula.
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam sagittis venenatis elit,
+            elementum consectetur mauris ullamcorper ullamcorper. Class aptent taciti sociosqu ad
+            litora torquent per conubia nostra, per inceptos himenaeos. Nulla sed mauris eget urna
+            ultricies sagittis sed sed lectus. Nulla commodo est vel lorem viverra, vitae gravida
+            dolor vehicula.
           </Typography>
         </AccordionDetails>
       </Accordion>
@@ -37,18 +34,17 @@ export default function FaqAccordion() {
           id="panel2a-header"
         >
           <Typography variant="h3">
-            {" "}
+            {' '}
             <span>Q</span>Can customer pay using cash method after taking rid
           </Typography>
         </AccordionSummary>
         <AccordionDetails>
           <Typography>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam
-            sagittis venenatis elit, elementum consectetur mauris ullamcorper
-            ullamcorper. Class aptent taciti sociosqu ad litora torquent per
-            conubia nostra, per inceptos himenaeos. Nulla sed mauris eget urna
-            ultricies sagittis sed sed lectus. Nulla commodo est vel lorem
-            viverra, vitae gravida dolor vehicula.
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam sagittis venenatis elit,
+            elementum consectetur mauris ullamcorper ullamcorper. Class aptent taciti sociosqu ad
+            litora torquent per conubia nostra, per inceptos himenaeos. Nulla sed mauris eget urna
+            ultricies sagittis sed sed lectus. Nulla commodo est vel lorem viverra, vitae gravida
+            dolor vehicula.
           </Typography>
         </AccordionDetails>
       </Accordion>
@@ -59,18 +55,17 @@ export default function FaqAccordion() {
           id="panel3a-header"
         >
           <Typography variant="h3">
-            {" "}
+            {' '}
             <span>Q</span>Can customer pay using cash method after taking rid
           </Typography>
         </AccordionSummary>
         <AccordionDetails>
           <Typography>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam
-            sagittis venenatis elit, elementum consectetur mauris ullamcorper
-            ullamcorper. Class aptent taciti sociosqu ad litora torquent per
-            conubia nostra, per inceptos himenaeos. Nulla sed mauris eget urna
-            ultricies sagittis sed sed lectus. Nulla commodo est vel lorem
-            viverra, vitae gravida dolor vehicula.
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam sagittis venenatis elit,
+            elementum consectetur mauris ullamcorper ullamcorper. Class aptent taciti sociosqu ad
+            litora torquent per conubia nostra, per inceptos himenaeos. Nulla sed mauris eget urna
+            ultricies sagittis sed sed lectus. Nulla commodo est vel lorem viverra, vitae gravida
+            dolor vehicula.
           </Typography>
         </AccordionDetails>
       </Accordion>
@@ -81,18 +76,17 @@ export default function FaqAccordion() {
           id="panel4a-header"
         >
           <Typography variant="h3">
-            {" "}
+            {' '}
             <span>Q</span>Can customer pay using cash method after taking rid
           </Typography>
         </AccordionSummary>
         <AccordionDetails>
           <Typography>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam
-            sagittis venenatis elit, elementum consectetur mauris ullamcorper
-            ullamcorper. Class aptent taciti sociosqu ad litora torquent per
-            conubia nostra, per inceptos himenaeos. Nulla sed mauris eget urna
-            ultricies sagittis sed sed lectus. Nulla commodo est vel lorem
-            viverra, vitae gravida dolor vehicula.
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam sagittis venenatis elit,
+            elementum consectetur mauris ullamcorper ullamcorper. Class aptent taciti sociosqu ad
+            litora torquent per conubia nostra, per inceptos himenaeos. Nulla sed mauris eget urna
+            ultricies sagittis sed sed lectus. Nulla commodo est vel lorem viverra, vitae gravida
+            dolor vehicula.
           </Typography>
         </AccordionDetails>
       </Accordion>
@@ -103,18 +97,17 @@ export default function FaqAccordion() {
           id="panel5a-header"
         >
           <Typography variant="h3">
-            {" "}
+            {' '}
             <span>Q</span>Can customer pay using cash method after taking rid
           </Typography>
         </AccordionSummary>
         <AccordionDetails>
           <Typography>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam
-            sagittis venenatis elit, elementum consectetur mauris ullamcorper
-            ullamcorper. Class aptent taciti sociosqu ad litora torquent per
-            conubia nostra, per inceptos himenaeos. Nulla sed mauris eget urna
-            ultricies sagittis sed sed lectus. Nulla commodo est vel lorem
-            viverra, vitae gravida dolor vehicula.
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam sagittis venenatis elit,
+            elementum consectetur mauris ullamcorper ullamcorper. Class aptent taciti sociosqu ad
+            litora torquent per conubia nostra, per inceptos himenaeos. Nulla sed mauris eget urna
+            ultricies sagittis sed sed lectus. Nulla commodo est vel lorem viverra, vitae gravida
+            dolor vehicula.
           </Typography>
         </AccordionDetails>
       </Accordion>

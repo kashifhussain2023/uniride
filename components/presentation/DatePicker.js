@@ -1,19 +1,13 @@
-import * as React from "react";
-import Image from "next/image";
-import styled from "@emotion/styled";
-import { TextField } from "@mui/material";
-import calendarIcon from "../../public/date.png";
+import styled from '@emotion/styled';
+import { TextField } from '@mui/material';
+import calendarIcon from '../../public/date.png';
+import SafeImage from '../common/SafeImage';
 
 export default function DatePicker() {
   return (
     <DatePickerComponent>
-      <Image src={calendarIcon} alt="logo" priority />
-      <TextField
-        id="outlined-basic"
-        label="Filter by Date"
-        variant="outlined"
-        type="date"
-      />
+      <SafeImage src={calendarIcon} alt="Calendar" priority />
+      <TextField id="outlined-basic" label="Filter by Date" variant="outlined" type="date" />
     </DatePickerComponent>
   );
 }

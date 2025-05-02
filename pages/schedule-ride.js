@@ -1,44 +1,36 @@
-import { useEffect, useState } from "react";
-import { toast } from "react-toastify";
-import Head from "next/head";
-import { getSession } from "next-auth/react";
-import styled from "@emotion/styled";
-import { Grid, Typography } from "@mui/material";
-import Layout from "@/components/common/Layout";
-import ScheduleRideTile from "@/components/common/ScheduleRideTile";
-import PageTitle from "@/components/common/PageTitle";
-import LargeInnerContent from "@/components/presentation/LargeInnerContent";
-import ThemeProvider from "@/theme/ThemeProvider";
-import { api } from "@/utils/api/common";
-import SpinnerLoader from "@/components/common/SpinnerLoader";
-
-const favoriteDestination = ({ ScheduleRide, session }) => {
+import { useEffect, useState } from 'react';
+import { toast } from 'react-toastify';
+import Head from 'next/head';
+import { getSession } from 'next-auth/react';
+import styled from '@emotion/styled';
+import { Grid, Typography } from '@mui/material';
+import Layout from '@/components/common/Layout';
+import ScheduleRideTile from '@/components/common/ScheduleRideTile';
+import PageTitle from '@/components/common/PageTitle';
+import LargeInnerContent from '@/components/presentation/LargeInnerContent';
+import ThemeProvider from '@/theme/ThemeProvider';
+import { api } from '@/utils/api/common';
+import SpinnerLoader from '@/components/common/SpinnerLoader';
+const ScheduleRide = ({ session }) => {
   const [loading, setLoading] = useState();
   const [open, setOpen] = useState(false);
   const [scheduleRideData, setScheduleRideData] = useState(null);
-
   const areYouSure = () => setOpen(true);
   const close = () => setOpen(false);
-
   const cancelSchedule = async () => {
     const {
       user: { token_code, customer_id },
     } = session;
-
     const formData = new FormData();
-
-    console.log("customer_id",customer_id)
-
-    formData.append("customer_id", customer_id);
-    formData.append("token_code", token_code);
+    console.log('customer_id', customer_id);
+    formData.append('customer_id', customer_id);
+    formData.append('token_code', token_code);
     setLoading(true);
-
     const scheduleRide = await api({
-      url: "/customer/booking/cancel-schedule-ride",
-      method: "POST",
       data: formData,
+      method: 'POST',
+      url: '/customer/booking/cancel-schedule-ride',
     });
-
     if (scheduleRide.status) {
       setOpen(false);
       setLoading(false);
@@ -47,35 +39,30 @@ const favoriteDestination = ({ ScheduleRide, session }) => {
     } else {
       setOpen(false);
       setLoading(false);
-      toast.error("Something went wrong");
+      toast.error('Something went wrong');
     }
   };
-
   useEffect(() => {
     const fetchScheduleRide = async () => {
       if (!session) return;
-
       try {
         const response = await api({
-          url: "/customer/booking/schedule-ride",
-          method: "GET",
+          method: 'GET',
+          url: '/customer/booking/schedule-ride',
         });
-
         if (response?.status === true) {
           setScheduleRideData(response.data);
         } else {
-          toast.error(response.message || "Failed to load scheduled rides");
+          toast.error(response.message || 'Failed to load scheduled rides');
         }
       } catch (err) {
-        toast.error("Something went wrong");
+        toast.error('Something went wrong');
       } finally {
         setLoading(false);
       }
     };
-
     fetchScheduleRide();
   }, [session]);
-
   return (
     <ThemeProvider>
       <Head>
@@ -92,7 +79,7 @@ const favoriteDestination = ({ ScheduleRide, session }) => {
               <PageTitle
                 title="Schedule Your"
                 subtitle="Rides"
-                images_icon={"../location.png"}
+                images_icon={'../location.png'}
               ></PageTitle>
             </HeadSection>
             <Grid container spacing={3}>
@@ -132,28 +119,24 @@ const favoriteDestination = ({ ScheduleRide, session }) => {
     </ThemeProvider>
   );
 };
-
-export default favoriteDestination;
+export default ScheduleRide;
 
 export async function getServerSideProps(context) {
   const session = await getSession(context);
-
   if (!session) {
     return {
       redirect: {
-        destination: "/login",
+        destination: '/login',
         permanent: false,
       },
     };
   }
-
   return {
     props: {
       session,
     },
   };
 }
-
 const Box = styled.div`
   ${({ theme }) => `
     background-color: ${theme.colors.palette.white};
@@ -162,7 +145,6 @@ const Box = styled.div`
     padding: 24px;
   `}
 `;
-
 const HeadSection = styled.div`
   ${({ theme }) => `
     display: flex;

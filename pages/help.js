@@ -1,48 +1,44 @@
-import React, { useEffect, useState } from "react";
-import { getSession, signOut } from "next-auth/react";
-import { useRouter } from "next/router";
-import { api } from "@/utils/api/common";
-import Head from "next/head";
-import ThemeProvider from "@/theme/ThemeProvider";
-import Layout from "@/components/common/Layout";
-import LargeInnerContent from "@/components/presentation/LargeInnerContent";
-import styled from "@emotion/styled";
-import PageTitle from "@/components/common/PageTitle";
-import Accordion from "@mui/material/Accordion";
-import AccordionSummary from "@mui/material/AccordionSummary";
-import AccordionDetails from "@mui/material/AccordionDetails";
-import Typography from "@mui/material/Typography";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import SpinnerLoader from "@/components/common/SpinnerLoader";
-
-export default function emergencyContact({ userAuth }) {
+import React, { useEffect, useState } from 'react';
+import { getSession, signOut } from 'next-auth/react';
+import { useRouter } from 'next/router';
+import { api } from '@/utils/api/common';
+import Head from 'next/head';
+import ThemeProvider from '@/theme/ThemeProvider';
+import Layout from '@/components/common/Layout';
+import LargeInnerContent from '@/components/presentation/LargeInnerContent';
+import styled from '@emotion/styled';
+import PageTitle from '@/components/common/PageTitle';
+import Accordion from '@mui/material/Accordion';
+import AccordionSummary from '@mui/material/AccordionSummary';
+import AccordionDetails from '@mui/material/AccordionDetails';
+import Typography from '@mui/material/Typography';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import SpinnerLoader from '@/components/common/SpinnerLoader';
+export default function Help() {
   const [loading, setLoading] = useState(true);
   const [helpData, setHelpData] = useState([]);
   const router = useRouter();
-
   const getHelpData = async () => {
     setLoading(true);
-
     const response = await api({
-      url: "/customer/get-faq",
-      method: "GET",
+      method: 'GET',
+      url: '/customer/get-faq',
     });
-
     if (response.status === true) {
       setLoading(false);
       setHelpData(response.data.data);
-    } else if (response.data.message == "Invalid token code") {
-      await signOut({ redirect: false });
-      router.push("/login");
+    } else if (response.data.message === 'Invalid token code') {
+      await signOut({
+        redirect: false,
+      });
+      router.push('/login');
     } else {
       setLoading(false);
     }
   };
-
   useEffect(() => {
     getHelpData();
   }, []);
-
   return (
     <ThemeProvider>
       <Head>
@@ -55,11 +51,11 @@ export default function emergencyContact({ userAuth }) {
       <Layout>
         <LargeInnerContent>
           <HelpSection>
-            <PageTitle subtitle="Help" images_icon={"../help.png"}></PageTitle>
+            <PageTitle subtitle="Help" images_icon={'../help.png'}></PageTitle>
             <HelpAccordion>
               {helpData ? (
-                helpData?.map((helpData) => (
-                  <Accordion>
+                helpData?.map(helpData => (
+                  <Accordion key={helpData.id}>
                     <AccordionSummary
                       expandIcon={<ExpandMoreIcon />}
                       aria-controls="panel5a-content"
@@ -87,11 +83,10 @@ export default function emergencyContact({ userAuth }) {
 }
 export async function getServerSideProps(context) {
   const session = await getSession(context);
-
   if (!session) {
     return {
       redirect: {
-        destination: "/login",
+        destination: '/login',
         permanent: false,
       },
     };
@@ -129,7 +124,6 @@ const HelpSection = styled.div`
     }
   `}
 `;
-
 const HelpAccordion = styled.div`
   ${({ theme }) => `
     .MuiAccordionSummary-content {

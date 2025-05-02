@@ -1,15 +1,13 @@
-import { useState } from "react";
-import Head from "next/head";
-import { signIn, getSession } from "next-auth/react";
-import { setCookie } from "nookies";
-import ThemeProvider from "@/theme/ThemeProvider";
-import Layout from "@/components/common/Layout";
-import styled from "@emotion/styled";
-import { useRouter } from "next/router";
-import { toast } from "react-toastify";
-import SpinnerLoader from "@/components/common/SpinnerLoader";
-import axios from "axios";
-
+import { useState } from 'react';
+import Head from 'next/head';
+import { signIn, getSession } from 'next-auth/react';
+import { setCookie } from 'nookies';
+import ThemeProvider from '@/theme/ThemeProvider';
+import Layout from '@/components/common/Layout';
+import styled from '@emotion/styled';
+import { useRouter } from 'next/router';
+import { toast } from 'react-toastify';
+import SpinnerLoader from '@/components/common/SpinnerLoader';
 import {
   Button,
   FormControl as MuiFormControl,
@@ -18,84 +16,77 @@ import {
   TextField,
   Typography,
   Grid,
-} from "@mui/material";
-import { Lock, Phone } from "@mui/icons-material";
-import Visibility from "@mui/icons-material/Visibility";
-import VisibilityOff from "@mui/icons-material/VisibilityOff";
-import { validateCustomer } from "@/utils/login";
-import CountrySelect from "@/components/common/CountrySelect";
-import CustomFormControl from "@/theme/CustomFormControl";
-
+} from '@mui/material';
+import { Lock } from '@mui/icons-material';
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import { validateCustomer } from '@/utils/login';
+import CountrySelect from '@/components/common/CountrySelect';
+import CustomFormControl from '@/theme/CustomFormControl';
 export default function Login() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [countrycode, setCountryCode] = useState("+1");
+  const [countrycode, setCountryCode] = useState('+1');
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({
-    mobile: "",
-    password: "",
+    mobile: '',
+    password: '',
   });
   const [inputs, setInputs] = useState({
-    mobile: "",
-    password: "",
+    mobile: '',
+    password: '',
   });
-  const [removeErrors, setRemoveErrors] = useState(false);
-
   const handleClickShowPassword = () => setShowPassword(!showPassword);
   const handleMouseDownPassword = () => setShowPassword(!showPassword);
-
   const handleInputChange = ({ target }) => {
-    setInputs((prev) => ({
+    setInputs(prev => ({
       ...prev,
       [target.name]: target.value,
     }));
-
-    if (removeErrors) {
-      const data = { ...inputs, [target.name]: target.value };
-      setErrors(validateCustomer(data));
-    }
+    const data = {
+      ...inputs,
+      [target.name]: target.value,
+    };
+    setErrors(validateCustomer(data));
   };
-
-  const handleCountryCode = (value) => {
-    setCountryCode("+" + value);
+  const handleCountryCode = value => {
+    setCountryCode('+' + value);
   };
-
   const validateInputs = () => {
     if (!inputs.mobile) {
-      toast.error("Mobile number is required");
+      toast.error('Mobile number is required');
       return false;
     }
     if (!inputs.password) {
-      toast.error("Password is required");
+      toast.error('Password is required');
       return false;
     }
     return true;
   };
-
-  const handleLoginSuccess = async (session) => {
+  const handleLoginSuccess = async session => {
     try {
       if (!session?.user?.data) {
-        throw new Error("Invalid session data");
+        throw new Error('Invalid session data');
       }
-
       const userData = session.user.data;
 
       const userProfile = {
-        name: userData.name,
-        mobile_number: userData.mobile_number,
         customer_id: userData.customer_id,
-        email: userData.email
+        email: userData.email,
+        mobile_number: userData.mobile_number,
+        name: userData.name,
       };
 
       // First check OTP verification status
       if (userData.otp_verified === 0) {
-        setCookie(null, "registrationDetail", JSON.stringify(userProfile), {
-          maxAge: 5 * 60, // 5 minutes
-          path: "/",
+        setCookie(null, 'registrationDetail', JSON.stringify(userProfile), {
+          maxAge: 5 * 60,
+          // 5 minutes
+          path: '/',
           secure: true,
         });
-        toast.info("Please verify your OTP to continue.");
-        router.push("/verification");
+        toast.info('Please verify your OTP to continue.');
+        router.push('/verification');
         return;
       }
 
@@ -117,56 +108,46 @@ export default function Login() {
         }else{
           router.push("/uniride");
         }
-
       } else if (userData.profile_status === 3) {
         // User profile is complete, proceed to main app
-        toast.success(session.user.message || "Login successful");
-        router.push("/uniride");
+        toast.success(session.user.message || 'Login successful');
+        router.push('/uniride');
       } else {
-        throw new Error("Invalid profile status");
+        throw new Error('Invalid profile status');
       }
     } catch (error) {
-      console.error("Login success handler error:", error);
-      toast.error("Error processing login response");
+      console.error('Login success handler error:', error);
+      toast.error('Error processing login response');
     }
   };
-
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault();
-
     try {
       if (!validateInputs()) {
         return;
       }
-
       setLoading(true);
-      const response = await signIn("credentials", {
-        phone: inputs.mobile,
+      const response = await signIn('credentials', {
         password: inputs.password,
+        phone: inputs.mobile,
         phone_code: countrycode,
         redirect: false,
       });
-
       if (response?.error) {
         throw new Error(response.error);
       }
-
       const session = await getSession();
-
       if (!session?.user?.data) {
-        throw new Error("Invalid session data received");
+        throw new Error('Invalid session data received');
       }
-
       await handleLoginSuccess(session);
-
     } catch (error) {
-      console.error("Login error:", error);
-      toast.error(error.message || "Login failed. Please try again.");
+      console.error('Login error:', error);
+      toast.error(error.message || 'Login failed. Please try again.');
     } finally {
       setLoading(false);
     }
   };
-
   return (
     <ThemeProvider>
       <Head>
@@ -185,35 +166,37 @@ export default function Login() {
                 <Welcome>Welcome to</Welcome>
                 <img src="../logo1.png" alt="logo" />
                 <Typography variant="h4">
-                  Our professionally trained drivers will make sure that the
-                  customers enjoy a safe and reliable ride.
+                  Our professionally trained drivers will make sure that the customers enjoy a safe
+                  and reliable ride.
                 </Typography>
               </LoginDesc>
               <MobilePhone>
-                {" "}
+                {' '}
                 <img src="../mobile.png" alt="mobile" />
               </MobilePhone>
             </LeftSide>
             <RightSide>
               <SignInHead>
                 <img src="../loginIcon.png" alt="login" />
-                <Typography variant="h1" sx={{ mb: 3 }}>
+                <Typography
+                  variant="h1"
+                  sx={{
+                    mb: 3,
+                  }}
+                >
                   Sign In
                 </Typography>
               </SignInHead>
               <Grid item md={6} sm={12} xs={12}>
                 <label>Mobile Number</label>
                 <CountryMobile>
-                  <CountrySelect
-                    onCountryCode={handleCountryCode}
-                    countrycode={countrycode}
-                  />
+                  <CountrySelect onCountryCode={handleCountryCode} countrycode={countrycode} />
                   <CustomFormControl
                     fullWidth
                     type="text"
                     placeholder="9999999999"
                     name="mobile"
-                    value={inputs.mobile || ""}
+                    value={inputs.mobile || ''}
                     onChange={handleInputChange}
                     autoComplete="off"
                   />
@@ -221,10 +204,10 @@ export default function Login() {
                 {errors && errors.mobile && (
                   <div
                     style={{
-                      color: "#e92020",
-                      fontSize: "12px",
-                      marginTop: "4px",
-                      marginLeft: "14px",
+                      color: '#e92020',
+                      fontSize: '12px',
+                      marginLeft: '14px',
+                      marginTop: '4px',
                     }}
                   >
                     {errors.mobile}
@@ -232,7 +215,13 @@ export default function Login() {
                 )}
               </Grid>
               <Typography variant="h6">Password</Typography>
-              <FormControl variant="outlined" fullWidth sx={{ mb: 2 }}>
+              <FormControl
+                variant="outlined"
+                fullWidth
+                sx={{
+                  mb: 2,
+                }}
+              >
                 <TextField
                   id="outlined-start-adornment"
                   fullWidth
@@ -241,11 +230,6 @@ export default function Login() {
                   value={inputs.password}
                   onChange={handleInputChange}
                   InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <Lock />
-                      </InputAdornment>
-                    ),
                     endAdornment: (
                       <InputAdornment position="end">
                         <IconButton
@@ -257,31 +241,28 @@ export default function Login() {
                         </IconButton>
                       </InputAdornment>
                     ),
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <Lock />
+                      </InputAdornment>
+                    ),
                   }}
                   helperText={errors && errors.password}
                 />
               </FormControl>
               <KeepMe>
                 <Typography align="center">
-                  <Button
-                    type="text"
-                    onClick={() => router.push("/forgot-password")}
-                  >
+                  <Button type="text" onClick={() => router.push('/forgot-password')}>
                     <u>Forgot password</u>
                   </Button>
                 </Typography>
               </KeepMe>
-              <Button
-                variant="contained"
-                color="primary"
-                fullWidth
-                onClick={handleSubmit}
-              >
+              <Button variant="contained" color="primary" fullWidth onClick={handleSubmit}>
                 Sign In
               </Button>
               <Register>
-                <span>Don't have an account</span>
-                <Button type="text" onClick={() => router.push("/register")}>
+                <span>Don&apos;t have an account</span>
+                <Button type="text" onClick={() => router.push('/register')}>
                   <u>Sign Up</u>
                 </Button>
               </Register>
@@ -325,17 +306,14 @@ export async function getServerSideProps(context) {
           };
         default:
           // If profile_status is not recognized, clear the session
-          context.res.setHeader(
-            'Set-Cookie',
-            [
-              'next-auth.session-token=deleted; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT',
-              'next-auth.csrf-token=deleted; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'
-            ]
-          );
+          context.res.setHeader('Set-Cookie', [
+            'next-auth.session-token=deleted; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT',
+            'next-auth.csrf-token=deleted; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT',
+          ]);
           return {
             props: {
-              error: "Invalid profile status"
-            }
+              error: 'Invalid profile status',
+            },
           };
       }
     }
@@ -343,15 +321,15 @@ export async function getServerSideProps(context) {
     // No session, allow access to login page
     return {
       props: {
-        null: null
-      }
+        null: null,
+      },
     };
   } catch (error) {
-    console.error("Session check error:", error);
+    console.error('Session check error:', error);
     return {
       props: {
-        error: "Session check failed"
-      }
+        error: 'Session check failed',
+      },
     };
   }
 }
@@ -365,7 +343,6 @@ const LoginContainer = styled.div`
     }
   `}
 `;
-
 const Box = styled.div`
   ${({ theme }) => `
     background-color: ${theme.colors.palette.white};
@@ -383,7 +360,6 @@ const Box = styled.div`
     }
   `}
 `;
-
 const LeftSide = styled.div`
   ${({ theme }) => `
 width:50%;
@@ -407,7 +383,6 @@ img{ width:100%; height:100%; }
 }
   `}
 `;
-
 const MobilePhone = styled.div`
   ${({ theme }) => `
     position: absolute;
@@ -432,7 +407,6 @@ const MobilePhone = styled.div`
     }
   `}
 `;
-
 const LoginDesc = styled.div`
   ${({ theme }) => `
     position: absolute;
@@ -455,7 +429,6 @@ const LoginDesc = styled.div`
     }
   `}
 `;
-
 const Welcome = styled.div`
   ${({ theme }) => `
     font-size: 24px;
@@ -464,7 +437,6 @@ const Welcome = styled.div`
     margin-bottom: 10px;
   `}
 `;
-
 const RightSide = styled.div`
   ${({ theme }) => `
     width: 100%;
@@ -498,7 +470,6 @@ const RightSide = styled.div`
     }
   `}
 `;
-
 const FormControl = styled(MuiFormControl)`
   ${({ theme }) => `
     font-size: 14px;
@@ -534,7 +505,6 @@ const FormControl = styled(MuiFormControl)`
     }
   `}
 `;
-
 const KeepMe = styled.div`
   ${({ theme }) => `
     margin-bottom: 47px;
@@ -564,7 +534,6 @@ const KeepMe = styled.div`
     }
   `}
 `;
-
 const Register = styled.div`
   ${({ theme }) => `
     display: flex;
@@ -590,11 +559,10 @@ const Register = styled.div`
   `}
 `;
 const SignInHead = styled.div`
-  ${({ theme }) => `
+  ${() => `
     text-align: center;
   `}
 `;
-
 const CountryMobile = styled.div`
   ${({ theme }) => `
     display: flex;

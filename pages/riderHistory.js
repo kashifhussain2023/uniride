@@ -1,48 +1,44 @@
-import Layout from "@/components/common/Layout";
-import PageTitle from "@/components/common/PageTitle";
-import RiderHistory from "@/components/common/history/List";
-import LargeInnerContent from "@/components/presentation/LargeInnerContent";
-import ThemeProvider from "@/theme/ThemeProvider";
-import { api } from "@/utils/api/common";
-import styled from "@emotion/styled";
-import { getSession, signOut } from "next-auth/react";
-import Head from "next/head";
-import { useEffect, useState } from "react";
-import { useRouter } from "next/router";
-import SpinnerLoader from "@/components/common/SpinnerLoader";
-
+import Layout from '@/components/common/Layout';
+import PageTitle from '@/components/common/PageTitle';
+import RiderHistory from '@/components/common/history/List';
+import LargeInnerContent from '@/components/presentation/LargeInnerContent';
+import ThemeProvider from '@/theme/ThemeProvider';
+import { api } from '@/utils/api/common';
+import styled from '@emotion/styled';
+import { getSession, signOut } from 'next-auth/react';
+import Head from 'next/head';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/router';
+import SpinnerLoader from '@/components/common/SpinnerLoader';
 export default function RiderHistoryPage({ userAuth }) {
   const router = useRouter();
   const [historyData, setHistoryData] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [subTitle, setSubTitle] = useState("History");
-
+  const [subTitle, setSubTitle] = useState('History');
   const getRiderHistoryList = async () => {
     const formData = new FormData();
-    formData.append("customer_id", userAuth.customer_id);
-    formData.append("token_code", userAuth.token_code);
-    formData.append("offset", 0);
-
+    formData.append('customer_id', userAuth.customer_id);
+    formData.append('token_code', userAuth.token_code);
+    formData.append('offset', 0);
     const response = await api({
-      url: "/customer/booking/ride-history",
-      method: "GET",
+      method: 'GET',
+      url: '/customer/booking/ride-history',
     });
-
     if (response.status === true) {
       setLoading(false);
       setHistoryData(response.data.data);
-    } else if (response.data.message == "Invalid token code") {
-      await signOut({ redirect: false });
-      router.push("/login");
+    } else if (response.data.message === 'Invalid token code') {
+      await signOut({
+        redirect: false,
+      });
+      router.push('/login');
     } else {
       setLoading(false);
     }
   };
-
   useEffect(() => {
     getRiderHistoryList();
   }, []);
-
   return (
     <ThemeProvider>
       <Head>
@@ -55,15 +51,8 @@ export default function RiderHistoryPage({ userAuth }) {
       <Layout>
         <LargeInnerContent>
           <Box>
-            <PageTitle
-              title="Ride"
-              subtitle={subTitle}
-              images_icon={"../history.png"}
-            ></PageTitle>
-            <RiderHistory
-              riderHistory={historyData}
-              setSubTitle={setSubTitle}
-            />
+            <PageTitle title="Ride" subtitle={subTitle} images_icon={'../history.png'}></PageTitle>
+            <RiderHistory riderHistory={historyData} setSubTitle={setSubTitle} />
           </Box>
         </LargeInnerContent>
       </Layout>
@@ -72,11 +61,10 @@ export default function RiderHistoryPage({ userAuth }) {
 }
 export async function getServerSideProps(context) {
   const session = await getSession(context);
-
   if (!session) {
     return {
       redirect: {
-        destination: "/login",
+        destination: '/login',
         permanent: false,
       },
     };

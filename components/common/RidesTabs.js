@@ -1,17 +1,13 @@
-import styled from "@emotion/styled";
-import { Button } from "@mui/material";
-import Box from "@mui/material/Box";
-import Tab from "@mui/material/Tab";
-import Tabs from "@mui/material/Tabs";
-import Typography from "@mui/material/Typography";
-import { useRouter } from "next/router";
-import PropTypes from "prop-types";
-import * as React from "react";
-import RidesCards from "./RidesCards";
-
+import styled from '@emotion/styled';
+import { Button } from '@mui/material';
+import Box from '@mui/material/Box';
+import Tab from '@mui/material/Tab';
+import Tabs from '@mui/material/Tabs';
+import PropTypes from 'prop-types';
+import * as React from 'react';
+import RidesCards from './RidesCards';
 function RidesTabs(props) {
   const { children, value, index, ...other } = props;
-
   return (
     <div
       role="tabpanel"
@@ -20,11 +16,18 @@ function RidesTabs(props) {
       aria-labelledby={`simple-tab-${index}`}
       {...other}
     >
-      {value === index && <Box sx={{ p: 1 }}>{children}</Box>}
+      {value === index && (
+        <Box
+          sx={{
+            p: 1,
+          }}
+        >
+          {children}
+        </Box>
+      )}
     </div>
   );
 }
-
 RidesTabs.propTypes = {
   children: PropTypes.node,
   index: PropTypes.number.isRequired,
@@ -33,11 +36,10 @@ RidesTabs.propTypes = {
 
 function a11yProps(index) {
   return {
+    'aria-controls': `simple-tabpanel-${index}`,
     id: `simple-tab-${index}`,
-    "aria-controls": `simple-tabpanel-${index}`,
   };
 }
-
 export default function BasicTabs({
   carsList,
   handleSelectRide,
@@ -53,24 +55,20 @@ export default function BasicTabs({
   duration,
 }) {
   const [value, setValue] = React.useState(0);
-
   const handleChange = (event, newValue) => {
     setValue(newValue);
-
-    if (newValue === 0) {
-      setCustomerRideType("regular");
-    }
-    if (newValue === 1) {
-      setCustomerRideType("corporate");
-    }
   };
-
   return (
-    <Box sx={{ width: "100%" }}>
+    <Box
+      sx={{
+        width: '100%',
+      }}
+    >
       {isAddDesignated ? (
         <>
           <RidesTabs value={value} index={0}>
             <RidesCards
+              carsList={carsList}
               type="regular"
               handleCarTypeId={handleCarTypeId}
               carStatus={carStatus}
@@ -83,7 +81,7 @@ export default function BasicTabs({
               variant="contained"
               color="primary"
               fullWidth
-              onClick={() => handleSelectRide("regular")}
+              onClick={() => handleSelectRide('regular')}
             >
               Ride Now
             </Button>
@@ -91,18 +89,14 @@ export default function BasicTabs({
         </>
       ) : (
         <>
-          {/* <ChooseTab>
+          <ChooseTab>
             <Box>
-              <Tabs
-                value={value}
-                onChange={handleChange}
-                aria-label="basic tabs example"
-              >
+              <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
                 <Tab label="Regular" {...a11yProps(0)} />
                 <Tab label="Corporate" {...a11yProps(1)} />
               </Tabs>
             </Box>
-          </ChooseTab> */}
+          </ChooseTab>
           <RidesTabs value={value} index={0}>
             <RidesCards
               type="regular"
@@ -121,7 +115,7 @@ export default function BasicTabs({
                 variant="contained"
                 color="primary"
                 fullWidth
-                onClick={() => handleSelectRide("regular")}
+                onClick={() => handleSelectRide('regular')}
               >
                 Ride Now
               </Button>
@@ -144,7 +138,7 @@ export default function BasicTabs({
                 variant="contained"
                 color="primary"
                 fullWidth
-                onClick={() => handleSelectRide("corporate")}
+                onClick={() => handleSelectRide('corporate')}
               >
                 Ride Now
               </Button>

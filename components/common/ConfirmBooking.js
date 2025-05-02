@@ -1,61 +1,49 @@
-import { useState } from "react";
-import PageTitle from "@/components/common/PageTitle";
-import styled from "@emotion/styled";
-import { Button, List, ListItem, Typography, TextField } from "@mui/material";
-import SpinnerLoader from "./SpinnerLoader";
-import { api } from "@/utils/api/common";
-import { toast } from "react-toastify";
+import PageTitle from '@/components/common/PageTitle';
+import { api } from '@/utils/api/common';
+import styled from '@emotion/styled';
 import DiscountIcon from '@mui/icons-material/Discount';
-import RemoveIcon from '@mui/icons-material/Remove';
-
+import { Button, List, ListItem, TextField } from '@mui/material';
+import { useState } from 'react';
+import { toast } from 'react-toastify';
+import SpinnerLoader from './SpinnerLoader';
 export default function ConfirmBooking({
   currentLocation,
   handleComfirmBooking,
   comfirmBookingData,
-  applyCoupon,
   isAddDesignated,
-  avgTime,
-  userAuth,
   setCouponActive,
   setCouponCode,
   setPromotionId,
 }) {
   const [promoCode, setPromoCode] = useState(false);
-  const [promoCodeValue, setPromoCodeValue] = useState("");
-  const [errors, setErrors] = useState("");
+  const [promoCodeValue, setPromoCodeValue] = useState('');
+  const [errors, setErrors] = useState('');
   const [codeStatus, setCodeStatus] = useState(false);
   const [loading, setLoading] = useState(false);
   const [couponData, setCouponData] = useState(null);
   const [discountAmount, setDiscountAmount] = useState(0);
-
-  const handlePromo = () => {
-    setPromoCode(true);
-  };
-  const handleChange = (event) => {
+  const handleChange = event => {
     setPromoCodeValue(event.target.value);
   };
-
   const BackRidePage = () => {
     window.location.reload();
   };
   const applyCouponCode = async () => {
-    if (!promoCodeValue || promoCodeValue.trim() === "") {
-      setErrors("Please enter promo code");
+    if (!promoCodeValue || promoCodeValue.trim() === '') {
+      setErrors('Please enter promo code');
     } else {
       setLoading(true);
       const couponData = {
-        "promo_code": promoCodeValue,
-        "estimate_amount": comfirmBookingData?.maximum_estimated_fare,
-        "pickup_lat": currentLocation.lat,
-        "pickup_lng": currentLocation.lng
-      }
-
+        estimate_amount: comfirmBookingData?.maximum_estimated_fare,
+        pickup_lat: currentLocation.lat,
+        pickup_lng: currentLocation.lng,
+        promo_code: promoCodeValue,
+      };
       const response = await api({
-        url: "/customer/apply-promocode",
-        method: "POST",
         data: couponData,
+        method: 'POST',
+        url: '/customer/apply-promocode',
       });
-
       if (response.status === true) {
         setLoading(false);
         setCodeStatus(true);
@@ -64,7 +52,7 @@ export default function ConfirmBooking({
         setCouponCode(response.data.offer_code);
         setPromotionId(response.data.id);
         setCouponData(response.data);
-        
+
         // Calculate discount amount based on discount type
         if (response.data.discount_type === 1) {
           // Fixed amount discount
@@ -76,10 +64,7 @@ export default function ConfirmBooking({
           const calculatedDiscount = (originalAmount * percentage) / 100;
           setDiscountAmount(calculatedDiscount);
         }
-      } else if (
-        !response.status &&
-        (response.code === 2 || response.code === 4)
-      ) {
+      } else if (!response.status && (response.code === 2 || response.code === 4)) {
         toast.error(response.message);
         setLoading(false);
       } else {
@@ -94,28 +79,22 @@ export default function ConfirmBooking({
     setPromotionId(null);
     setCodeStatus(false);
     setPromoCode(false);
-    setPromoCodeValue("");
+    setPromoCodeValue('');
     setDiscountAmount(0);
     setCouponData(null);
-    toast.error("Coupon code remove successfully.");
+    toast.error('Coupon code remove successfully.');
   };
 
   // Calculate final price after discount
   const getFinalPrice = () => {
     if (!comfirmBookingData?.maximum_estimated_fare) return 0;
-    
     const originalAmount = parseFloat(comfirmBookingData.maximum_estimated_fare);
     return (originalAmount - discountAmount).toFixed(2);
   };
-
   return (
     <>
       <SpinnerLoader loading={loading} />
-      <PageTitle
-        title="Confirm Your"
-        subtitle="Booking"
-        images_icon={"../confirm.png"}
-      ></PageTitle>
+      <PageTitle title="Confirm Your" subtitle="Booking" images_icon={'../confirm.png'}></PageTitle>
 
       <RouteDriver>
         <BookingCarInfo>
@@ -127,7 +106,7 @@ export default function ConfirmBooking({
               {avgTime === "no cars"
                 ? "No car available"
                 : "Car is " + avgTime + " away from you"}{" "}
-            </Typography> */}
+             </Typography> */}
           </div>
         </BookingCarInfo>
         <BookingDtl>
@@ -155,10 +134,7 @@ export default function ConfirmBooking({
               <BookingLabel>Coupon</BookingLabel>
               {!promoCode ? (
                 <>
-                  <PromoButton
-                    variant="text"
-                    onClick={() => setPromoCode(true)}
-                  >
+                  <PromoButton variant="text" onClick={() => setPromoCode(true)}>
                     Apply promo code
                   </PromoButton>
                   <BookingIcon>
@@ -169,7 +145,12 @@ export default function ConfirmBooking({
                 <>
                   <CouponDisplay>
                     <DiscountIconWrapper>
-                      <DiscountIcon fontSize="small" style={{ color: '#FFA500' }} />
+                      <DiscountIcon
+                        fontSize="small"
+                        style={{
+                          color: '#FFA500',
+                        }}
+                      />
                     </DiscountIconWrapper>
                     <CouponCode>
                       {promoCodeValue}
@@ -209,8 +190,8 @@ export default function ConfirmBooking({
 
               <Details>
                 {isAddDesignated
-                  ? "Request for designated driver"
-                  : "1-" + (comfirmBookingData?.total_passengers || 3)}
+                  ? 'Request for designated driver'
+                  : '1-' + (comfirmBookingData?.total_passengers || 3)}
               </Details>
               <BookingIcon>
                 <img src="../passenger.png" />
@@ -220,29 +201,18 @@ export default function ConfirmBooking({
         </BookingDtl>
       </RouteDriver>
       <ButtonBox>
-        <Button
-          variant="secondary"
-          color="primary"
-          fullWidth
-          onClick={BackRidePage}
-        >
+        <Button variant="secondary" color="primary" fullWidth onClick={BackRidePage}>
           Back
         </Button>
-        <Button
-          variant="contained"
-          color="primary"
-          fullWidth
-          onClick={handleComfirmBooking}
-        >
+        <Button variant="contained" color="primary" fullWidth onClick={handleComfirmBooking}>
           Booking
         </Button>
       </ButtonBox>
     </>
   );
 }
-
 const RouteDriver = styled.div`
-  ${({ theme }) => `
+  ${() => `
     border: 1px solid #e9e9e9;
     border-radius: 6px;
     padding: 20px 15px;
@@ -250,7 +220,7 @@ const RouteDriver = styled.div`
   `}
 `;
 const BookingCarInfo = styled.div`
-  ${({ theme }) => `
+  ${() => `
     display: flex;
     align-items: center;
 
@@ -260,13 +230,11 @@ const BookingCarInfo = styled.div`
     }
   `}
 `;
-
 const CarImg = styled.div`
-  ${({ theme }) => `
+  ${() => `
     margin-right:10px;
   `}
 `;
-
 const BookingDtl = styled.div`
   ${({ theme }) => `
     .MuiList-root {
@@ -301,15 +269,13 @@ const Details = styled.div`
     color: ${theme.colors.palette.dGray};
   `}
 `;
-
 const BookingIcon = styled.div`
-  ${({ theme }) => `
+  ${() => `
     width: 100%;
     flex: 0 0 40px;
     margin-left: 10px;
   `}
 `;
-
 const Price = styled.div`
   ${({ theme }) => `
     font-size: 24px;
@@ -317,7 +283,6 @@ const Price = styled.div`
     font-weight: 700;
   `}
 `;
-
 const PromoButton = styled(Button)`
   &.MuiButton-root {
     flex: 1;
@@ -328,7 +293,6 @@ const PromoButton = styled(Button)`
     text-decoration: none;
   }
 `;
-
 const ApplyButton = styled(Button)`
   &.MuiButton-root {
     min-width: 60px;
@@ -337,7 +301,7 @@ const ApplyButton = styled(Button)`
     text-decoration: none;
   }
 `;
-const ButtonBox = styled("div")`
+const ButtonBox = styled('div')`
   ${({ theme }) => `
     display: flex;
     border-top: 1px solid ${theme.colors.palette.grey};
@@ -346,7 +310,6 @@ const ButtonBox = styled("div")`
      gap: 15px;
   `}
 `;
-
 const DiscountInfo = styled.div`
   ${({ theme }) => `
     display: flex;
@@ -360,9 +323,8 @@ const DiscountInfo = styled.div`
     }
   `}
 `;
-
 const CouponDisplay = styled.div`
-  ${({ theme }) => `
+  ${() => `
     display: flex;
     align-items: center;
     width: 100%;
@@ -370,14 +332,12 @@ const CouponDisplay = styled.div`
     gap: 8px;
   `}
 `;
-
 const DiscountIconWrapper = styled.div`
-  ${({ theme }) => `
+  ${() => `
     display: flex;
     align-items: center;
   `}
 `;
-
 const CouponCode = styled.div`
   ${({ theme }) => `
     display: flex;
@@ -392,7 +352,6 @@ const CouponCode = styled.div`
     }
   `}
 `;
-
 const RemoveButton = styled(Button)`
   ${({ theme }) => `
     margin-left: auto;
@@ -406,7 +365,6 @@ const RemoveButton = styled(Button)`
     }
   `}
 `;
-
 const DiscountDetails = styled.div`
   ${({ theme }) => `
     display: flex;

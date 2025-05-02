@@ -1,48 +1,35 @@
-import { useState } from "react";
-import { getSession } from "next-auth/react";
-import Head from "next/head";
-import ThemeProvider from "@/theme/ThemeProvider";
-import Layout from "@/components/common/Layout";
-import styled from "@emotion/styled";
-import { useRouter } from "next/router";
-import { toast } from "react-toastify";
-import {
-  Button,
-  FormControl as MuiFormControl,
-  Typography,
-  Grid,
-} from "@mui/material";
-import { validateForgotFields } from "@/utils/forgot-password";
-import { api } from "./api/auth/register";
-import SpinnerLoader from "@/components/common/SpinnerLoader";
-import CountrySelect from "@/components/common/CountrySelect";
-import CustomFormControl from "@/theme/CustomFormControl";
-
+import { useState } from 'react';
+import Head from 'next/head';
+import ThemeProvider from '@/theme/ThemeProvider';
+import Layout from '@/components/common/Layout';
+import styled from '@emotion/styled';
+import { useRouter } from 'next/router';
+import { toast } from 'react-toastify';
+import { Button, FormControl as Typography, Grid } from '@mui/material';
+import { validateForgotFields } from '@/utils/forgot-password';
+import { api } from './api/auth/register';
+import SpinnerLoader from '@/components/common/SpinnerLoader';
+import CountrySelect from '@/components/common/CountrySelect';
+import CustomFormControl from '@/theme/CustomFormControl';
 export default function ForgotPassword() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({
-    mobile: "",
+    mobile: '',
   });
-
   const [inputs, setInputs] = useState({
-    mobile: "",
+    mobile: '',
   });
-
   const [removeErrors, setRemoveErrors] = useState(false);
-  const [countrycode, setCountryCode] = useState("+1");
-  
-  const handleCountryCode = (value) => {
-    setCountryCode("+" + value);
+  const [countrycode, setCountryCode] = useState('+1');
+  const handleCountryCode = value => {
+    setCountryCode('+' + value);
   };
-
-
   const handleInputChange = ({ target }) => {
-    setInputs((inputs) => ({
+    setInputs(inputs => ({
       ...inputs,
       [target.name]: target.value,
     }));
-
     if (removeErrors) {
       setErrors({
         ...validateForgotFields({
@@ -51,55 +38,47 @@ export default function ForgotPassword() {
       });
     }
   };
-
-  const handleSubmit = async (e) => {
-
+  const handleSubmit = async e => {
     e.preventDefault();
-
-    let inputForValidation = {
+    const inputForValidation = {
       mobile: inputs.mobile,
       password: inputs.password,
     };
-
     const validationErrors = validateForgotFields(inputForValidation);
     const noErrors = Object.keys(validationErrors).length === 0;
     setRemoveErrors(true);
     //set All data to form data
     const formData = new FormData();
-    formData.append("phone", inputs.mobile);
-    formData.append("phone_code", countrycode)
-
+    formData.append('phone', inputs.mobile);
+    formData.append('phone_code', countrycode);
     const requestBody = {
-      phone : inputs.mobile,
-      phone_code : countrycode
-    }
-
+      phone: inputs.mobile,
+      phone_code: countrycode,
+    };
     if (noErrors) {
       setLoading(true);
       const response = await api({
-        url: "/customer/forgot-password",
-        method: "POST",
         data: requestBody,
+        method: 'POST',
+        url: '/customer/forgot-password',
       });
-
       if (response.status === true) {
         setLoading(false);
         toast.success(response.message);
         setTimeout(() => {
-          router.push("/login");
+          router.push('/login');
         }, 2000);
       } else if (response.status === false) {
         setLoading(false);
         toast.error(response.message);
       } else {
         setLoading(false);
-        toast.error("Internal Server Error");
+        toast.error('Internal Server Error');
       }
     } else {
       setErrors(validationErrors);
     }
   };
-
   return (
     <ThemeProvider>
       <Head>
@@ -118,65 +97,70 @@ export default function ForgotPassword() {
                 <Welcome>Welcome to</Welcome>
                 <img src="../logo1.png" />
                 <Typography variant="h4">
-                  Our professionally trained drivers will make sure that the
-                  customers enjoy a safe and reliable ride.
+                  Our professionally trained drivers will make sure that the customers enjoy a safe
+                  and reliable ride.
                 </Typography>
               </LoginDesc>
 
               <MobilePhone>
-                {" "}
+                {' '}
                 <img src="../mobile.png" />
               </MobilePhone>
             </LeftSide>
             <RightSide>
               <SignInHead>
                 <img src="../loginIcon.png" />
-                <Typography variant="h1" sx={{ mb: 3 }}>
+                <Typography
+                  variant="h1"
+                  sx={{
+                    mb: 3,
+                  }}
+                >
                   Forgot Password
                 </Typography>
               </SignInHead>
-              <Grid item md={6} sm={12} xs={12} sx={{marginBottom: "20px"}}>
-                              <label>Mobile Number</label>
-                              <CountryMobile>
-                                <CountrySelect
-                                  onCountryCode={handleCountryCode}
-                                  countrycode={countrycode}
-                                />
-                                <CustomFormControl
-                                  fullWidth
-                                  type="text"
-                                  placeholder="9999999999"
-                                  name="mobile"
-                                  value={inputs.mobile || ""}
-                                  onChange={handleInputChange}
-                                  autoComplete="off"
-                                />
-                              </CountryMobile>
-                              {errors && errors.mobile && (
-                                <div
-                                  style={{
-                                    color: "#e92020",
-                                    fontSize: "12px",
-                                    marginTop: "4px",
-                                    marginLeft: "14px",
-                                  }}
-                                >
-                                  {errors.mobile}
-                                </div>
-                              )}
-                            </Grid>
-
-              <Button
-                variant="contained"
-                color="primary"
-                fullWidth
-                onClick={handleSubmit}
+              <Grid
+                item
+                md={6}
+                sm={12}
+                xs={12}
+                sx={{
+                  marginBottom: '20px',
+                }}
               >
+                <label>Mobile Number</label>
+                <CountryMobile>
+                  <CountrySelect onCountryCode={handleCountryCode} countrycode={countrycode} />
+                  <CustomFormControl
+                    fullWidth
+                    type="text"
+                    placeholder="9999999999"
+                    name="mobile"
+                    value={inputs.mobile || ''}
+                    onChange={handleInputChange}
+                    autoComplete="off"
+                  />
+                </CountryMobile>
+                {errors && errors.mobile && (
+                  <div
+                    style={{
+                      color: '#e92020',
+                      fontSize: '12px',
+                      marginLeft: '14px',
+                      marginTop: '4px',
+                    }}
+                  >
+                    {errors.mobile}
+                  </div>
+                )}
+              </Grid>
+
+              <Button variant="contained" color="primary" fullWidth onClick={handleSubmit}>
                 Submit
               </Button>
               <Register>
-                <span>Don't have an account?</span>
-                <Button type="text" onClick={() => router.push("/register")}>
+                <span>Don&apos;t have an account?</span>
+                <Button type="text" onClick={() => router.push('/register')}>
                   <u>Sign Up</u>
                 </Button>
               </Register>
@@ -187,7 +171,6 @@ export default function ForgotPassword() {
     </ThemeProvider>
   );
 }
-
 const LoginContainer = styled.div`
   ${({ theme }) => `
     max-width: 1200px;
@@ -198,7 +181,6 @@ const LoginContainer = styled.div`
     }
   `}
 `;
-
 const Box = styled.div`
   ${({ theme }) => `
     background-color: ${theme.colors.palette.white};
@@ -217,7 +199,6 @@ const Box = styled.div`
     }
   `}
 `;
-
 const LeftSide = styled.div`
   ${({ theme }) => `
 width:50%;
@@ -249,7 +230,6 @@ img{ width:100%; height:100%; }
     
   `}
 `;
-
 const MobilePhone = styled.div`
   ${({ theme }) => `
     position: absolute;
@@ -274,7 +254,6 @@ const MobilePhone = styled.div`
     }
   `}
 `;
-
 const LoginDesc = styled.div`
   ${({ theme }) => `
     position: absolute;
@@ -297,7 +276,6 @@ const LoginDesc = styled.div`
     }
   `}
 `;
-
 const Welcome = styled.div`
   ${({ theme }) => `
     font-size: 24px;
@@ -306,7 +284,6 @@ const Welcome = styled.div`
     margin-bottom: 10px;
   `}
 `;
-
 const RightSide = styled.div`
   ${({ theme }) => `
     width: 100%;
@@ -340,43 +317,6 @@ const RightSide = styled.div`
     }
   `}
 `;
-
-const FormControl = styled(MuiFormControl)`
-  ${({ theme }) => `
-    font-size: 14px;
-
-    .MuiFormLabel-root {
-      transform: translate(60px, 10px) scale(0.75);
-      color: ${theme.colors.palette.mediumGrey};
-    }
-
-    .MuiFormHelperText-root {
-      color: ${theme.colors.palette.darkRed};
-    }
-
-    .MuiInputBase-root {
-      .MuiSvgIcon-root {
-        color: ${theme.colors.palette.darkGrey};
-      }
-
-      .MuiInputBase-input {
-        padding-top: 12px;
-        padding-bottom: 12px;
-        padding-left: calc(${theme.spacing(1)} + 2px);
-      }
-
-      legend {
-        width: 0;
-      }
-
-      &:after,
-      &:before {
-        display: none;
-      }
-    }
-  `}
-`;
-
 const Register = styled.div`
   ${({ theme }) => `
     display: flex;
@@ -402,14 +342,11 @@ const Register = styled.div`
   `}
 `;
 const SignInHead = styled.div`
-  ${({ theme }) => `
+  ${() => `
   text-align:center;
 
   `}
 `;
-
-
-
 const CountryMobile = styled.div`
   ${({ theme }) => `
     display: flex;

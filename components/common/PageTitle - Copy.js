@@ -1,8 +1,7 @@
-import * as React from "react";
-import styled from "@emotion/styled";
-import { Typography } from "@mui/material";
-
-export default function PageTitle({children, subtitle, title}) {
+import * as React from 'react';
+import styled from '@emotion/styled';
+import { Typography } from '@mui/material';
+export default function PageTitle({ children, subtitle, title }) {
   return (
     <Container>
       <Left>
@@ -13,7 +12,6 @@ export default function PageTitle({children, subtitle, title}) {
     </Container>
   );
 }
-
 const Container = styled.div`
   ${({ theme }) => `
     padding: ${theme.spacing(2)};
@@ -27,7 +25,6 @@ const Container = styled.div`
     }   
   `}
 `;
-
 const Left = styled.div`
   ${({ theme }) => `
     h2 {
@@ -48,5 +45,4 @@ const Left = styled.div`
     }
   `}
 `;
-
 const Right = styled.div``;
