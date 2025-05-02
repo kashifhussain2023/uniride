@@ -410,7 +410,10 @@ class SocketService {
 
       // Set up request status changed handler
       const requestStatusHandler = data => {
-        debugLog('Request status changed:', data);
+        //debugLog('Request status changed:', data);
+
+        console.log('Request status changed:', data);
+
         if (data) {
           setRideStatus(data.status);
           if (data.status === true) {

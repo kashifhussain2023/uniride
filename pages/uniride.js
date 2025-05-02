@@ -5,7 +5,7 @@ import RiderInfo from '@/components/common/RiderInfo';
 import SpinnerLoader from '@/components/common/SpinnerLoader';
 import LocationValueModel from '@/components/common/model/LocationValueModel';
 import InnerContent from '@/components/presentation/InnerContent';
-import { socketEvents, socketHelpers } from '@/components/presentation/SocketEvents';
+import { socketHelpers } from '@/components/presentation/SocketEvents';
 import ThemeProvider from '@/theme/ThemeProvider';
 import { api } from '@/utils/api/register';
 import styled from '@emotion/styled';
@@ -360,11 +360,7 @@ export default function Dashboard() {
 
         // Register the request sent handler
         socketHelpers.onRequestSent(requestSentHandler);
-        // Emit the booking request
-        await socketHelpers.requestRide(bookingPayload);
-
-        // Clean up on component unmount or when booking is complete
-        return () => {};
+        await socketHelpers.requestRide(payload);
       } catch (error) {
         console.error('Error in proceedGenderModel:', error);
         toast.error('An error occurred while requesting a driver. Please try again.');
@@ -573,11 +569,11 @@ export default function Dashboard() {
 
       // Set up socket event listeners
       socketHelpers.setupSocketEventListeners({
-        _setDriverId,
-        _setEndRideData,
         setAcceptDriverDetail,
         setBookingRequestId,
         setComfirmBooking,
+        setDriverId,
+        setEndRideData,
         setInRRoute,
         setIsBookingInProgress,
         setRideStatus,
