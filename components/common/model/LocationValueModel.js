@@ -29,15 +29,6 @@ export default function LocationValueModel({
   const [searchInput, setSearchInput] = useState('');
   const [error, setError] = useState('');
 
-  // Reset state when dialog opens
-  useEffect(() => {
-    if (open) {
-      setSearchInput('');
-      setIsCalculating(false);
-      setError('');
-    }
-  }, [open]);
-
   const handleSearchBoxLoad = ref => {
     console.log('ref', ref);
     setSearchBox(ref);
