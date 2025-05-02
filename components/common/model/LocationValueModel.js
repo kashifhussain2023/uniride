@@ -1,4 +1,5 @@
 import CustomFormControl from '@/theme/CustomFormControl';
+import { Typography } from '@mui/material';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
@@ -20,6 +21,8 @@ export default function LocationValueModel({
   currentLocation,
   dropLocation,
   userAuth,
+  distance,
+  duration,
 }) {
   const [searchBox, setSearchBox] = useState(null);
   const [isCalculating, setIsCalculating] = useState(false);
@@ -118,7 +121,8 @@ export default function LocationValueModel({
       setIsCalculating(false);
 
       dropPickLocation(newLocation, distanceValue, durationValue);
-      handleCloseModel();
+      // handleCloseModel();
+      setSearchInput(newLocation.address);
     } catch (error) {
       console.error('Error getting places:', error);
       setError('Error processing location. Please try again.');
@@ -130,6 +134,18 @@ export default function LocationValueModel({
     setSearchInput(e.target.value);
     setError('');
   };
+
+  useEffect(() => {
+    if (open) {
+      if (dropLocation) {
+        setSearchInput(dropLocation.address);
+      } else {
+        setSearchInput('');
+      }
+      setIsCalculating(false);
+      setError('');
+    }
+  }, [open, dropLocation]);
 
   return (
     <LoadScript
@@ -180,6 +196,12 @@ export default function LocationValueModel({
                 Calculating distance and duration...
               </div>
             )}
+            {distance && duration && (
+              <DistanceDurationContainer>
+                <Typography variant="body1">Distance: {distance}</Typography>
+                <Typography variant="body1">Duration: {duration}</Typography>
+              </DistanceDurationContainer>
+            )}
           </DialogContentText>
         </DialogContent>
         <DialogActions>
@@ -218,4 +240,10 @@ const ButtonBox = styled('div')`
     padding: ${theme.spacing(2, 3)};
     gap: 15px;
   `}
+`;
+
+const DistanceDurationContainer = styled('div')`
+  margin-top: 16px;
+  text-align: left;
+  font-weight: bold;
 `;
