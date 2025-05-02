@@ -87,7 +87,7 @@ export default function TopBar({ setOpenDelete }) {
                 onClick={() => router.push(path)}
               >
                 <ListItemIcon>
-                  <SafeImage src={`/${icon}`} alt={label} width={30} height={30} />
+                  <SafeImage src={`/${icon.props.src}`} alt={label} width={30} height={30} />
                 </ListItemIcon>
                 {label}
               </MenuItem>

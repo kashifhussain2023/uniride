@@ -101,6 +101,7 @@ export default function Dashboard() {
   const [_endRideData, _setEndRideData] = useState();
   const scheduleMsg =
     'Another ride is only possible after scheduled ride complete or scheduled ride cancel';
+
   const handleCarTypeId = carId => {
     setCarTypeId(carId);
 
@@ -114,6 +115,7 @@ export default function Dashboard() {
       socketHelpers.getDriverLocation(requestData);
     }
   };
+
   const handleSelectRide = async () => {
     if (scheduleRideStatus) {
       setScheduleMessage(true);
@@ -174,16 +176,20 @@ export default function Dashboard() {
       dropPickLocationType('drop');
     }
   };
+
   const dropPickLocationType = type => {
     setLocationType(type);
     setOpenValueModel(true);
   };
+
   const handleComfirmBooking = () => {
     setGenderModelOpen(true);
   };
+
   const handleGenderClose = () => {
     setGenderModelOpen(close);
   };
+
   const proceedGenderModel = async gender => {
     if (!userAuth) {
       toast.error('Please log in to continue');
@@ -268,9 +274,11 @@ export default function Dashboard() {
       setIsBookingInProgress(false);
     }
   };
+
   const handleInRoute = () => {
     //setInRRoute(true);
   };
+
   const handleRideCancelModel = async () => {
     try {
       setLoading(true);
@@ -293,6 +301,7 @@ export default function Dashboard() {
       setLoading(false);
     }
   };
+
   const handleCancelRunningRide = async () => {
     if (!userAuth) {
       toast.error('Please log in to continue');
@@ -317,6 +326,7 @@ export default function Dashboard() {
       setLoading(false);
     }
   };
+
   const handleFavoriteModelValue = () => {
     router.push(
       {
@@ -332,12 +342,15 @@ export default function Dashboard() {
       }
     );
   };
+
   const handleActionScheduleRide = () => {
     router.push('/schedule-ride');
   };
+
   const closeScheduleMessage = () => {
     setScheduleMessage(false);
   };
+
   const getDropPickLocation = (location, distanceValue, durationValue) => {
     console.log({
       distanceValue: distanceValue,
@@ -368,9 +381,11 @@ export default function Dashboard() {
       setDuration(durationValue);
     }
   };
+
   const closeValueModel = () => {
     setOpenValueModel(false);
   };
+
   const getAllCarsList = async location => {
     setLoading(true);
     await socketHelpers.getAllCarsList(location, {
@@ -387,6 +402,7 @@ export default function Dashboard() {
       setMapLocationLabel,
     });
   };
+
   const getCurrentRideStatus = async () => {
     const response = await api({
       headers: {
@@ -415,6 +431,7 @@ export default function Dashboard() {
       });
     }
   };
+
   const getScheduleRideDetail = async () => {
     await socketHelpers.getScheduleRideDetail(userAuth, {
       setLoading,
@@ -424,6 +441,7 @@ export default function Dashboard() {
       setSelectedTime,
     });
   };
+
   const applyCoupon = async () => {
     await socketHelpers.applyCoupon(couponCode, userAuth);
   };
@@ -564,6 +582,8 @@ export default function Dashboard() {
                 dropPickLocation={getDropPickLocation}
                 currentLocation={currentLocation}
                 dropLocation={dropLocation}
+                distance={distance}
+                duration={duration}
               />
               <RightPannel>
                 <LocationPickerMap
