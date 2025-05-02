@@ -7,11 +7,13 @@ import styled from '@emotion/styled';
 import { Lock } from '@mui/icons-material';
 import {
   Button,
+  IconButton,
   InputAdornment,
   FormControl as MuiFormControl,
   TextField,
   Typography,
 } from '@mui/material';
+import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { signOut } from 'next-auth/react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
@@ -31,6 +33,19 @@ export default function ChangePassword({ userAuth }) {
     old_password: '',
   });
   const [removeErrors, setRemoveErrors] = useState(false);
+  const [showPassword, setShowPassword] = useState({
+    old_password: false,
+    new_password: false,
+    confirm_password: false,
+  });
+
+  const handleClickShowPassword = field => {
+    setShowPassword(prev => ({
+      ...prev,
+      [field]: !prev[field],
+    }));
+  };
+
   const handleInputChange = ({ target }) => {
     setInputs(inputs => ({
       ...inputs,
@@ -58,16 +73,14 @@ export default function ChangePassword({ userAuth }) {
     const validationErrors = validateChangePassword(inputForValidation);
     const noErrors = Object.keys(validationErrors).length === 0;
     setRemoveErrors(true);
-    //set All data to form data
-    //return false;
 
     if (noErrors) {
       setLoading(true);
       const formData = new FormData();
       formData.append('old_password', inputs.old_password);
       formData.append('new_password', inputs.new_password);
-      formData.append('customer_id', userAuth.customer_id);
-      formData.append('token_code', userAuth.token_code);
+      formData.append('customer_id', userAuth?.customer_id);
+      formData.append('token_code', userAuth?.token_code);
       const requestBody = {
         confirm_password: inputs.confirm_password,
         new_password: inputs.new_password,
@@ -134,7 +147,7 @@ export default function ChangePassword({ userAuth }) {
                 <TextField
                   id="outlined-start-adornment"
                   fullWidth
-                  type="password"
+                  type={showPassword.old_password ? 'text' : 'password'}
                   name="old_password"
                   value={inputs.old_password}
                   onChange={handleInputChange}
@@ -142,6 +155,17 @@ export default function ChangePassword({ userAuth }) {
                     startAdornment: (
                       <InputAdornment position="start">
                         <Lock />
+                      </InputAdornment>
+                    ),
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          onClick={() => handleClickShowPassword('old_password')}
+                          edge="end"
+                          aria-label="toggle password visibility"
+                        >
+                          {showPassword.old_password ? <Visibility /> : <VisibilityOff />}
+                        </IconButton>
                       </InputAdornment>
                     ),
                   }}
@@ -159,7 +183,7 @@ export default function ChangePassword({ userAuth }) {
                 <TextField
                   id="outlined-start-adornment"
                   fullWidth
-                  type="password"
+                  type={showPassword.new_password ? 'text' : 'password'}
                   name="new_password"
                   value={inputs.new_password}
                   onChange={handleInputChange}
@@ -167,6 +191,17 @@ export default function ChangePassword({ userAuth }) {
                     startAdornment: (
                       <InputAdornment position="start">
                         <Lock />
+                      </InputAdornment>
+                    ),
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          onClick={() => handleClickShowPassword('new_password')}
+                          edge="end"
+                          aria-label="toggle password visibility"
+                        >
+                          {showPassword.new_password ? <Visibility /> : <VisibilityOff />}
+                        </IconButton>
                       </InputAdornment>
                     ),
                   }}
@@ -184,7 +219,7 @@ export default function ChangePassword({ userAuth }) {
                 <TextField
                   id="outlined-start-adornment"
                   fullWidth
-                  type="password"
+                  type={showPassword.confirm_password ? 'text' : 'password'}
                   name="confirm_password"
                   value={inputs.confirm_password}
                   onChange={handleInputChange}
@@ -192,6 +227,17 @@ export default function ChangePassword({ userAuth }) {
                     startAdornment: (
                       <InputAdornment position="start">
                         <Lock />
+                      </InputAdornment>
+                    ),
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          onClick={() => handleClickShowPassword('confirm_password')}
+                          edge="end"
+                          aria-label="toggle password visibility"
+                        >
+                          {showPassword.confirm_password ? <Visibility /> : <VisibilityOff />}
+                        </IconButton>
                       </InputAdornment>
                     ),
                   }}
