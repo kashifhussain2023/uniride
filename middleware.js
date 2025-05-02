@@ -1,9 +1,4 @@
-import {
-  getDefaultAuthRedirect,
-  getLoginPath,
-  isAuthRoute,
-  isPublicRoute,
-} from '@/utils/routes';
+import { getDefaultAuthRedirect, getLoginPath, isAuthRoute, isPublicRoute } from '@/utils/routes';
 import { getToken } from 'next-auth/jwt';
 import { NextResponse } from 'next/server';
 export async function middleware(request) {
@@ -61,11 +56,10 @@ export async function middleware(request) {
             'x-login-method': 'jwt',
           },
           method: 'GET',
-        },
+        }
       );
 
       // Debug response
-      //console.log('Profile Response Status:', profileResponse.status);
 
       if (!profileResponse.ok) {
         const errorText = await profileResponse.text();
@@ -88,12 +82,11 @@ export async function middleware(request) {
       // Check OTP verification status
       if (profileData.data.otp_verified === 0 && pathname !== '/verification') {
         // Store current path to redirect back after verification
-        const response = NextResponse.redirect(
-          new URL('/verification', request.url),
-        );
+        const response = NextResponse.redirect(new URL('/verification', request.url));
         response.cookies.set('redirectAfterVerification', pathname);
         return response;
       }
+      console.log('Profile profileData.data:', profileData.data);
 
       // Handle specific route requirements
       // if (pathname === '/uniride') {
@@ -123,13 +116,11 @@ export async function middleware(request) {
       });
 
       // Create response for redirect
-      const response = NextResponse.redirect(
-        new URL(getLoginPath(), request.url),
-      );
+      const response = NextResponse.redirect(new URL(getLoginPath(), request.url));
 
       // Clear all cookies
       const cookies = request.cookies.getAll();
-      cookies.forEach((cookie) => {
+      cookies.forEach(cookie => {
         response.cookies.delete(cookie.name);
       });
 
@@ -155,9 +146,7 @@ export async function middleware(request) {
     // If user is logged in, redirect to dashboard
     if (token) {
       //console.log('User is logged in, redirecting from public route to dashboard');
-      return NextResponse.redirect(
-        new URL(getDefaultAuthRedirect(), request.url),
-      );
+      return NextResponse.redirect(new URL(getDefaultAuthRedirect(), request.url));
     }
 
     return NextResponse.next();

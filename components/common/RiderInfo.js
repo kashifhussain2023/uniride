@@ -52,6 +52,7 @@ export default function RiderInfo({
   return (
     <LeftPannel>
       <AddDesignated
+        rideStatus={rideStatus}
         saveDateTime={saveDateTime}
         setSaveDateTime={setSaveDateTime}
         selectedTime={selectedTime}

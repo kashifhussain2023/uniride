@@ -16,8 +16,8 @@ app.prepare().then(() => {
   if (dev) {
     // Development mode - use HTTPS with mkcert certificates
     const httpsOptions = {
-      cert: fs.readFileSync(path.join(__dirname, 'certificates', 'cert.pem')),
-      key: fs.readFileSync(path.join(__dirname, 'certificates', 'key.pem')),
+      cert: fs.readFileSync(path.join(__dirname, 'certificates', 'localhost.pem')),
+      key: fs.readFileSync(path.join(__dirname, 'certificates', 'localhost-key.pem')),
     };
 
     createHttpsServer(httpsOptions, (req, res) => {

@@ -25,29 +25,7 @@ export default function InRoute({
   const [openSOS, setOpenSOS] = useState(false);
   const [sosLocation, setSosLocation] = useState({});
   const router = useRouter();
-  const handleOpenModel = async () => {
-    //setLoading(true);
-    const formData = new FormData();
-    formData.append('request_id', acceptDriverDetail.request_id);
-    formData.append('ride_id', acceptDriverDetail.ride_id);
-    formData.append('customer_id', userAuth.customer_id);
-    formData.append('token_code', userAuth.token_code);
-    const response = await api({
-      data: formData,
-      method: 'POST',
-      url: '/customers/customer_cancellation_charge_alert',
-    });
-    if (response.status === true) {
-      //setLoading(false);
-      setDeleteMessage(response.message);
-      setOpenCancelModel(true);
-    } else {
-      alert('Please try again');
-    }
-  };
-  const handleCloseModel = () => {
-    setOpenCancelModel(false);
-  };
+
   const cancelRide = () => {
     setOpenCancelModel(false);
     if (rideStatus === 2 || rideStatus === 3) {
@@ -57,7 +35,7 @@ export default function InRoute({
     }
   };
   const handleCallDriver = () => {
-    const phoneNumber = '+1470-735-7308';
+    const phoneNumber = acceptDriverDetail?.driver_info.driver_phone; //'+1470-735-7308';
     window.open(`tel:${phoneNumber}`, '_blank');
   };
   const handleOpenSOS = () => {
@@ -76,9 +54,7 @@ export default function InRoute({
     }
     setOpenSOS(true);
   };
-  const handleCloseSOS = () => {
-    setOpenSOS(false);
-  };
+
   const handleSOS = async () => {
     const formData = new FormData();
     formData.append('current_lat', sosLocation.lat);
@@ -116,24 +92,18 @@ export default function InRoute({
     <>
       <SpinnerLoader loading={sosLoading} />
       <PageTitle
-        title="In"
-        subtitle={
-          rideStatus === 2
-            ? 'Arriving Now'
-            : rideStatus === 3
-            ? 'Driver Arrived'
-            : rideStatus === 4
-            ? 'Route'
-            : ''
-        }
+        title=""
+        subtitle={acceptDriverDetail.ride_status}
         images_icon={'../iconInRoute.png'}
       ></PageTitle>
       <RouteDriver>
         <DriverInfo>
           <DriverLeft>
-            <Typography variant="subtitle2">{acceptDriverDetail?.driver_name}</Typography>
+            <Typography variant="subtitle2">
+              {acceptDriverDetail?.driver_info.driver_name}
+            </Typography>
             <Typography variant="h2" component="h2">
-              {acceptDriverDetail?.vehicle_no}
+              {acceptDriverDetail?.request_data.request_otp}
             </Typography>
             <Typography
               variant="subtitle2"
@@ -141,34 +111,37 @@ export default function InRoute({
                 mt: 0,
               }}
             >
-              {acceptDriverDetail?.vehicle_make} {acceptDriverDetail?.vehicle_model}
-              {acceptDriverDetail?.vehicle_type}
+              {acceptDriverDetail?.driver_info.vehicle_make}{' '}
+              {acceptDriverDetail?.driver_info.vehicle_model}
+              {acceptDriverDetail?.driver_info.vehicle_type}
             </Typography>
 
             <RatingStar>
-              <StarIcon /> {acceptDriverDetail?.driver_rating}
+              <StarIcon /> {acceptDriverDetail?.driver_info.driver_rating}
             </RatingStar>
           </DriverLeft>
           {
             <DriverRight>
-              <img src={`${acceptDriverDetail?.vehicle_image}`} />
+              <img src={`${acceptDriverDetail?.driver_info.vehicle_image}`} />
               <div>
-                <img src={`${acceptDriverDetail?.driver_image}`} />
+                <img src={`${acceptDriverDetail?.driver_info.driver_image}`} />
               </div>
             </DriverRight>
           }
         </DriverInfo>
-        <Button
-          variant="contained"
-          color="primary"
-          fullWidth
-          sx={{
-            mt: 2,
-          }}
-          onClick={handleCallDriver}
-        >
-          <CallOutlinedIcon /> Call Driver
-        </Button>
+        {rideStatus !== 3 && rideStatus !== 4 && (
+          <Button
+            variant="contained"
+            color="primary"
+            fullWidth
+            sx={{
+              mt: 2,
+            }}
+            onClick={handleCallDriver}
+          >
+            <CallOutlinedIcon /> Call Driver
+          </Button>
+        )}
         <Button
           variant="outlinedSecondary"
           color="primary"
@@ -176,13 +149,15 @@ export default function InRoute({
           sx={{
             mt: 1,
           }}
-          onClick={handleOpenModel}
+          onClick={() => {
+            setOpenCancelModel(true);
+          }}
         >
           <HighlightOffOutlinedIcon /> Cancel Ride
         </Button>
-        {rideStatus === 4 && (
+        {rideStatus === 3 && (
           <Button
-            variant="secondary"
+            variant="outlinedSecondary"
             color="primary"
             fullWidth
             sx={{
@@ -199,13 +174,13 @@ export default function InRoute({
 
         <MessageModel
           open={openSOS}
-          close={handleCloseSOS}
+          close={() => setOpenSOS(false)}
           handleAction={handleSOS}
           message="Are you sure want to send an alert to your emergency contacts?"
         />
         <CancelModel
           open={openCancelModel}
-          handleClose={handleCloseModel}
+          handleClose={() => setOpenCancelModel(false)}
           actionCancel={cancelRide}
           deleteMessage={deleteMessage}
         />

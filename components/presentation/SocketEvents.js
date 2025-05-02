@@ -5,7 +5,7 @@ import { getSession } from 'next-auth/react';
 import { api } from '@/utils/api/register';
 
 const socketEvents = {
-  CANCEL_RIDE: 'cancel_ride',
+  CANCEL_RIDE: 'cancelRide',
   CAR_AVAILABILITY_RESPONSE: 'carAvailabilityResponse',
   CAR_LOCATIONS: 'carLocations',
   CHANGE_REQUEST_STATUS: 'changeRequestStatus',
@@ -22,6 +22,7 @@ const socketEvents = {
   REQUEST_SENT: 'requestSent',
   REQUEST_STATUS_CHANGED: 'requestStatusChanged',
   REQUEST_TIMEOUT: 'requestTimeOut',
+  RESUME_CURRENT_RIDE: 'resumeCurrentRide',
   RIDE_COMPLETENESS_RESPONSE: 'rideCompletenessResponse',
   SAVE_SOCKET_INFO: 'saveSocketInfo',
   SCHEDULE_REQUEST_SENT: 'scheduleRequestSent',
@@ -402,10 +403,13 @@ class SocketService {
         setBookingRequestId,
         setComfirmBooking,
         setDriverId,
+        setComfirmBolking,
+        setAcceptDriRerDetail,
         setInRRoute,
         setIsBookingInProgress,
-        setRideStatus,
         setSelectRide,
+        setShowReview,
+        setRideStatus,
       } = setStateFunctions;
 
       // Set up request status changed handler
@@ -421,8 +425,17 @@ class SocketService {
             setSelectRide(false);
             setComfirmBooking(false);
             setInRRoute(true);
-            setAcceptDriverDetail(data.data.driver_info);
+            setAcceptDriverDetail(data.data);
             setDriverId(data.data.driver_info.driver_id);
+          } else if (data.data.ride_status_value === 4) {
+            setSelectRide(false);
+            setComfirmBolking(false);
+            setAcceptDriRerDetail(data.data);
+            setComfirmBooking(false);
+            setInRRoute(true);
+            setAcceptDriverDetail(data.data);
+            setDriverId(data.data.driver_info.driver_id);
+            setShowReview(true);
           }
         }
       };
@@ -624,42 +637,52 @@ const socketHelpers = {
   },
 
   // Get current ride status
-  async getCurrentRideStatus(
-    userAuth,
-    {
-      _setDriverId,
-      setAcceptDriverDetail,
-      setComfirmBooking,
-      setCurrentLocation,
-      setDriverLocation,
-      setDropLocation,
-      setInRRoute,
-      setLoading,
-      setRideStatus,
-      setSelectRide,
-      setShowReview,
-    }
-  ) {
+  async getCurrentRideStatus({
+    ride_id,
+    setDriverId,
+    setAcceptDriverDetail,
+    setComfirmBooking,
+    setCurrentLocation,
+    setDropLocation,
+    setInRRoute,
+    setLoading,
+    setRideStatus,
+    setSelectRide,
+    setDriverLocation,
+    setShowReview,
+  }) {
     try {
-      const response = await api({
-        headers: {
-          'x-login-method': `jwt`,
-        },
-        method: 'GET',
-        url: '/customers/current_ride_status',
-      });
-      if (response.status === true) {
-        if (response.data) {
-          setRideStatus(response.data.status);
-          if (response.data.status === 2) {
+      socketService.emit(socketEvents.RESUME_CURRENT_RIDE, { ride_id: ride_id });
+      socketService.on(socketEvents.RESUME_CURRENT_RIDE, data => {
+        console.log('Resume current ride', data);
+        if (data && data.data) {
+          setRideStatus(data.data.ride_status_value);
+          if (data.data.ride_status_value === 3) {
             setSelectRide(false);
             setComfirmBooking(false);
             setInRRoute(true);
-            setAcceptDriverDetail(response.data);
-            _setDriverId(response.data.driver_id);
+            setAcceptDriverDetail(data.data);
+            setDriverId(data.data.driver_info.driver_id);
+            setCurrentLocation({
+              address: data.data.request_data.start_location_name,
+              lat: Number(data.data.request_data.start_location_lat),
+              lng: Number(data.data.request_data.start_location_lon),
+            });
+
+            setDropLocation({
+              address: data.data.request_data.end_location_name,
+              lat: Number(data.data.request_data.end_location_lat),
+              lng: Number(data.data.request_data.end_location_lon),
+            });
+
+            setDriverLocation({
+              lat: Number(data.data.driver_info.driver_lat),
+              lng: Number(data.data.driver_info.driver_lng),
+            });
+            // setShowReview(true);
           }
         }
-      }
+      });
     } catch (error) {
       errorLog('Error getting current ride status', error);
       toast.error('Failed to get ride status. Please try again.');

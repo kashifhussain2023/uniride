@@ -274,35 +274,18 @@ export default function Dashboard() {
   const handleRideCancelModel = async () => {
     try {
       setLoading(true);
-      const formData = new FormData();
-      formData.append('request_id', acceptDriverDetail.request_id);
-      formData.append('ride_id', acceptDriverDetail.ride_id);
-      formData.append('customer_id', userAuth.customer_id);
-      formData.append('token_code', userAuth.token_code);
-      const response = await api({
-        data: formData,
-        method: 'POST',
-        url: '/customers/customer_cancel',
-      });
-      if (response.status === true) {
-        setSelectRide(true);
-        setComfirmBooking(false);
-        setInRRoute(false);
-        toast.success(response.message);
-        const params = {
-          auth_token: userAuth.token_code,
-          customer_id: userAuth.customer_id,
-          request_id: acceptDriverDetail.request_id,
-          token_code: userAuth.token_code,
-          user_type: 'customer',
-        };
-        socketHelpers.cancel_ride(params);
-        setTimeout(() => {
-          window.location.reload();
-        }, 2000);
-      } else {
-        toast.error(response.message || 'Failed to cancel ride');
-      }
+      console.log({ handleRideCancelModel: acceptDriverDetail });
+
+      const cancelRideData = {
+        cancel_by: 'customer',
+        ride_id: acceptDriverDetail.ride_id,
+      };
+      socketHelpers.cancelRide(cancelRideData);
+
+      toast.success('Ride cancelled successfully');
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000);
     } catch (error) {
       console.error('Error in handleRideCancelModel:', error);
       toast.error('An error occurred while canceling your ride. Please try again.');
@@ -396,7 +379,7 @@ export default function Dashboard() {
       setLoading,
     });
   };
-  const getUserCurrentLoacation = () => {
+  const getUserCurrentLoacation = async () => {
     socketHelpers.getUserCurrentLocation({
       getAllCarsList,
       setCenterMapLocation,
@@ -405,19 +388,32 @@ export default function Dashboard() {
     });
   };
   const getCurrentRideStatus = async () => {
-    await socketHelpers.getCurrentRideStatus(userAuth, {
-      _setDriverId,
-      setAcceptDriverDetail,
-      setComfirmBooking,
-      setCurrentLocation,
-      setDriverLocation,
-      setDropLocation,
-      setInRRoute,
-      setLoading,
-      setRideStatus,
-      setSelectRide,
-      setShowReview,
+    const response = await api({
+      headers: {
+        'x-login-method': `jwt`,
+      },
+      method: 'GET',
+      url: '/customer/get-profile-details',
     });
+
+    console.log({ getCurrentRideStatus: response });
+
+    if (response.data && response.data.onride !== '') {
+      await socketHelpers.getCurrentRideStatus({
+        ride_id: response.data.onride,
+        setAcceptDriverDetail,
+        setComfirmBooking,
+        setCurrentLocation,
+        setDriverId,
+        setDriverLocation,
+        setDropLocation,
+        setInRRoute,
+        setLoading,
+        setRideStatus,
+        setSelectRide,
+        setShowReview,
+      });
+    }
   };
   const getScheduleRideDetail = async () => {
     await socketHelpers.getScheduleRideDetail(userAuth, {
@@ -448,7 +444,7 @@ export default function Dashboard() {
       getUserCurrentLoacation();
 
       // Get current ride status
-      //getCurrentRideStatus();
+      getCurrentRideStatus();
 
       // Get schedule ride detail
       //getScheduleRideDetail();

@@ -56,17 +56,32 @@ const LocationPickerMap = ({
     }
   };
   const calculateDirections = driverLocation => {
+    if (!driverLocation || !driverLocation.lat || !driverLocation.lng) {
+      console.error('Invalid driver location');
+      return;
+    }
+
     const directionsService = new window.google.maps.DirectionsService();
     let destination;
     const origin = new window.google.maps.LatLng(driverLocation.lat, driverLocation.lng);
+
     if (rideStatus === 2) {
+      if (!currentLocation || !currentLocation.lat || !currentLocation.lng) {
+        console.error('Invalid current location');
+        return;
+      }
       destination = new window.google.maps.LatLng(currentLocation.lat, currentLocation.lng);
     } else {
+      if (!dropCustomerLocation || !dropCustomerLocation.lat || !dropCustomerLocation.lng) {
+        console.error('Invalid drop customer location');
+        return;
+      }
       destination = new window.google.maps.LatLng(
         dropCustomerLocation.lat,
         dropCustomerLocation.lng
       );
     }
+
     directionsService.route(
       {
         destination,
@@ -78,17 +93,28 @@ const LocationPickerMap = ({
           setDirections(result);
         } else {
           console.error('Directions request failed:', status);
+          setDirections(null);
         }
       }
     );
   };
   const calculateDirectionsWithoutRide = dropCustomerLocation => {
+    if (!currentLocation || !currentLocation.lat || !currentLocation.lng) {
+      console.error('Invalid current location');
+      return;
+    }
+    if (!dropCustomerLocation || !dropCustomerLocation.lat || !dropCustomerLocation.lng) {
+      console.error('Invalid drop customer location');
+      return;
+    }
+
     const directionsService = new window.google.maps.DirectionsService();
     const origin = new window.google.maps.LatLng(currentLocation.lat, currentLocation.lng);
     const destination = new window.google.maps.LatLng(
       dropCustomerLocation.lat,
       dropCustomerLocation.lng
     );
+
     directionsService.route(
       {
         destination,
@@ -100,6 +126,7 @@ const LocationPickerMap = ({
           setDirections(result);
         } else {
           console.error('Directions request failed:', status);
+          setDirections(null);
         }
       }
     );
@@ -127,6 +154,10 @@ const LocationPickerMap = ({
     distance,
     duration,
   ]);
+
+  console.log({
+    currentLocation: currentLocation,
+  });
   return (
     <LoadScript
       googleMapsApiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}
@@ -166,9 +197,9 @@ const LocationPickerMap = ({
           <MarkerF position={centerMapLocation} />
         )}
 
-        {comfirmBooking && currentLocation && <MarkerF position={currentLocation} />}
+        {currentLocation && <MarkerF position={currentLocation} />}
 
-        {comfirmBooking && dropCustomerLocation && <MarkerF position={dropCustomerLocation} />}
+        {dropCustomerLocation && <MarkerF position={dropCustomerLocation} />}
 
         {availableDriver &&
           availableDriver.length > 0 &&
@@ -218,8 +249,8 @@ const LocationPickerMap = ({
         {/* Display distance and duration on the map */}
         {distance && duration && (
           <DistanceDurationOverlay>
-            <Typography>Distance: {distance}</Typography>
-            <Typography>Duration: {duration}</Typography>
+            <Typography>Distance: {distance} KM</Typography>
+            <Typography>Duration: {duration} Min</Typography>
           </DistanceDurationOverlay>
         )}
         {selectRide ? (
