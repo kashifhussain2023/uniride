@@ -1,7 +1,13 @@
 import styled from '@emotion/styled';
 import { Typography } from '@mui/material';
 import TextField from '@mui/material/TextField';
-import { DirectionsRenderer, GoogleMap, LoadScript, MarkerF } from '@react-google-maps/api';
+import {
+  DirectionsRenderer,
+  GoogleMap,
+  LoadScript,
+  MarkerF,
+  Polyline,
+} from '@react-google-maps/api';
 import { useEffect, useState } from 'react';
 const LocationPickerMap = ({
   currentLocation,
@@ -20,6 +26,7 @@ const LocationPickerMap = ({
 }) => {
   const [directions, setDirections] = useState(null);
   const [directionsKey, setDirectionsKey] = useState(0);
+  const [routePath, setRoutePath] = useState([]);
   const resetMap = () => {
     // Increment the key to force remounting the map
     setDirectionsKey(prevKey => prevKey + 1);
@@ -61,10 +68,13 @@ const LocationPickerMap = ({
       return;
     }
 
+    console.log('calculateDirections driverLocation', driverLocation);
+
     const directionsService = new window.google.maps.DirectionsService();
     let destination;
     const origin = new window.google.maps.LatLng(driverLocation.lat, driverLocation.lng);
 
+    console.log('calculateDirections rideStatus', rideStatus);
     if (rideStatus === 2) {
       if (!currentLocation || !currentLocation.lat || !currentLocation.lng) {
         console.error('Invalid current location');
@@ -76,11 +86,14 @@ const LocationPickerMap = ({
         console.error('Invalid drop customer location');
         return;
       }
+
       destination = new window.google.maps.LatLng(
         dropCustomerLocation.lat,
         dropCustomerLocation.lng
       );
     }
+
+    console.log('destination', destination);
 
     directionsService.route(
       {
@@ -89,6 +102,8 @@ const LocationPickerMap = ({
         travelMode: window.google.maps.TravelMode.DRIVING,
       },
       (result, status) => {
+        console.log('result', result);
+
         if (status === window.google.maps.DirectionsStatus.OK) {
           setDirections(result);
         } else {
@@ -131,11 +146,51 @@ const LocationPickerMap = ({
       }
     );
   };
+
+  const calculateRoutePath = (origin, destination) => {
+    if (!origin || !destination) return;
+
+    const directionsService = new window.google.maps.DirectionsService();
+
+    directionsService.route(
+      {
+        destination: new window.google.maps.LatLng(destination.lat, destination.lng),
+        origin: new window.google.maps.LatLng(origin.lat, origin.lng),
+        travelMode: window.google.maps.TravelMode.DRIVING,
+      },
+      (result, status) => {
+        if (status === window.google.maps.DirectionsStatus.OK) {
+          const path = result.routes[0].overview_path.map(point => ({
+            lat: point.lat(),
+            lng: point.lng(),
+          }));
+          setRoutePath(path);
+        } else {
+          console.error('Directions request failed:', status);
+          setRoutePath([]);
+        }
+      }
+    );
+  };
+
+  console.log({
+    comfirmBooking: comfirmBooking,
+    currentLocation: currentLocation,
+    distance: distance,
+    dropCustomerLocation: dropCustomerLocation,
+    rideStatus: rideStatus,
+  });
+
   useEffect(() => {
     const cleanup = () => {
-      // Reset directions when the component unmounts
       setDirections(null);
+      setRoutePath([]);
     };
+
+    if (currentLocation && dropCustomerLocation) {
+      calculateRoutePath(currentLocation, dropCustomerLocation);
+    }
+
     if (rideStatus) {
       calculateDirections(driverLocation);
       resetMap();
@@ -156,7 +211,7 @@ const LocationPickerMap = ({
   ]);
 
   console.log({
-    currentLocation: currentLocation,
+    directions: directions,
   });
   return (
     <LoadScript
@@ -184,6 +239,19 @@ const LocationPickerMap = ({
           zoomControl: false,
         }}
       >
+        {/* Add Route Polyline */}
+        {routePath.length > 0 && (
+          <Polyline
+            path={routePath}
+            options={{
+              geodesic: true,
+              strokeColor: '#4285F4',
+              strokeOpacity: 0.8,
+              strokeWeight: 4,
+            }}
+          />
+        )}
+
         {directions && (
           <DirectionsRenderer
             directions={directions}

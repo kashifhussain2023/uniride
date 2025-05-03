@@ -473,6 +473,7 @@ export default function Dashboard() {
         setBookingRequestId,
         setComfirmBooking,
         setDriverId,
+        setDriverLocation,
         setEndRideData,
         setInRRoute,
         setIsBookingInProgress,
@@ -510,7 +511,6 @@ export default function Dashboard() {
     }
   }, [currentLocation, carTypeId, userAuth]);
 
-  console.log('availableDriver', availableDriver);
   return (
     <ThemeProvider>
       <Head>

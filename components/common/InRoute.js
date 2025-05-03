@@ -88,6 +88,7 @@ export default function InRoute({
     }
   };
   useEffect(() => {}, []);
+  console.log('acceptDriverDetail', acceptDriverDetail);
   return (
     <>
       <SpinnerLoader loading={sosLoading} />
@@ -102,6 +103,7 @@ export default function InRoute({
             <Typography variant="subtitle2">
               {acceptDriverDetail?.driver_info.driver_name}
             </Typography>
+            Pin for this Trip:
             <Typography variant="h2" component="h2">
               {acceptDriverDetail?.request_data.request_otp}
             </Typography>
@@ -115,7 +117,6 @@ export default function InRoute({
               {acceptDriverDetail?.driver_info.vehicle_model}
               {acceptDriverDetail?.driver_info.vehicle_type}
             </Typography>
-
             <RatingStar>
               <StarIcon /> {acceptDriverDetail?.driver_info.driver_rating}
             </RatingStar>

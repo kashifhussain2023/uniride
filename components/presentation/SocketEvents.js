@@ -1,6 +1,5 @@
 import io from 'socket.io-client';
 import { toast } from 'react-toastify';
-import { signOut } from 'next-auth/react';
 import { getSession } from 'next-auth/react';
 import { api } from '@/utils/api/register';
 
@@ -403,13 +402,13 @@ class SocketService {
         setBookingRequestId,
         setComfirmBooking,
         setDriverId,
-        setComfirmBolking,
-        setAcceptDriRerDetail,
+        setEndRideData,
         setInRRoute,
         setIsBookingInProgress,
         setSelectRide,
         setShowReview,
         setRideStatus,
+        setDriverLocation,
       } = setStateFunctions;
 
       // Set up request status changed handler
@@ -420,21 +419,16 @@ class SocketService {
 
         if (data) {
           setRideStatus(data.data.ride_status_value);
-          if (data.data.ride_status_value === 1) {
-            // Driver accepted
-            setSelectRide(false);
-            setComfirmBooking(false);
-            setInRRoute(true);
-            setAcceptDriverDetail(data.data);
-            setDriverId(data.data.driver_info.driver_id);
-          } else if (data.data.ride_status_value === 4) {
-            setSelectRide(false);
-            setComfirmBolking(false);
-            setAcceptDriRerDetail(data.data);
-            setComfirmBooking(false);
-            setInRRoute(true);
-            setAcceptDriverDetail(data.data);
-            setDriverId(data.data.driver_info.driver_id);
+          setDriverLocation(data.data.driver_info);
+
+          setAcceptDriverDetail(data.data);
+          setEndRideData(data.data);
+          setInRRoute(true);
+          setSelectRide(false);
+          setComfirmBooking(false);
+          setDriverId(data.data.driver_info.driver_id);
+
+          if (data.data.ride_status_value === 4) {
             setShowReview(true);
           }
         }
@@ -649,7 +643,6 @@ const socketHelpers = {
     setRideStatus,
     setSelectRide,
     setDriverLocation,
-    setShowReview,
   }) {
     try {
       socketService.emit(socketEvents.RESUME_CURRENT_RIDE, { ride_id: ride_id });
@@ -905,7 +898,7 @@ const socketHelpers = {
   },
 
   // Request booking with status tracking
-  requestBookingWithStatus(payload, { onDriverAccepted, onNoDriverFound, onRequestStatusChanged }) {
+  requestBookingWithStatus(payload, { onNoDriverFound, onRequestStatusChanged }) {
     debugLog('Requesting booking with status tracking', payload);
 
     // Register event handlers

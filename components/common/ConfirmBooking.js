@@ -2,7 +2,7 @@ import PageTitle from '@/components/common/PageTitle';
 import { api } from '@/utils/api/common';
 import styled from '@emotion/styled';
 import DiscountIcon from '@mui/icons-material/Discount';
-import { Button, List, ListItem, TextField } from '@mui/material';
+import { Button, List, ListItem, TextField, Typography } from '@mui/material';
 import { useState } from 'react';
 import { toast } from 'react-toastify';
 import SpinnerLoader from './SpinnerLoader';
@@ -107,6 +107,11 @@ export default function ConfirmBooking({
                 ? "No car available"
                 : "Car is " + avgTime + " away from you"}{" "}
              </Typography> */}
+
+            <Typography variant="subtitle3">
+              {' '}
+              <strong> {comfirmBookingData.car_name} </strong>
+            </Typography>
           </div>
         </BookingCarInfo>
         <BookingDtl>

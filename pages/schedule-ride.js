@@ -121,22 +121,22 @@ const ScheduleRide = ({ session }) => {
 };
 export default ScheduleRide;
 
-export async function getServerSideProps(context) {
-  const session = await getSession(context);
-  if (!session) {
-    return {
-      redirect: {
-        destination: '/login',
-        permanent: false,
-      },
-    };
-  }
-  return {
-    props: {
-      session,
-    },
-  };
-}
+// export async function getServerSideProps(context) {
+//   const session = await getSession(context);
+//   if (!session) {
+//     return {
+//       redirect: {
+//         destination: '/login',
+//         permanent: false,
+//       },
+//     };
+//   }
+//   return {
+//     props: {
+//       session,
+//     },
+//   };
+// }
 const Box = styled.div`
   ${({ theme }) => `
     background-color: ${theme.colors.palette.white};

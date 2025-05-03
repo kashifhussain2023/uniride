@@ -5,40 +5,61 @@ import LargeInnerContent from '@/components/presentation/LargeInnerContent';
 import ThemeProvider from '@/theme/ThemeProvider';
 import { api } from '@/utils/api/common';
 import styled from '@emotion/styled';
-import { getSession, signOut } from 'next-auth/react';
+import { useSession } from 'next-auth/react';
 import Head from 'next/head';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import SpinnerLoader from '@/components/common/SpinnerLoader';
-export default function RiderHistoryPage({ userAuth }) {
+
+export default function RiderHistoryPage() {
   const router = useRouter();
+  const { data: session, status } = useSession();
   const [historyData, setHistoryData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [subTitle, setSubTitle] = useState('History');
+
   const getRiderHistoryList = async () => {
-    const formData = new FormData();
-    formData.append('customer_id', userAuth.customer_id);
-    formData.append('token_code', userAuth.token_code);
-    formData.append('offset', 0);
-    const response = await api({
-      method: 'GET',
-      url: '/customer/booking/ride-history',
-    });
-    if (response.status === true) {
-      setLoading(false);
-      setHistoryData(response.data.data);
-    } else if (response.data.message === 'Invalid token code') {
-      await signOut({
-        redirect: false,
+    if (!session?.accessToken) return;
+
+    try {
+      const response = await api({
+        headers: {
+          'x-login-method': `jwt`,
+        },
+        method: 'GET',
+        url: '/customer/booking/ride-history',
       });
-      router.push('/login');
-    } else {
+
+      if (response.status === true) {
+        setLoading(false);
+        setHistoryData(response.data.data);
+      } else {
+        setLoading(false);
+        if (response.data.message === 'Invalid token code') {
+          router.push('/login');
+        }
+      }
+    } catch (error) {
       setLoading(false);
+      console.error('Error fetching ride history:', error);
     }
   };
+
   useEffect(() => {
-    getRiderHistoryList();
-  }, []);
+    if (status === 'unauthenticated') {
+      router.push('/login');
+      return;
+    }
+
+    if (status === 'authenticated') {
+      getRiderHistoryList();
+    }
+  }, [status, session]);
+
+  if (!session) {
+    return <SpinnerLoader loading={true} />;
+  }
+
   return (
     <ThemeProvider>
       <Head>
@@ -59,22 +80,7 @@ export default function RiderHistoryPage({ userAuth }) {
     </ThemeProvider>
   );
 }
-export async function getServerSideProps(context) {
-  const session = await getSession(context);
-  if (!session) {
-    return {
-      redirect: {
-        destination: '/login',
-        permanent: false,
-      },
-    };
-  }
-  return {
-    props: {
-      userAuth: session.user || null,
-    },
-  };
-}
+
 const Box = styled.div`
   ${({ theme }) => `
     background-color: ${theme.colors.palette.white};

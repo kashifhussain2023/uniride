@@ -6,11 +6,12 @@
 export const authRoutes = {
   addCard: '/cards/add',
   corporateVerification: '/corporate-verification',
+  designatedDriver: '/designated-driver',
   profile: '/profile',
+  riderHistory: '/rider-history',
   rides: '/rides',
   settings: '/settings',
   uniride: '/uniride',
-  designatedDriver: '/designated-driver',
 };
 
 // Public routes (including login/register pages)
@@ -40,7 +41,7 @@ export const routeGroups = {
  * @param {string} pathname - The current pathname
  * @returns {boolean}
  */
-export const isAuthRoute = (pathname) => {
+export const isAuthRoute = pathname => {
   return routeGroups.auth.includes(pathname);
 };
 
@@ -49,7 +50,7 @@ export const isAuthRoute = (pathname) => {
  * @param {string} pathname - The current pathname
  * @returns {boolean}
  */
-export const isPublicRoute = (pathname) => {
+export const isPublicRoute = pathname => {
   return routeGroups.public.includes(pathname);
 };
 

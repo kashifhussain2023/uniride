@@ -23,8 +23,8 @@ export default function RiderHistory({ riderHistory, setSubTitle }) {
                 <SafeImage
                   src={historyItem.path_image || '../mapImg.png'}
                   alt="Map Image"
-                  width="100%"
-                  height="100%"
+                  width={100}
+                  height={100}
                   className="safe-image"
                   fallbackSrc="../mapImg.png"
                 />
