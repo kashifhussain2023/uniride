@@ -129,6 +129,7 @@ const RatingStar = styled.div`
     }
   `}
 `;
+
 const DriverRight = styled.div`
   ${() => `
     position: relative;

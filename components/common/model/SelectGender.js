@@ -10,6 +10,7 @@ import ListItemText from '@mui/material/ListItemText';
 import { Radio, Typography } from '@mui/material';
 const SelectGender = ({ open, handleGenderClose, proceedGenderModel }) => {
   const [checked, setChecked] = React.useState('male');
+  
   const handleToggle = value => () => {
     setChecked(value);
   };

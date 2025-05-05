@@ -1,9 +1,10 @@
 import styled from '@emotion/styled';
 import { Typography } from '@mui/material';
 export default function CopyRight() {
+  const year = new Date().getFullYear();
   return (
     <Container>
-      <Typography>Uniride ©2024 All rights reserved</Typography>
+      <Typography>Uniride ©{year} All rights reserved</Typography>
     </Container>
   );
 }
