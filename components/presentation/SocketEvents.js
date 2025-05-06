@@ -419,7 +419,13 @@ class SocketService {
 
         if (data) {
           setRideStatus(data.data.ride_status_value);
-          setDriverLocation(data.data.driver_info);
+
+          setDriverLocation({
+            lat: Number(data.data.driver_info.driver_lat),
+            lng: Number(data.data.driver_info.driver_lng),
+          });
+
+          // setDriverLocation(data.data.driver_info);
 
           setAcceptDriverDetail(data.data);
           setEndRideData(data.data);
@@ -630,12 +636,26 @@ const socketHelpers = {
     }
   },
 
+  // Get customer ride type
+  getCustomerRideType: () => customerRideType,
+
+  // Get driver location
+  getDriverLocation: data => {
+    debugLog('Getting driver location', data);
+    socketService.emit(socketEvents.GET_DRIVER_LOCATION, data);
+  },
+
+  getRealtimeDriverLocation: async () => {
+    //await socketHelpers.getRealtimeDriverLocation();
+  },
+
   // Get current ride status
-  async getCurrentRideStatus({
+  async getResumeRideProcess({
     ride_id,
     setDriverId,
     setAcceptDriverDetail,
     setComfirmBooking,
+    setCarTypeId,
     setCurrentLocation,
     setDropLocation,
     setInRRoute,
@@ -650,30 +670,29 @@ const socketHelpers = {
         console.log('Resume current ride', data);
         if (data && data.data) {
           setRideStatus(data.data.ride_status_value);
-          if (data.data.ride_status_value === 3) {
-            setSelectRide(false);
-            setComfirmBooking(false);
-            setInRRoute(true);
-            setAcceptDriverDetail(data.data);
-            setDriverId(data.data.driver_info.driver_id);
-            setCurrentLocation({
-              address: data.data.request_data.start_location_name,
-              lat: Number(data.data.request_data.start_location_lat),
-              lng: Number(data.data.request_data.start_location_lon),
-            });
 
-            setDropLocation({
-              address: data.data.request_data.end_location_name,
-              lat: Number(data.data.request_data.end_location_lat),
-              lng: Number(data.data.request_data.end_location_lon),
-            });
+          setSelectRide(false);
+          setCarTypeId(data.data.applied_rates.car_type_id);
+          setComfirmBooking(false);
+          setInRRoute(true);
+          setAcceptDriverDetail(data.data);
+          setDriverId(data.data.driver_info.driver_id);
+          setCurrentLocation({
+            address: data.data.request_data.start_location_name,
+            lat: Number(data.data.request_data.start_location_lat),
+            lng: Number(data.data.request_data.start_location_lon),
+          });
 
-            setDriverLocation({
-              lat: Number(data.data.driver_info.driver_lat),
-              lng: Number(data.data.driver_info.driver_lng),
-            });
-            // setShowReview(true);
-          }
+          setDropLocation({
+            address: data.data.request_data.end_location_name,
+            lat: Number(data.data.request_data.end_location_lat),
+            lng: Number(data.data.request_data.end_location_lon),
+          });
+
+          setDriverLocation({
+            lat: Number(data.data.driver_info.driver_lat),
+            lng: Number(data.data.driver_info.driver_lng),
+          });
         }
       });
     } catch (error) {
@@ -682,15 +701,6 @@ const socketHelpers = {
     } finally {
       setLoading(false);
     }
-  },
-
-  // Get customer ride type
-  getCustomerRideType: () => customerRideType,
-
-  // Get driver location
-  getDriverLocation: data => {
-    debugLog('Getting driver location', data);
-    socketService.emit(socketEvents.GET_DRIVER_LOCATION, data);
   },
 
   // Get schedule ride detail

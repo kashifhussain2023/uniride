@@ -403,7 +403,7 @@ export default function Dashboard() {
     });
   };
 
-  const getCurrentRideStatus = async () => {
+  const getResumeRideProcess = async () => {
     const response = await api({
       headers: {
         'x-login-method': `jwt`,
@@ -412,12 +412,11 @@ export default function Dashboard() {
       url: '/customer/get-profile-details',
     });
 
-    console.log({ getCurrentRideStatus: response });
-
     if (response.data && response.data.onride !== '') {
-      await socketHelpers.getCurrentRideStatus({
+      await socketHelpers.getResumeRideProcess({
         ride_id: response.data.onride,
         setAcceptDriverDetail,
+        setCarTypeId,
         setComfirmBooking,
         setCurrentLocation,
         setDriverId,
@@ -446,6 +445,10 @@ export default function Dashboard() {
     await socketHelpers.applyCoupon(couponCode, userAuth);
   };
 
+  const getRealtimeDriverLocation = async () => {
+    await socketHelpers.getRealtimeDriverLocation();
+  };
+
   useEffect(() => {
     // Set the ride type to regular
     socketHelpers.setCustomerRideType('regular');
@@ -461,8 +464,11 @@ export default function Dashboard() {
       // Get user's current location
       getUserCurrentLoacation();
 
-      // Get current ride status
-      getCurrentRideStatus();
+      // Get resume ride status
+      getResumeRideProcess();
+
+      // Get realtime location of driver
+      getRealtimeDriverLocation();
 
       // Get schedule ride detail
       //getScheduleRideDetail();
@@ -587,6 +593,7 @@ export default function Dashboard() {
               />
               <RightPannel>
                 <LocationPickerMap
+                  acceptDriverDetail={acceptDriverDetail}
                   currentLocation={currentLocation}
                   dropCustomerLocation={dropLocation}
                   dropPickLocationType={dropPickLocationType}

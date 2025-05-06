@@ -1,14 +1,8 @@
 {
-  "extends": [
-    "next/core-web-vitals",
-    "eslint:recommended",
-    "prettier"
-  ],
-  "plugins": [
-    "sort-keys-fix",
-    "prettier"
-  ],
+  "extends": ["next/core-web-vitals", "eslint:recommended", "prettier"],
+  "plugins": ["sort-keys-fix", "prettier"],
   "rules": {
+    "react-hooks/exhaustive-deps": "off",
     "sort-keys-fix/sort-keys-fix": [
       "warn",
       "asc",

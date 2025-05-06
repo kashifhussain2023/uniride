@@ -68,47 +68,77 @@ const LocationPickerMap = ({
       return;
     }
 
-    console.log('calculateDirections driverLocation', driverLocation);
-
     const directionsService = new window.google.maps.DirectionsService();
-    let destination;
-    const origin = new window.google.maps.LatLng(driverLocation.lat, driverLocation.lng);
+    let origin, destination;
 
-    console.log('calculateDirections rideStatus', rideStatus);
-    if (rideStatus === 2) {
+    // Handle different ride statuses
+    if (rideStatus === 1) {
+      // Arrived Soon - Show driver to customer's current location
       if (!currentLocation || !currentLocation.lat || !currentLocation.lng) {
         console.error('Invalid current location');
         return;
       }
+
+      const driverLoc = {
+        lat: parseFloat(driverLocation.lat),
+        lng: parseFloat(driverLocation.lng),
+      };
+
+      origin = new window.google.maps.LatLng(driverLoc.lat, driverLoc.lng);
       destination = new window.google.maps.LatLng(currentLocation.lat, currentLocation.lng);
-    } else {
+    } else if (rideStatus === 2 || rideStatus === 3) {
+      // Arrived or Completed - Show customer to dropoff
+      if (!currentLocation || !currentLocation.lat || !currentLocation.lng) {
+        console.error('Invalid current location');
+        return;
+      }
       if (!dropCustomerLocation || !dropCustomerLocation.lat || !dropCustomerLocation.lng) {
         console.error('Invalid drop customer location');
         return;
       }
-
+      origin = new window.google.maps.LatLng(currentLocation.lat, currentLocation.lng);
       destination = new window.google.maps.LatLng(
         dropCustomerLocation.lat,
         dropCustomerLocation.lng
       );
     }
 
-    console.log('destination', destination);
+    console.log('Calculating directions:', {
+      currentLocation,
+      destination,
+      driverLocation,
+      dropCustomerLocation,
+      origin,
+      rideStatus,
+    });
 
     directionsService.route(
       {
         destination,
+        optimizeWaypoints: true,
         origin,
+        provideRouteAlternatives: true,
         travelMode: window.google.maps.TravelMode.DRIVING,
       },
       (result, status) => {
-        console.log('result', result);
-
         if (status === window.google.maps.DirectionsStatus.OK) {
+          const shortestRoute = result.routes.reduce((shortest, current) => {
+            return current.legs[0].distance.value < shortest.legs[0].distance.value
+              ? current
+              : shortest;
+          });
+
+          const path = shortestRoute.overview_path.map(point => ({
+            lat: point.lat(),
+            lng: point.lng(),
+          }));
+
+          setRoutePath(path);
           setDirections(result);
         } else {
           console.error('Directions request failed:', status);
           setDirections(null);
+          setRoutePath([]);
         }
       }
     );
@@ -177,6 +207,7 @@ const LocationPickerMap = ({
     comfirmBooking: comfirmBooking,
     currentLocation: currentLocation,
     distance: distance,
+    driverLocation: driverLocation,
     dropCustomerLocation: dropCustomerLocation,
     rideStatus: rideStatus,
   });
@@ -187,7 +218,10 @@ const LocationPickerMap = ({
       setRoutePath([]);
     };
 
-    if (currentLocation && dropCustomerLocation) {
+    if (rideStatus === 1 && isValidLocation(driverLocation) && isValidLocation(currentLocation)) {
+      // Only calculate route from driver to customer for ride_status = 1
+      calculateRoutePath(driverLocation, currentLocation);
+    } else if (currentLocation && dropCustomerLocation) {
       calculateRoutePath(currentLocation, dropCustomerLocation);
     }
 
@@ -211,8 +245,48 @@ const LocationPickerMap = ({
   ]);
 
   console.log({
-    directions: directions,
+    availableDriver: availableDriver,
   });
+
+  const getMapCenter = () => {
+    // Ensure we have valid coordinates before using them
+    const parseLocation = location => {
+      if (!location || typeof location.lat !== 'number' || typeof location.lng !== 'number') {
+        return null;
+      }
+      return {
+        lat: parseFloat(location.lat),
+        lng: parseFloat(location.lng),
+      };
+    };
+
+    const driverLoc = parseLocation(driverLocation);
+    const currentLoc = parseLocation(currentLocation);
+    const dropLoc = parseLocation(dropCustomerLocation);
+
+    switch (rideStatus) {
+      case 1:
+        return driverLoc || currentLoc || { lat: 0, lng: 0 };
+      case 2:
+      case 3:
+        return currentLoc || { lat: 0, lng: 0 };
+      case 4:
+        return dropLoc || currentLoc || { lat: 0, lng: 0 };
+      default:
+        return parseLocation(centerMapLocation) || currentLoc || { lat: 0, lng: 0 };
+    }
+  };
+
+  const isValidLocation = location => {
+    return (
+      location &&
+      typeof location.lat === 'number' &&
+      typeof location.lng === 'number' &&
+      !isNaN(location.lat) &&
+      !isNaN(location.lng)
+    );
+  };
+
   return (
     <LoadScript
       googleMapsApiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}
@@ -221,15 +295,7 @@ const LocationPickerMap = ({
       <GoogleMap
         key={directionsKey}
         mapContainerStyle={mapContainerStyle}
-        center={
-          selectRide
-            ? centerMapLocation
-            : comfirmBooking
-            ? centerMapLocation
-            : rideStatus === 2
-            ? currentLocation
-            : dropCustomerLocation
-        }
+        center={getMapCenter()}
         zoom={15}
         onClick={handleMapClick}
         options={{
@@ -239,55 +305,99 @@ const LocationPickerMap = ({
           zoomControl: false,
         }}
       >
-        {/* Add Route Polyline */}
+        {/* Show driver marker with car image only for ride_status = 1 */}
+        {rideStatus === 1 && isValidLocation(driverLocation) && (
+          <MarkerF
+            position={{
+              lat: parseFloat(driverLocation.lat),
+              lng: parseFloat(driverLocation.lng),
+            }}
+            icon={{
+              scaledSize: new window.google.maps.Size(40, 40),
+              url: '../carImage.png',
+            }}
+          />
+        )}
+
+        {/* Show customer current location marker */}
+        {isValidLocation(currentLocation) && (
+          <MarkerF
+            position={{
+              lat: parseFloat(currentLocation.lat),
+              lng: parseFloat(currentLocation.lng),
+            }}
+          />
+        )}
+
+        {/* Show drop location marker */}
+        {isValidLocation(dropCustomerLocation) && (
+          <MarkerF
+            position={{
+              lat: parseFloat(dropCustomerLocation.lat),
+              lng: parseFloat(dropCustomerLocation.lng),
+            }}
+          />
+        )}
+
+        {/* Show route polyline only for ride_status = 1 */}
         {routePath.length > 0 && (
           <Polyline
             path={routePath}
             options={{
               geodesic: true,
-              strokeColor: '#4285F4',
-              strokeOpacity: 0.8,
-              strokeWeight: 4,
+              icons: [
+                {
+                  icon: {
+                    path: 'M 0,-1 0,1',
+                    scale: 4,
+                    strokeOpacity: 1,
+                  },
+                  offset: '0',
+                  repeat: '20px',
+                },
+              ],
+              strokeColor: '#feae01',
+              strokeOpacity: 1,
+              strokeWeight: 6,
             }}
           />
         )}
 
-        {directions && (
-          <DirectionsRenderer
-            directions={directions}
-            options={{
-              suppressMarkers: true,
-            }}
-          />
-        )}
+        {/* Show available drivers only when ride_status is not 1 */}
+        {rideStatus !== 1 &&
+          availableDriver &&
+          availableDriver.length > 0 &&
+          availableDriver.map((driver, index) => (
+            <MarkerF
+              key={index}
+              position={{
+                lat: parseFloat(driver.driver_lat),
+                lng: parseFloat(driver.driver_lng),
+              }}
+              icon={{
+                scaledSize: new window.google.maps.Size(40, 40),
+                url: '../carImage.png',
+              }}
+            />
+          ))}
 
         {(comfirmBooking || selectRide) && centerMapLocation && (
           <MarkerF position={centerMapLocation} />
         )}
 
-        {currentLocation && <MarkerF position={currentLocation} />}
-
-        {dropCustomerLocation && <MarkerF position={dropCustomerLocation} />}
-
-        {availableDriver &&
-          availableDriver.length > 0 &&
-          availableDriver.map((driver, index) => {
-            return (
-              <MarkerF
-                key={index}
-                position={{
-                  lat: parseFloat(driver.driver_lat),
-                  lng: parseFloat(driver.driver_lng),
-                }}
-                icon={{
-                  scaledSize: new window.google.maps.Size(40, 40),
-                  url: '../carImage.png',
-                }}
-              />
-            );
-          })}
-
-        {driverLocation && rideStatus === 4 && (
+        {rideStatus === 4 && isValidLocation(driverLocation) && (
+          <MarkerF
+            position={{
+              lat: driverLocation.lat,
+              lng: driverLocation.lng,
+            }}
+            icon={{
+              scaledSize: new window.google.maps.Size(40, 40),
+              url: '../carImage.png',
+            }}
+          />
+        )}
+        {driverLocation && rideStatus === 2 && isValidLocation(driverLocation) && (
           <MarkerF
             position={driverLocation}
             icon={{
@@ -296,16 +406,7 @@ const LocationPickerMap = ({
             }}
           />
         )}
-        {driverLocation && rideStatus === 2 && (
-          <MarkerF
-            position={driverLocation}
-            icon={{
-              scaledSize: new window.google.maps.Size(40, 40),
-              url: '../carImage.png',
-            }}
-          />
-        )}
-        {driverLocation && rideStatus === 3 && (
+        {driverLocation && rideStatus === 3 && isValidLocation(driverLocation) && (
           <MarkerF
             position={driverLocation}
             icon={{
