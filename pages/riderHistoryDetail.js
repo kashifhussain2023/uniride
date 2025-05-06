@@ -15,10 +15,11 @@ export default function RiderHistoryDetail() {
   const router = useRouter();
   const [value, setValue] = useState(0);
   const [historyDetailData, setHistoryDetailData] = useState([]);
+
   const getRideHistoryDetail = async () => {
     const response = await api({
       method: 'GET',
-      url: `/customer/booking/ride-history-details?request_id=${738}`,
+      url: `/customer/booking/ride-history-details?request_id=${305}`,
     });
     if (response.status === true) {
       setHistoryDetailData(response.data);
@@ -30,9 +31,11 @@ export default function RiderHistoryDetail() {
       router.push('/login');
     }
   };
+
   useEffect(() => {
     getRideHistoryDetail();
   }, []);
+
   return (
     <ThemeProvider>
       <Head>

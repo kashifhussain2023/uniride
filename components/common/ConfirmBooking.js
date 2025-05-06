@@ -22,12 +22,15 @@ export default function ConfirmBooking({
   const [loading, setLoading] = useState(false);
   const [couponData, setCouponData] = useState(null);
   const [discountAmount, setDiscountAmount] = useState(0);
+
   const handleChange = event => {
     setPromoCodeValue(event.target.value);
   };
+
   const BackRidePage = () => {
     window.location.reload();
   };
+
   const applyCouponCode = async () => {
     if (!promoCodeValue || promoCodeValue.trim() === '') {
       setErrors('Please enter promo code');
@@ -73,6 +76,7 @@ export default function ConfirmBooking({
       }
     }
   };
+  
   const removeCouponCode = async () => {
     setCouponActive(false);
     setCouponCode(null);
@@ -91,6 +95,7 @@ export default function ConfirmBooking({
     const originalAmount = parseFloat(comfirmBookingData.maximum_estimated_fare);
     return (originalAmount - discountAmount).toFixed(2);
   };
+  
   return (
     <>
       <SpinnerLoader loading={loading} />

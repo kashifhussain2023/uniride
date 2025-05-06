@@ -26,6 +26,7 @@ const AddDesignated = ({
   const [tempDate, setTempDate] = useState();
   const [tempTime, setTempTime] = useState();
   const [timeError, setTimeError] = useState(false);
+
   const handleOpen = () => {
     if (scheduleRideStatus) {
       setOpenScheduleMsg(true);
@@ -33,8 +34,11 @@ const AddDesignated = ({
       setOpen(true);
     }
   };
+
   const handleClose = () => setOpen(false);
+
   const handleMessageClose = () => setOpenScheduleMsg(false);
+
   const handleSave = () => {
     if (timeError) {
       return;
@@ -48,19 +52,22 @@ const AddDesignated = ({
     //   setSaveDateTime(true);
     // }
   };
+
   const handleCancel = () => {
     setOpen(false), setSaveDateTime(false);
     setSelectedDate(null);
     setSelectedTime(null);
   };
+
   const handleTimeChange = time => {
     setTempTime(time);
     setTimeError(false);
   };
+
   const handleDateChange = date => {
     setTempDate(date);
-    //set
   };
+
   const isTimeDisabled = time => {
     const currentTime = new Date();
     if (selectedDate || tempDate) {
@@ -122,18 +129,16 @@ const AddDesignated = ({
       return currentTimeCopy < currentTime;
     }
   };
+
   return (
     <Container>
-      {!saveDateTime ? (
-        <>
-          <IconButton onClick={handleOpen}>
-            <SafeImage src="/date-time-icon.png" alt="Date and Time" width={30} height={30} />
-          </IconButton>
-        </>
-      ) : (
+      <IconButton onClick={handleOpen}>
+        <SafeImage src="/date-time-icon.png" alt="Date and Time" width={30} height={30} />
+      </IconButton>
+      {saveDateTime && (
         <SelectedDateTime onClick={handleOpen}>
           <Typography>{format(new Date(selectedDate || newDate), 'EEE MMM dd yyyy')}</Typography>
-          <Typography> {format(new Date(selectedTime || newDate), 'hh:mm a')}</Typography>
+          <Typography>{format(new Date(selectedTime || newDate), 'hh:mm a')}</Typography>
         </SelectedDateTime>
       )}
       <Dialog open={open} onClose={handleClose}>

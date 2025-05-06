@@ -590,6 +590,8 @@ export default function Dashboard() {
                 dropLocation={dropLocation}
                 distance={distance}
                 duration={duration}
+                // confirmButtonText="Favorite Location"
+                confirmButtonText={rideStatus === 3 ? 'Confirm' : 'Favorite Location'}
               />
               <RightPannel>
                 <LocationPickerMap

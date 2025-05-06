@@ -5,14 +5,16 @@ import { useState } from 'react';
 import RideDetails from '../RideDetails';
 import SafeImage from '../SafeImage';
 
-export default function RiderHistory({ riderHistory, setSubTitle }) {
+export default function RiderHistory({ riderHistory, setSubTitle, historyDetailData }) {
   const [rideDetailStatus, setRideDetailStatus] = useState(true);
   const [rideDetail, setRideDetail] = useState();
+
   const rideDetailData = index => {
     setRideDetailStatus(false);
     setRideDetail(riderHistory[index]);
     setSubTitle('History Detail');
   };
+
   return (
     <>
       {rideDetailStatus ? (
@@ -23,8 +25,8 @@ export default function RiderHistory({ riderHistory, setSubTitle }) {
                 <SafeImage
                   src={historyItem.path_image || '../mapImg.png'}
                   alt="Map Image"
-                  width={100}
-                  height={100}
+                  width={345}
+                  height={200}
                   className="safe-image"
                   fallbackSrc="../mapImg.png"
                 />
@@ -48,7 +50,7 @@ export default function RiderHistory({ riderHistory, setSubTitle }) {
                   })}
                 </DateTime>
 
-                <Typography variant="subtitle1">{historyItem.distance_travelled} mi</Typography>
+                <Typography variant="subtitle1">{historyItem.distance_travelled} mile</Typography>
                 <Typography
                   variant="subtitle1"
                   sx={{
@@ -68,9 +70,7 @@ export default function RiderHistory({ riderHistory, setSubTitle }) {
                 </Price>
                 <Action>
                   <Typography variant="success">
-                    {historyItem.customer_cancel_ride || historyItem.driver_cancel_ride
-                      ? 'Cancelled'
-                      : 'Success'}
+                    {historyItem.ride_status === 0 ? 'Cancelled' : 'Success'}
                   </Typography>
                 </Action>
               </HistoryAction>

@@ -124,6 +124,7 @@ export default function BasicTabs({
           <RidesTabs value={value} index={1}>
             <RidesCards
               type="corporate"
+              carsList={carsList}
               handleCarTypeId={handleCarTypeId}
               carStatus={carStatus}
               carTypeId={carTypeId}

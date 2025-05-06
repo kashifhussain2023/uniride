@@ -45,6 +45,26 @@ export default function RiderHistoryPage() {
     }
   };
 
+    const getRideHistoryDetail = async (request_id) => {
+      const response = await api({
+        method: 'GET',
+        url: `/customer/booking/ride-history-details?request_id=${request_id}`,
+      });
+      if (response.status === true) {
+        setHistoryDetailData(response.data);
+        setValue(response.data.rated || 0);
+      } else if (response.message === 'Invalid token code') {
+        await signOut({
+          redirect: false,
+        });
+        router.push('/login');
+      }
+    };
+  
+    useEffect(() => {
+      getRideHistoryDetail();
+    }, []);
+
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.push('/login');

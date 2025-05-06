@@ -35,7 +35,7 @@ export default function InRoute({
     }
   };
   const handleCallDriver = () => {
-    const phoneNumber = acceptDriverDetail?.driver_info.driver_phone; //'+1470-735-7308';
+    const phoneNumber = acceptDriverDetail?.driver_info.driver_number; //'+1470-735-7308';
     window.open(`tel:${phoneNumber}`, '_blank');
   };
   const handleOpenSOS = () => {
@@ -66,12 +66,13 @@ export default function InRoute({
     const response = await api({
       data: formData,
       method: 'POST',
-      url: '/customer/contacts/send_sos',
+      url: '/customer/booking/send-sos',
     });
-    if (response.status === '1') {
+
+    if (response.status === true) {
       setSosLoading(false);
       toast.info(response.message);
-    } else if (response.status === '0' && response.message === 'Invalid token code') {
+    } else if (response.status === false && response.message === 'Invalid token code') {
       toast.error(
         'Your account has been logged in on another device.Please login again to continue.'
       );
@@ -79,7 +80,7 @@ export default function InRoute({
         redirect: false,
       });
       router.push('/login');
-    } else if (response.status === '0') {
+    } else if (response.status === false) {
       setSosLoading(false);
       toast.info(response.message);
     } else {
@@ -87,8 +88,9 @@ export default function InRoute({
       toast.info(response.message);
     }
   };
+
   useEffect(() => {}, []);
-  console.log('acceptDriverDetail', acceptDriverDetail);
+
   return (
     <>
       <SpinnerLoader loading={sosLoading} />

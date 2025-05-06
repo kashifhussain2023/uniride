@@ -27,18 +27,27 @@ const LocationPickerMap = ({
   const [directions, setDirections] = useState(null);
   const [directionsKey, setDirectionsKey] = useState(0);
   const [routePath, setRoutePath] = useState([]);
+  const [openValueModel, setOpenValueModel] = useState(false);
+
+  const handleOpenValueModel = () => {
+    setOpenValueModel(true); // Open the LocationValueModel
+  };
+
   const resetMap = () => {
     // Increment the key to force remounting the map
     setDirectionsKey(prevKey => prevKey + 1);
   };
+
   const mapContainerStyle = {
     height: '100%',
     width: '100%',
   };
+
   const setLocationType = type => {
     dropPickLocationType(type);
     resetMap();
   };
+
   const handleMapClick = async e => {
     const clickedLocation = {
       lat: e.latLng.lat(),
@@ -461,8 +470,13 @@ const LocationPickerMap = ({
                 placeholder="Drop off"
                 name="drop_out"
                 value={dropCustomerLocation?.address || ''}
-                disabled={!selectRide}
+                // disabled={!selectRide}
+                disabled={rideStatus === 4 || rideStatus === 3 ? false : !selectRide}
                 autoComplete="off"
+                onClick={() => {
+                  setLocationType('drop');
+                  handleOpenValueModel();
+                }}
               />
             </DropField>
           </DropinOut>

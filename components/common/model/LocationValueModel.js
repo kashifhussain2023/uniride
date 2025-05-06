@@ -23,6 +23,7 @@ export default function LocationValueModel({
   userAuth,
   distance,
   duration,
+  confirmButtonText,
 }) {
   const [searchBox, setSearchBox] = useState(null);
   const [isCalculating, setIsCalculating] = useState(false);
@@ -189,8 +190,8 @@ export default function LocationValueModel({
             )}
             {distance && duration && (
               <DistanceDurationContainer>
-                <Typography variant="body1">Distance: {distance}</Typography>
-                <Typography variant="body1">Duration: {duration}</Typography>
+                <Typography variant="body1">Distance: {distance} KM</Typography>
+                <Typography variant="body1">Duration: {duration} Min</Typography>
               </DistanceDurationContainer>
             )}
           </DialogContentText>
@@ -201,7 +202,7 @@ export default function LocationValueModel({
               Cancel
             </Button>
             <Button onClick={actionFavorite} variant="contained">
-              Favorite Location
+              {confirmButtonText}
             </Button>
           </ButtonBox>
         </DialogActions>
