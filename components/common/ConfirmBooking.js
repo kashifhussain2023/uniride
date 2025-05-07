@@ -76,7 +76,7 @@ export default function ConfirmBooking({
       }
     }
   };
-  
+
   const removeCouponCode = async () => {
     setCouponActive(false);
     setCouponCode(null);
@@ -95,7 +95,7 @@ export default function ConfirmBooking({
     const originalAmount = parseFloat(comfirmBookingData.maximum_estimated_fare);
     return (originalAmount - discountAmount).toFixed(2);
   };
-  
+
   return (
     <>
       <SpinnerLoader loading={loading} />

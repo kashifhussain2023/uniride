@@ -22,28 +22,6 @@ export default function Dashboard() {
   const router = useRouter();
   const { type, lat, lng, address } = router.query;
   const { data: session, status } = useSession();
-  const [userAuth, setUserAuth] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  // Check authentication status
-  useEffect(() => {
-    const checkAuth = async () => {
-      if (status === 'loading') return;
-
-      if (status === 'unauthenticated') {
-        router.push('/login');
-        return;
-      }
-
-      if (session?.user) {
-        setUserAuth(session.user);
-      }
-
-      setIsLoading(false);
-    };
-
-    checkAuth();
-  }, [session, status, router]);
 
   let dLocation = '';
   let pLocation = '';
@@ -61,6 +39,9 @@ export default function Dashboard() {
       lng: parseFloat(lng),
     };
   }
+
+  const [userAuth, setUserAuth] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [loading, setLoading] = useState(false);
   const { carsList, setCarsList } = useCarContext();
   const [currentLocation, setCurrentLocation] = useState(dLocation || '');
@@ -101,6 +82,27 @@ export default function Dashboard() {
   const [_endRideData, _setEndRideData] = useState();
   const scheduleMsg =
     'Another ride is only possible after scheduled ride complete or scheduled ride cancel';
+  let isCalculatingPrice = false;
+
+  // Check authentication status
+  useEffect(() => {
+    const checkAuth = async () => {
+      if (status === 'loading') return;
+
+      if (status === 'unauthenticated') {
+        router.push('/login');
+        return;
+      }
+
+      if (session?.user) {
+        setUserAuth(session.user);
+      }
+
+      setIsLoading(false);
+    };
+
+    checkAuth();
+  }, [session, status, router]);
 
   const handleCarTypeId = carId => {
     setCarTypeId(carId);
@@ -113,6 +115,72 @@ export default function Dashboard() {
         pickup_lng: currentLocation.lng,
       };
       socketHelpers.getDriverLocation(requestData);
+    }
+  };
+
+  const calculateEstimationPrice = async () => {
+    console.log('Current Location:', currentLocation);
+    console.log('Drop Location:', dropLocation);
+    console.log('Car Type ID:', carTypeId);
+
+    if (isCalculatingPrice) return; // Prevent duplicate calls
+    isCalculatingPrice = true;
+
+    // Validate currentLocation
+    if (
+      !currentLocation ||
+      !currentLocation.address ||
+      !currentLocation.lat ||
+      !currentLocation.lng
+    ) {
+      toast.error('Pickup location is required.');
+      isCalculatingPrice = false;
+      return null;
+    }
+
+    if (!carTypeId) {
+      toast.error('Car type is required.');
+      isCalculatingPrice = false;
+      return null;
+    }
+
+    try {
+      const rideNow = {
+        car_type_id: carTypeId,
+        distance: String(distance || '6.8'),
+        dropoff: String(dropLocation.address),
+        dropoff_lat: String(dropLocation.lat),
+        dropoff_lng: String(dropLocation.lng),
+        is_scheduled: false,
+        pickup: String(currentLocation.address),
+        pickup_lat: String(currentLocation.lat),
+        pickup_lng: String(currentLocation.lng),
+        time: String(duration || '22'),
+      };
+
+      console.log('Sending payload to /socket/estimation-price:', rideNow);
+
+      const response = await api({
+        data: rideNow,
+        method: 'POST',
+        url: '/socket/estimation-price',
+      });
+
+      console.log('Response from /socket/estimation-price:', response);
+
+      if (response.status === true) {
+        isCalculatingPrice = false;
+        return response.data.maximum_estimated_fare;
+      } else {
+        toast.error(response.message || 'Failed to calculate price.');
+        isCalculatingPrice = false;
+        return null;
+      }
+    } catch (error) {
+      console.error('Error in calculateEstimationPrice:', error);
+      toast.error('An error occurred while calculating the price. Please try again.');
+      isCalculatingPrice = false;
+      return null;
     }
   };
 
@@ -343,6 +411,65 @@ export default function Dashboard() {
     );
   };
 
+  const handleUpdateLocation = () => {
+    if (!dropLocation || !acceptDriverDetail) {
+      toast.error('Drop location or ride details are missing.');
+      return;
+    }
+
+    const payload = {
+      ride_id: acceptDriverDetail.ride_id,
+      dropoff_lat: String(dropLocation.lat),
+      dropoff_lng: String(dropLocation.lng),
+      dropoff_name: String(dropLocation.address),
+      distance: String(distance || '6.8'),
+      time: String(duration || '22'),
+      car_type_id: carTypeId,
+    };
+
+    // Emit the update destination event
+    socketHelpers.updateDestination(payload, {
+      onSuccess: response => {
+        console.log('Destination updated successfully:', response);
+        setOpenValueModel(false);
+        toast.success(response.message || 'Drop location updated successfully.');
+      },
+      onError: error => {
+        console.error('Failed to update destination:', error);
+        toast.error(error.message || 'Failed to update drop location.');
+      },
+    });
+  };
+
+  // const handleUpdateLocation = () => {
+  //   if (!dropLocation || !acceptDriverDetail) {
+  //     toast.error('Drop location or ride details are missing.');
+  //     return;
+  //   }
+
+  //   const payload = {
+  //     ride_id: acceptDriverDetail.ride_id,
+  //     dropoff_lat: String(dropLocation.lat),
+  //     dropoff_lng: String(dropLocation.lng),
+  //     dropoff_name: String(dropLocation.address),
+  //     distance: String(distance || '6.8'),
+  //     time: String(duration || '22'),
+  //     car_type_id: carTypeId,
+  //   };
+
+  //   socketHelpers.updateDestination(payload, {
+  //     onSuccess: response => {
+  //       console.log('Destination updated successfully:', response);
+  //       setOpenValueModel(false);
+  //       toast.success(response.message || 'Drop location updated successfully.');
+  //     },
+  //     onError: error => {
+  //       console.error('Failed to update destination:', error);
+  //       toast.error(error.message || 'Failed to update drop location.');
+  //     },
+  //   });
+  // };
+
   const handleActionScheduleRide = () => {
     router.push('/schedule-ride');
   };
@@ -449,6 +576,21 @@ export default function Dashboard() {
     await socketHelpers.getRealtimeDriverLocation();
   };
 
+  const listenDestinationRequestStatus = async () => {
+    await socketHelpers.listeningDestinationRequestStatus();
+  };
+
+  const listeningChangeLocation = async () => {
+    await socketHelpers.trackingRide({
+      setLoading,
+      setDriverLocation,
+      setEndRideData,
+      setInRRoute,
+      setSelectRide,
+      setShowReview,
+    });
+  };
+
   useEffect(() => {
     // Set the ride type to regular
     socketHelpers.setCustomerRideType('regular');
@@ -469,6 +611,10 @@ export default function Dashboard() {
 
       // Get realtime location of driver
       getRealtimeDriverLocation();
+
+      listenDestinationRequestStatus();
+
+      listeningChangeLocation();
 
       // Get schedule ride detail
       //getScheduleRideDetail();
@@ -583,7 +729,7 @@ export default function Dashboard() {
               <LocationValueModel
                 open={openValueModel}
                 handleCloseModel={closeValueModel}
-                actionFavorite={handleFavoriteModelValue}
+                actionFavorite={rideStatus !== 3 ? handleFavoriteModelValue : handleUpdateLocation}
                 locationType={locationType}
                 dropPickLocation={getDropPickLocation}
                 currentLocation={currentLocation}
@@ -592,6 +738,8 @@ export default function Dashboard() {
                 duration={duration}
                 // confirmButtonText="Favorite Location"
                 confirmButtonText={rideStatus === 3 ? 'Confirm' : 'Favorite Location'}
+                calculateEstimationPrice={calculateEstimationPrice}
+                rideStatus={rideStatus}
               />
               <RightPannel>
                 <LocationPickerMap

@@ -62,20 +62,20 @@ export default function RiderInfo({
         scheduleRideStatus={scheduleRideStatus}
       />
       {selectRide ? (
-          <SelectRide
-            carsList={carsList}
-            handleSelectRide={handleSelectRide}
-            setCustomerRideType={setCustomerRideType}
-            handleCarTypeId={handleCarTypeId}
-            carTypeId={carTypeId}
-            setCarTypeId={setCarTypeId}
-            isAddDesignated={isAddDesignated}
-            carStatus={carStatus}
-            setAvgTime={setAvgTime}
-            setAvailableDriver={setAvailableDriver}
-            distance={distance}
-            duration={duration}
-          />
+        <SelectRide
+          carsList={carsList}
+          handleSelectRide={handleSelectRide}
+          setCustomerRideType={setCustomerRideType}
+          handleCarTypeId={handleCarTypeId}
+          carTypeId={carTypeId}
+          setCarTypeId={setCarTypeId}
+          isAddDesignated={isAddDesignated}
+          carStatus={carStatus}
+          setAvgTime={setAvgTime}
+          setAvailableDriver={setAvailableDriver}
+          distance={distance}
+          duration={duration}
+        />
       ) : comfirmBooking ? (
         <>
           <ConfirmBooking

@@ -19,6 +19,7 @@ const socketEvents = {
   REQUEST_RIDE_COMPLETENESS: 'requestRideCompleteness',
   REQUEST_SCHEDULE_RIDE_DETAILS: 'requestScheduleRideDetails',
   REQUEST_SENT: 'requestSent',
+  DESTINATION_REQUEST_STATUS: 'destinationRequestStatus',
   REQUEST_STATUS_CHANGED: 'requestStatusChanged',
   REQUEST_TIMEOUT: 'requestTimeOut',
   RESUME_CURRENT_RIDE: 'resumeCurrentRide',
@@ -27,6 +28,9 @@ const socketEvents = {
   SCHEDULE_REQUEST_SENT: 'scheduleRequestSent',
   SCHEDULE_RIDE_DETAILS_RESPONSE: 'scheduleRideDetailsResponse',
   SOCKET_SAVED: 'socketSaved',
+  UPDATE_DESTINATION_LOCATION: 'updateDestinationLocation',
+  UPDATE_DESTINATION_REQUEST: 'updateDestinationRequest',
+  CHANGE_LOCATION: 'trackRide',
 };
 
 // Debug flag - set to true to enable detailed logging
@@ -584,6 +588,53 @@ const socketService = new SocketService();
 
 // Basic socket helper functions
 const socketHelpers = {
+  async updateDestination(payload, { onSuccess, onError }) {
+    debugLog('Emitting updateDestinationRequest event', payload);
+
+    try {
+      socketService.emit(socketEvents.UPDATE_DESTINATION_LOCATION, payload);
+
+      socketService.on(socketEvents.UPDATE_DESTINATION_REQUEST, response => {
+        debugLog('Received updateDestinationRequest response', response);
+        if (response?.message) {
+          toast.success(response.message);
+        }
+        if (onSuccess) onSuccess(response);
+      });
+
+      socketService.on(socketEvents.ERROR, error => {
+        errorLog('Error in updateDestinationRequest', error);
+        toast.error(error.message || 'Failed to update destination.');
+        if (onError) onError(error);
+      });
+    } catch (error) {
+      errorLog('Error emitting updateDestinationRequest', error);
+      if (onError) onError(error);
+    }
+  },
+
+  async listeningDestinationRequestStatus() {
+    socketService.on(socketEvents.DESTINATION_REQUEST_STATUS, response => {
+      debugLog('Received destinationRequestStatus event:', response);
+      if (response && response.update_status === 1) {
+        toast.success(response.message || 'Destination request status updated successfully');
+
+        if (response.ride_id) {
+          debugLog('Emitting RESUME_CURRENT_RIDE event with rideId:', response.ride_id);
+          socketService.emit(socketEvents.RESUME_CURRENT_RIDE, { ride_id: response.ride_id });
+        }
+      } else {
+        toast.error(response.message || 'Failed to update destination request status');
+      }
+    });
+  },
+
+  async trackingRide() {
+    socketService.on(socketEvents.CHANGE_LOCATION, response => {
+      debugLog('Received changeLocation event:', response);
+    });
+  },
+
   // Apply coupon
   async applyCoupon(couponCode, userAuth) {
     try {

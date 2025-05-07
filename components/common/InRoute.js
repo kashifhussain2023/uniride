@@ -34,10 +34,12 @@ export default function InRoute({
       handleCancelRunningRide();
     }
   };
+
   const handleCallDriver = () => {
-    const phoneNumber = acceptDriverDetail?.driver_info.driver_number; //'+1470-735-7308';
+    const phoneNumber = acceptDriverDetail?.driver_twilio; //'+1470-735-7308';
     window.open(`tel:${phoneNumber}`, '_blank');
   };
+
   const handleOpenSOS = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -105,8 +107,8 @@ export default function InRoute({
             <Typography variant="subtitle2">
               {acceptDriverDetail?.driver_info.driver_name}
             </Typography>
-            Pin for this Trip:
-            <Typography variant="h2" component="h2">
+            <Typography variant="subtitle2"> Pin for this Trip:</Typography>
+            <Typography sx={{ fontSize: 28 }} variant="h2" component="h2">
               {acceptDriverDetail?.request_data.request_otp}
             </Typography>
             <Typography
@@ -119,6 +121,12 @@ export default function InRoute({
               {acceptDriverDetail?.driver_info.vehicle_model}
               {acceptDriverDetail?.driver_info.vehicle_type}
             </Typography>
+            <Typography variant="subtitle2">
+              <strong>Vehicle Number:</strong> {acceptDriverDetail?.driver_info.vehicle_no || 'N/A'}
+            </Typography>
+            <Typography variant="subtitle2">
+              <strong>Ride Type:</strong> {acceptDriverDetail?.ride_type || 'N/A'}
+            </Typography>
             <RatingStar>
               <StarIcon /> {acceptDriverDetail?.driver_info.driver_rating}
             </RatingStar>
@@ -126,9 +134,17 @@ export default function InRoute({
           {
             <DriverRight>
               <img src={`${acceptDriverDetail?.driver_info.vehicle_image}`} />
-              <div>
-                <img src={`${acceptDriverDetail?.driver_info.driver_image}`} />
-              </div>
+              <img
+                src={acceptDriverDetail.driver_info.driver_image || '/avatar.png'}
+                alt="Driver"
+                style={{
+                  borderRadius: '50%',
+                  boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)',
+                  objectFit: 'cover',
+                  width: '50px',
+                  height: '50px',
+                }}
+              />
             </DriverRight>
           }
         </DriverInfo>
@@ -203,6 +219,8 @@ const DriverInfo = styled.div`
     display: flex;
     align-items: center;
     justify-content: space-between;
+    padding: 10px;
+    background: #f6f7f8
   `}
 `;
 const DriverLeft = styled.div`
