@@ -441,35 +441,6 @@ export default function Dashboard() {
     });
   };
 
-  // const handleUpdateLocation = () => {
-  //   if (!dropLocation || !acceptDriverDetail) {
-  //     toast.error('Drop location or ride details are missing.');
-  //     return;
-  //   }
-
-  //   const payload = {
-  //     ride_id: acceptDriverDetail.ride_id,
-  //     dropoff_lat: String(dropLocation.lat),
-  //     dropoff_lng: String(dropLocation.lng),
-  //     dropoff_name: String(dropLocation.address),
-  //     distance: String(distance || '6.8'),
-  //     time: String(duration || '22'),
-  //     car_type_id: carTypeId,
-  //   };
-
-  //   socketHelpers.updateDestination(payload, {
-  //     onSuccess: response => {
-  //       console.log('Destination updated successfully:', response);
-  //       setOpenValueModel(false);
-  //       toast.success(response.message || 'Drop location updated successfully.');
-  //     },
-  //     onError: error => {
-  //       console.error('Failed to update destination:', error);
-  //       toast.error(error.message || 'Failed to update drop location.');
-  //     },
-  //   });
-  // };
-
   const handleActionScheduleRide = () => {
     router.push('/schedule-ride');
   };

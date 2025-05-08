@@ -590,18 +590,18 @@ const socketService = new SocketService();
 const socketHelpers = {
   async updateDestination(payload, { onSuccess, onError }) {
     debugLog('Emitting updateDestinationRequest event', payload);
-
+  
     try {
       socketService.emit(socketEvents.UPDATE_DESTINATION_LOCATION, payload);
-
+  
+      // Remove previous listeners to prevent duplicate toasts
+      socketService.removeAllListeners(socketEvents.UPDATE_DESTINATION_REQUEST);
+  
       socketService.on(socketEvents.UPDATE_DESTINATION_REQUEST, response => {
         debugLog('Received updateDestinationRequest response', response);
-        if (response?.message) {
-          toast.success(response.message);
-        }
         if (onSuccess) onSuccess(response);
       });
-
+  
       socketService.on(socketEvents.ERROR, error => {
         errorLog('Error in updateDestinationRequest', error);
         toast.error(error.message || 'Failed to update destination.');
@@ -613,19 +613,18 @@ const socketHelpers = {
     }
   },
 
-  async listeningDestinationRequestStatus() {
+  listeningDestinationRequestStatus(onStatus) {
+    // Remove previous listeners to prevent duplicate toasts
+    socketService.removeAllListeners(socketEvents.DESTINATION_REQUEST_STATUS);
+  
     socketService.on(socketEvents.DESTINATION_REQUEST_STATUS, response => {
       debugLog('Received destinationRequestStatus event:', response);
-      if (response && response.update_status === 1) {
-        toast.success(response.message || 'Destination request status updated successfully');
-
-        if (response.ride_id) {
-          debugLog('Emitting RESUME_CURRENT_RIDE event with rideId:', response.ride_id);
-          socketService.emit(socketEvents.RESUME_CURRENT_RIDE, { ride_id: response.ride_id });
-        }
+      if (response && response.message && response.update_status === 1) {
+        toast.success(response.message);
       } else {
-        toast.error(response.message || 'Failed to update destination request status');
+        toast.error(response.message);
       }
+      if (onStatus) onStatus(response);
     });
   },
 
