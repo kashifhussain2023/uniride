@@ -1,13 +1,7 @@
 import styled from '@emotion/styled';
 import { Typography } from '@mui/material';
 import TextField from '@mui/material/TextField';
-import {
-  DirectionsRenderer,
-  GoogleMap,
-  LoadScript,
-  MarkerF,
-  Polyline,
-} from '@react-google-maps/api';
+import { GoogleMap, LoadScript, MarkerF, Polyline } from '@react-google-maps/api';
 import { useEffect, useState } from 'react';
 const LocationPickerMap = ({
   currentLocation,
@@ -215,9 +209,11 @@ const LocationPickerMap = ({
   console.log({
     comfirmBooking: comfirmBooking,
     currentLocation: currentLocation,
+    directions: directions,
     distance: distance,
     driverLocation: driverLocation,
     dropCustomerLocation: dropCustomerLocation,
+    openValueModel: openValueModel,
     rideStatus: rideStatus,
   });
 

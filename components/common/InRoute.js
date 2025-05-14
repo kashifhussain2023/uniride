@@ -22,7 +22,6 @@ export default function InRoute({
   userAuth,
 }) {
   const [openCancelModel, setOpenCancelModel] = useState(false);
-  const [deleteMessage, setDeleteMessage] = useState('');
   const [sosLoading, setSosLoading] = useState(false);
   const [openSOS, setOpenSOS] = useState(false);
   const [sosLocation, setSosLocation] = useState({});
@@ -199,7 +198,6 @@ export default function InRoute({
           open={openCancelModel}
           handleClose={() => setOpenCancelModel(false)}
           actionCancel={cancelRide}
-          deleteMessage={deleteMessage}
         />
       </RouteDriver>
     </>

@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import Head from 'next/head';
-import { getSession } from 'next-auth/react';
 import styled from '@emotion/styled';
 import { Grid, Typography } from '@mui/material';
 import Layout from '@/components/common/Layout';

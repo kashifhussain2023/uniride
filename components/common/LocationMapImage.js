@@ -1,5 +1,4 @@
 import { GoogleMap, LoadScript, MarkerF } from '@react-google-maps/api';
-import { useEffect, useState } from 'react';
 
 const LocationMapImage = props => {
   const mapContainerStyle = {

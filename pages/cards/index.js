@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getSession, signOut, useSession } from 'next-auth/react';
+import { signOut, useSession } from 'next-auth/react';
 import Head from 'next/head';
 import ThemeProvider from '@/theme/ThemeProvider';
 import Layout from '@/components/common/Layout';

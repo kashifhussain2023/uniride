@@ -20,7 +20,6 @@ export default function LocationValueModel({
   dropPickLocation,
   currentLocation,
   dropLocation,
-  userAuth,
   distance,
   duration,
   confirmButtonText,

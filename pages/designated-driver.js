@@ -6,7 +6,7 @@ import SpinnerLoader from '@/components/common/SpinnerLoader';
 import LocationValueModel from '@/components/common/model/LocationValueModel';
 import MessageModel from '@/components/common/model/MessageModel';
 import InnerContent from '@/components/presentation/InnerContent';
-import { socketEvents, socketHelpers, socketService } from '@/components/presentation/SocketEvents';
+import { socketHelpers } from '@/components/presentation/SocketEvents';
 import ThemeProvider from '@/theme/ThemeProvider';
 import { api } from '@/utils/api/register';
 import styled from '@emotion/styled';
@@ -46,7 +46,6 @@ export default function Dashboard() {
   }, [session, status, router]);
 
   let dLocation = '';
-  let pLocation = '';
   if (type === 'drop' && lat && lng && address) {
     dLocation = {
       address: address,
@@ -54,13 +53,13 @@ export default function Dashboard() {
       lng: parseFloat(lng),
     };
   }
-  if (type === 'pickup' && lat && lng && address) {
-    pLocation = {
-      address: address,
-      lat: parseFloat(lat),
-      lng: parseFloat(lng),
-    };
-  }
+  // if (type === 'pickup' && lat && lng && address) {
+  //   pLocation = {
+  //     address: address,
+  //     lat: parseFloat(lat),
+  //     lng: parseFloat(lng),
+  //   };
+  // }
   const [loading, setLoading] = useState(false);
   const { carsList, setCarsList } = useCarContext();
   const [currentLocation, setCurrentLocation] = useState(dLocation || '');

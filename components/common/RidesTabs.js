@@ -43,7 +43,6 @@ function a11yProps(index) {
 export default function BasicTabs({
   carsList,
   handleSelectRide,
-  setCustomerRideType,
   handleCarTypeId,
   isAddDesignated,
   carStatus,
