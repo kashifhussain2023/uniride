@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import dayjs from 'dayjs';
-// import swal from 'sweetalert';
 import { styled } from '@mui/system';
 import {
   Box,
@@ -29,26 +28,23 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { useDropzone } from 'react-dropzone';
 import { MobileDatePicker } from '@mui/x-date-pickers';
-import DashboardLayout from '@/components/common/Layout';
-// import GenericHead from '@/components/generic/Head';
-import PageTitle from '@/components/common/PageTitle';
 import validator from 'validator';
 import {
   stepFieldsMap,
   transformErrorMessage,
   validateField,
 } from '@/utils/validations/driverValidator';
-// import { getWelcomeEmailTemplate } from '@/utils/emailTemplates';
-import ApiImage from '@/components/common/ApiImage';
 import { api } from '@/utils/api/common';
 import { toast } from 'react-toastify';
 import axiosInstance from '@/utils/api/axiosInstance';
 import Link from 'next/link';
+import CountrySelect from '@/components/common/CountrySelect';
 const steps = ['Personal Details', 'Vehicle Details', 'Insurance Details'];
 
 const AddDriver = () => {
   const router = useRouter();
   const [activeStep, setActiveStep] = useState(0);
+  const [countrycode, setCountryCode] = useState('+1');
   const [formValues, setFormValues] = useState({
     accept_terms: false,
     address: '',
@@ -74,7 +70,7 @@ const AddDriver = () => {
     middle_name: '',
     password: '',
     phone: null,
-    phone_code: '+1',
+    phone_code: countrycode,
     postal_code: '',
     profile_pic: null,
     second_name: '',
@@ -129,6 +125,16 @@ const AddDriver = () => {
     setErrors(prevErrors => ({
       ...prevErrors,
       state_id: '', // Clear the error for state_id
+    }));
+  };
+
+  const handleCountryCode = value => {
+    const updatedCountryCode = '+' + value;
+    setCountryCode(updatedCountryCode);
+
+    setFormValues(prev => ({
+      ...prev,
+      phone_code: updatedCountryCode,
     }));
   };
 
@@ -594,6 +600,8 @@ const AddDriver = () => {
               <Grid item xs={12} sm={4}>
                 <TextField
                   label="Phone no"
+                  name="phone"
+                  autoComplete="off"
                   fullWidth
                   variant="outlined"
                   value={formValues.phone || ''}
@@ -601,9 +609,10 @@ const AddDriver = () => {
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
-                        <Typography component="span" sx={{ color: '#000000de' }}>
-                          +1
-                        </Typography>
+                        <CountrySelect
+                          onCountryCode={handleCountryCode}
+                          countrycode={countrycode}
+                        />
                       </InputAdornment>
                     ),
                   }}
