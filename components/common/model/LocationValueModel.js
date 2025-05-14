@@ -140,10 +140,7 @@ export default function LocationValueModel({
   }, [open, dropLocation]);
 
   return (
-    <LoadScript
-      googleMapsApiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}
-      libraries={LIBRARIES}
-    >
+    <LoadScript googleMapsApiKey={process.env.GOOGLE_MAPS_API_KEY} libraries={LIBRARIES}>
       <Dialog
         open={open}
         onClose={handleCloseModel}

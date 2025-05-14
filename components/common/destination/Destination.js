@@ -9,6 +9,8 @@ import { useState } from 'react';
 import { toast } from 'react-toastify';
 import MessageModel from '../model/MessageModel';
 import SpinnerLoader from '../SpinnerLoader';
+import Image from 'next/image';
+
 export default function DestinationList({
   favoritelist,
   type,
@@ -118,7 +120,7 @@ export default function DestinationList({
                   handleLocation(favorite.fav_lat, favorite.fav_long, favorite.address)
                 }
               >
-                <img src="../mapIcon.png" alt="map icon" />
+                <Image src="/mapIcon.png" alt="Map icon" width={24} height={24} className="mr-2" />
                 <Typography variant="h3">{favorite.tag}</Typography>
                 <Typography variant="subtitle1">{favorite.address}</Typography>
               </Detail>

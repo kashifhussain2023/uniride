@@ -16,6 +16,8 @@ import CountrySelect from '@/components/common/CountrySelect';
 import { toast } from 'react-toastify';
 import SpinnerLoader from '@/components/common/SpinnerLoader';
 import { setCookie } from 'nookies';
+import Image from 'next/image';
+
 export default function Login() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -239,17 +241,27 @@ export default function Login() {
       <Layout>
         <LoginContainer>
           <Box>
-            <SignUpLeft>
-              <span>
-                {' '}
-                <img src="../taxiimg.png" />
-              </span>
-            </SignUpLeft>
-            <SignUpRight>
-              <span>
-                {' '}
-                <img src="../loginIcon.png" />
-              </span>
+            <LeftSide>
+              <Image
+                src="/taxiimg.png"
+                alt="Taxi illustration"
+                width={500}
+                height={300}
+                priority
+                className="w-full h-auto"
+              />
+            </LeftSide>
+            <RightSide>
+              <div className="text-center mb-8">
+                <Image
+                  src="/loginIcon.png"
+                  alt="Login icon"
+                  width={40}
+                  height={40}
+                  priority
+                  className="mb-4"
+                />
+              </div>
               <Typography
                 variant="h1"
                 sx={{
@@ -376,7 +388,7 @@ export default function Login() {
                   </Register>
                 </SignUpFt>
               </SignupForm>
-            </SignUpRight>
+            </RightSide>
 
             <div>
               {/* <h1>Custom Form Control Example</h1>
@@ -440,7 +452,7 @@ const Box = styled.div`
     }
   `}
 `;
-const SignUpLeft = styled.div`
+const LeftSide = styled.div`
   ${({ theme }) => `
     display: none;
     width: 266px;
@@ -476,7 +488,7 @@ const SignUpLeft = styled.div`
     }
   `}
 `;
-const SignUpRight = styled.div`
+const RightSide = styled.div`
   ${({ theme }) => `
     width: 100%;
     padding: 40px;

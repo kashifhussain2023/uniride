@@ -3,7 +3,7 @@ import axios from 'axios';
 import cookie from 'js-cookie';
 
 //const AUTH_KEY = cookie.get('userAuth');
-const API_BASE_URL = process.env.NEXT_PUBLIC_NEW_API_URL; //`http://127.0.0.1:8000/api`;
+const API_BASE_URL = process.env.NEW_API_URL; //`http://127.0.0.1:8000/api`;
 
 const headerValue = async () => {
   const TOKEN = cookie.get('token');

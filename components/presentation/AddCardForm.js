@@ -10,17 +10,19 @@ import { Button, Typography } from '@mui/material';
 import InputLabel from '@mui/material/InputLabel';
 import Grid from '@mui/material/Unstable_Grid2';
 import { CardElement, useElements, useStripe } from '@stripe/react-stripe-js';
-import { signOut, useSession } from 'next-auth/react';
+import { signOut } from 'next-auth/react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 import { toast } from 'react-toastify';
 import SpinnerLoader from '../common/SpinnerLoader';
+import Image from 'next/image';
+
 export default function AddCardForm() {
   const router = useRouter();
   const stripe = useStripe();
   const elements = useElements();
-  useSession();
+
   const [loading, setLoading] = useState(false);
   const [removeErrors, setRemoveErrors] = useState(false);
   const [cardError, setCardError] = useState('');
@@ -40,6 +42,7 @@ export default function AddCardForm() {
     // expiration_month: "",
     // expiration_year: "",
   });
+
   const handleCardDetail = event => {
     const brandName = event.brand.toUpperCase();
     setInputs(inputs => ({
@@ -47,6 +50,7 @@ export default function AddCardForm() {
       ['card_type']: brandName,
     }));
   };
+
   const handleInputChange = ({ target }) => {
     setInputs(inputs => ({
       ...inputs,
@@ -60,14 +64,17 @@ export default function AddCardForm() {
       });
     }
   };
+
   const handleSubmit = async e => {
     e.preventDefault();
     const inputForValidation = {
       card_holder: inputs.card_holder,
     };
+
     const validationErrors = cardValidation(inputForValidation);
     const noErrors = Object.keys(validationErrors).length === 0;
     setRemoveErrors(true);
+
     if (noErrors) {
       try {
         setLoading(true);
@@ -85,6 +92,7 @@ export default function AddCardForm() {
           card: cardElement,
           type: 'card',
         });
+
         if (paymentError) {
           console.error('Stripe payment method error:', paymentError);
           setCardError(paymentError.message);
@@ -102,30 +110,15 @@ export default function AddCardForm() {
           payment_method_id: paymentMethod.id,
           // customer_id: userAuth
         };
+
         const response = await api({
           data: requestBody,
           method: 'POST',
           url: '/customer/payments/add-card',
         });
+
         if (response.status === true) {
           toast.success(response.message || 'Card added successfully');
-
-          // Fetch updated profile data to get the latest default_payment_method status
-
-          // if (profileResponse.status === true) {
-          //   // Update session with new payment method status
-          //   if (session) {
-          //     await sessionUpdate({
-          //       user: {
-          //         ...session?.user,
-          //         data: {
-          //           ...session?.user?.data,
-          //           default_payment_method: profileResponse.data.default_payment_method
-          //         }
-          //       },
-          //     });
-          //   }
-          // }
 
           setTimeout(async () => {
             const profileResponse = await api({
@@ -159,6 +152,7 @@ export default function AddCardForm() {
       setErrors(validationErrors);
     }
   };
+
   return (
     <ThemeProvider>
       <Head>
@@ -235,7 +229,13 @@ export default function AddCardForm() {
               </Grid>
               <Grid lg={6} md={6} sm={12} xs={12}>
                 <AddPaymentImg>
-                  <img src="../addPayment.png" />
+                  <Image
+                    src="/addPayment.png"
+                    alt="Add payment"
+                    width={24}
+                    height={24}
+                    className="mr-2"
+                  />
                 </AddPaymentImg>
               </Grid>
             </Grid>

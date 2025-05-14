@@ -12,6 +12,8 @@ import { toast } from 'react-toastify';
 import SpinnerLoader from './SpinnerLoader';
 import CancelModel from './model/CancelModel';
 import MessageModel from './model/MessageModel';
+import Image from 'next/image';
+
 export default function InRoute({
   handleCancelModelInfo,
   acceptDriverDetail,
@@ -125,9 +127,21 @@ export default function InRoute({
           </DriverLeft>
           {
             <DriverRight>
-              <img src={`${acceptDriverDetail?.driver_info.vehicle_image}`} />
+              <Image
+                src={acceptDriverDetail?.driver_info.vehicle_image}
+                alt="Vehicle"
+                width={100}
+                height={100}
+                className="w-full h-auto"
+              />
               <div>
-                <img src={`${acceptDriverDetail?.driver_info.driver_image}`} />
+                <Image
+                  src={acceptDriverDetail?.driver_info.driver_image}
+                  alt="Driver"
+                  width={100}
+                  height={100}
+                  className="w-full h-auto"
+                />
               </div>
             </DriverRight>
           }

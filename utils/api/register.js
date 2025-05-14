@@ -3,11 +3,11 @@ import axios from 'axios';
 import { getSession } from 'next-auth/react';
 
 //const AUTH_KEY = cookie.get('userAuth');
-const API_BASE_URL = `${process.env.NEXT_PUBLIC_NEW_API_URL}`; //`http://127.0.0.1:8000/api`;
+const API_BASE_URL = `${process.env.NEW_API_URL}`; //`http://127.0.0.1:8000/api`;
 
 const headerValue = async () => {
   const session = await getSession();
-  const token = session?.user?.data?.token_code;
+  const token = session?.user?.token_code;
   const header = {
     Accept: 'application/json',
     Authorization: token ? `Bearer ${token}` : '',

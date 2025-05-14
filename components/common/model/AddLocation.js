@@ -15,6 +15,8 @@ import { useRouter } from 'next/router';
 import { useState } from 'react';
 import { toast } from 'react-toastify';
 import SpinnerLoader from '../SpinnerLoader';
+import Image from 'next/image';
+
 const AddLocation = ({ open, handleClose, userAuth, getFavoriteList }) => {
   const router = useRouter();
   const [searchPickupBox, setSearchPickupBox] = useState(null);
@@ -120,10 +122,7 @@ const AddLocation = ({ open, handleClose, userAuth, getFavoriteList }) => {
     }
   };
   return (
-    <LoadScript
-      googleMapsApiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}
-      libraries={LIBRARIES}
-    >
+    <LoadScript googleMapsApiKey={process.env.GOOGLE_MAPS_API_KEY} libraries={LIBRARIES}>
       <SpinnerLoader loading={loading} />
       <BootstrapDialog
         onClose={handleClose}
@@ -146,7 +145,13 @@ const AddLocation = ({ open, handleClose, userAuth, getFavoriteList }) => {
         </IconButton>
         <DialogContent>
           <LeftSection>
-            <img src="../locationImage.png" />
+            <Image
+              src="/locationImage.png"
+              alt="Location"
+              width={24}
+              height={24}
+              className="mr-2"
+            />
           </LeftSection>
           <RightSection>
             <PageTitle

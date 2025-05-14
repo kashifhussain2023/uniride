@@ -11,6 +11,7 @@ import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import SpinnerLoader from './SpinnerLoader';
 import TipAmountModel from './model/TipAmountModel';
+import Image from 'next/image';
 
 // Helper functions for formatting
 const formatDuration = duration => {
@@ -381,7 +382,7 @@ export default function Review({ acceptDriverDetail }) {
           <PageTitle title="Customer" subtitle="Review" images_icon={'../review.png'} />
           {rideResponse?.discount_total && rideResponse?.discount_applied === true && (
             <DiscountLabel>
-              <img src="../couponIcon.png" alt="Discount" />
+              <Image src="/couponIcon.png" alt="Discount" width={24} height={24} className="mr-2" />
               <Typography variant="h3" component="h3">
                 {rideResponse?.discount_total} discount applied
               </Typography>

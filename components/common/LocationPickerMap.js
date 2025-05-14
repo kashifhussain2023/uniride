@@ -55,7 +55,7 @@ const LocationPickerMap = ({
     };
     try {
       const response = await fetch(
-        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${clickedLocation.lat},${clickedLocation.lng}&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`
+        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${clickedLocation.lat},${clickedLocation.lng}&key=${process.env.GOOGLE_MAPS_API_KEY}`
       );
       const data = await response.json();
       if (data.status === 'OK' && data.results.length > 0) {
@@ -297,10 +297,7 @@ const LocationPickerMap = ({
   };
 
   return (
-    <LoadScript
-      googleMapsApiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}
-      libraries={LIBRARIES}
-    >
+    <LoadScript googleMapsApiKey={process.env.GOOGLE_MAPS_API_KEY} libraries={LIBRARIES}>
       <GoogleMap
         key={directionsKey}
         mapContainerStyle={mapContainerStyle}

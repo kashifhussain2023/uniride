@@ -13,6 +13,7 @@ const StyledInput = styled.input`
     height: ${props => props.height || 'auto'};
     font-weight: ${props => props.fontWeight || 'light'};
     color: ${theme.colors.palette.darkGrey};
+    background-color: ${theme.colors.palette.white};
     font-size: 16px;
 
     &::placeholder {

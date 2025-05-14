@@ -7,6 +7,8 @@ import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 import { styled } from '@mui/material/styles';
+import Image from 'next/image';
+
 const ConfirmBooking = ({ open, handleClose }) => {
   return (
     <BootstrapDialog
@@ -18,7 +20,13 @@ const ConfirmBooking = ({ open, handleClose }) => {
     >
       <DialogContent>
         <LeftSection>
-          <img src="../ConfirmBooking.png" />
+          <Image
+            src="/ConfirmBooking.png"
+            alt="Confirm booking"
+            width={24}
+            height={24}
+            className="mr-2"
+          />
         </LeftSection>
         <RightSection>
           <List>

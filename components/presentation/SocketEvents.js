@@ -119,38 +119,39 @@ class SocketService {
   }
 
   // Initialize the socket connection
-  async initialize() {
+  async initialize(userAuth) {
     // If already initialized, return the existing socket
     if (this.socket) {
-      debugLog('Socket already initialized, returning existing instance');
       return this.socket;
     }
 
     // If already initializing, wait for the initialization to complete
     if (this.isInitializing) {
-      debugLog('Socket initialization already in progress, waiting for completion');
       // Wait for a short time and check again
       await new Promise(resolve => setTimeout(resolve, 100));
-      return this.initialize();
+      return this.initialize(userAuth);
     }
 
     this.isInitializing = true;
-    debugLog('Initializing socket connection');
 
-    // Socket configuration
-    debugLog('Connecting to socket URL', 'https://pattisonedutechstore.24livehost.com/');
     try {
-      // Create query parameters with token
-      const query = this.authToken
-        ? {
-            token: `Bearer ${this.authToken}`,
-          }
-        : {};
-
-      this.socket = io('https://pattisonedutechstore.24livehost.com', {
-        path: '/socket.io',
-        query: query,
+      this.socket = io(process.env.NEXT_SOCKET_URL, {
+        autoConnect: true,
+        forceNew: true,
+        query: {
+          EIO: '3',
+          token: `Bearer ${userAuth.token_code}`,
+          user_type: 'customer',
+          userId: userAuth.customer_id,
+        },
+        reconnection: true,
+        reconnectionAttempts: 5,
+        reconnectionDelay: 1000,
+        reconnectionDelayMax: 5000,
+        rememberUpgrade: true,
+        timeout: 20000,
         transports: ['polling'],
+        upgrade: true,
       });
 
       // Set up event listeners
@@ -860,7 +861,7 @@ const socketHelpers = {
         socketService.on('connect_error', onConnectError);
 
         // Initialize the socket
-        socketService.initialize().catch(error => {
+        socketService.initialize(userAuth).catch(error => {
           errorLog('Socket initialization error', error);
           reject(error);
         });

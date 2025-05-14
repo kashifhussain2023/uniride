@@ -8,7 +8,7 @@ export async function middleware(request) {
   // Get the token and session data
   const token = await getToken({
     req: request,
-    secret: process.env.NEXT_PUBLIC_NEXTAUTH_SECRET,
+    secret: process.env.NEXTAUTH_SECRET,
   });
   console.log('token', token);
   // Special handling for verification page
@@ -44,7 +44,7 @@ export async function middleware(request) {
 
       // Fetch profile details for protected routes
       const profileResponse = await fetch(
-        `${process.env.NEXT_PUBLIC_NEW_API_URL}/customer/get-profile-details`,
+        `${process.env.NEW_API_URL}/customer/get-profile-details`,
         {
           headers: {
             Accept: 'application/json',
@@ -132,7 +132,7 @@ export async function middleware(request) {
       // Check if OTP is verified for logged-in users
       try {
         const profileResponse = await fetch(
-          `${process.env.NEXT_PUBLIC_NEW_API_URL}/customer/get-profile-details`,
+          `${process.env.NEW_API_URL}/customer/get-profile-details`,
           {
             headers: {
               Accept: 'application/json',

@@ -6,6 +6,8 @@ import StarIcon from '@mui/icons-material/Star';
 import { Button, Typography } from '@mui/material';
 import { useState } from 'react';
 import CancelModel from './model/CancelModel';
+import Image from 'next/image';
+
 export default function DriverArrived(handleCancelModelInfo, acceptDriverDetail, rideStatus) {
   //const router = useRouter();
   const [openCancelModel, setOpenCancelModel] = useState(false);
@@ -57,9 +59,21 @@ export default function DriverArrived(handleCancelModelInfo, acceptDriverDetail,
           </DriverLeft>
           {
             <DriverRight>
-              <img src={`${acceptDriverDetail?.vehicle_image}`} />
+              <Image
+                src={acceptDriverDetail?.vehicle_image}
+                alt="Vehicle"
+                width={100}
+                height={100}
+                className="w-full h-auto"
+              />
               <div>
-                <img src={`${acceptDriverDetail?.driver_image}`} />
+                <Image
+                  src={acceptDriverDetail?.driver_image}
+                  alt="Driver"
+                  width={100}
+                  height={100}
+                  className="w-full h-auto"
+                />
               </div>
             </DriverRight>
           }

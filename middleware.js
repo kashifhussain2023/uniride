@@ -1,16 +1,15 @@
-import { getDefaultAuthRedirect, getLoginPath, isAuthRoute, isPublicRoute } from '@/utils/routes';
+import { getLoginPath, isAuthRoute, isPublicRoute } from '@/utils/routes';
 import { getToken } from 'next-auth/jwt';
 import { NextResponse } from 'next/server';
+
 export async function middleware(request) {
   const { pathname } = request.nextUrl;
-  console.log('pathname', pathname);
 
   // Get the token and session data
   const token = await getToken({
     req: request,
-    secret: process.env.NEXT_PUBLIC_NEXTAUTH_SECRET,
+    secret: process.env.NEXTAUTH_SECRET,
   });
-  //console.log("token", token);
 
   // Special handling for verification page
   if (pathname === '/verification') {
@@ -23,43 +22,31 @@ export async function middleware(request) {
     return NextResponse.redirect(new URL(getLoginPath(), request.url));
   }
 
-  // Handle auth routes
-  //console.log("isAuthRoute", isAuthRoute(pathname));
   if (isAuthRoute(pathname)) {
     if (!token) {
-      //console.log('No token found, redirecting to login');
       return NextResponse.redirect(new URL(getLoginPath(), request.url));
     }
 
     try {
-      // Debug token
-      // console.log('Token data:', {
-      //     hasToken: !!token,
-      //     hasUser: !!token?.user,
-      //     hasData: !!token?.user?.data,
-      //     hasTokenCode: !!token?.user?.data?.token_code
-      // });
-
-      if (!token.user?.data?.token_code) {
+      // Check if we have the necessary token data
+      if (!token.user?.token_code) {
         console.error('Token code missing in session');
         return NextResponse.redirect(new URL(getLoginPath(), request.url));
       }
 
       // Fetch profile details for protected routes
       const profileResponse = await fetch(
-        `${process.env.NEXT_PUBLIC_NEW_API_URL}/customer/get-profile-details`,
+        `${process.env.NEW_API_URL}/customer/get-profile-details`,
         {
           headers: {
             Accept: 'application/json',
-            Authorization: `Bearer ${token.user.data.token_code}`,
+            Authorization: `Bearer ${token.user.token_code}`,
             'Content-Type': 'application/json',
             'x-login-method': 'jwt',
           },
           method: 'GET',
         }
       );
-
-      // Debug response
 
       if (!profileResponse.ok) {
         const errorText = await profileResponse.text();
@@ -72,10 +59,8 @@ export async function middleware(request) {
       }
 
       const profileData = await profileResponse.json();
-      //console.log('Profile Data:', JSON.stringify(profileData));
 
       if (!profileData.data) {
-        //console.error('Invalid profile data structure:', profileData);
         throw new Error('Invalid profile data received');
       }
 
@@ -86,17 +71,6 @@ export async function middleware(request) {
         response.cookies.set('redirectAfterVerification', pathname);
         return response;
       }
-      console.log('Profile profileData.data:', profileData.data);
-
-      // Handle specific route requirements
-      // if (pathname === '/uniride') {
-      //     console.log("profileData", profileData);
-      //     // Check if user needs to add payment method
-      //     if (!profileData.data.default_payment_method) {
-      //         console.log('Redirecting to add-card: No default payment method');
-      //         return NextResponse.redirect(new URL('/cards/add', request.url));
-      //     }
-      // }
 
       // Store profile data in request headers for use in the page
       const requestHeaders = new Headers(request.headers);
@@ -131,39 +105,14 @@ export async function middleware(request) {
       response.cookies.delete('registrationDetail');
       response.cookies.delete('redirectAfterVerification');
 
-      // If the error is related to an expired or invalid token, redirect to login
-      if (error.message.includes('401') || error.message.includes('403')) {
-        return response;
-      }
-
-      // For other errors, redirect to error page
-      return NextResponse.redirect(new URL('/error', request.url));
+      return response;
     }
   }
 
-  // For public routes, if user is logged in, redirect them to the dashboard
+  // For public routes, allow access
   if (isPublicRoute(pathname)) {
-    // If user is logged in, redirect to dashboard
-    if (token) {
-      //console.log('User is logged in, redirecting from public route to dashboard');
-      return NextResponse.redirect(new URL(getDefaultAuthRedirect(), request.url));
-    }
-
     return NextResponse.next();
   }
 
   return NextResponse.next();
 }
-
-export const config = {
-  matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - api (API routes)
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     */
-    '/((?!api|_next/static|_next/image|favicon.ico).*)',
-  ],
-};
