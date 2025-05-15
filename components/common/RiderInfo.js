@@ -98,13 +98,13 @@ export default function RiderInfo({
         </>
       ) : inRoute ? (
         // Render something for inRoute case
-          <InRoute
-            handleCancelModelInfo={handleCancelModelInfo}
-            handleCancelRunningRide={handleCancelRunningRide}
-            acceptDriverDetail={acceptDriverDetail}
-            userAuth={userAuth}
-            rideStatus={rideStatus}
-          />
+        <InRoute
+          handleCancelModelInfo={handleCancelModelInfo}
+          handleCancelRunningRide={handleCancelRunningRide}
+          acceptDriverDetail={acceptDriverDetail}
+          userAuth={userAuth}
+          rideStatus={rideStatus}
+        />
       ) : (
         ''
       )}

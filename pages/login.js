@@ -8,6 +8,7 @@ import styled from '@emotion/styled';
 import { useRouter } from 'next/router';
 import { toast } from 'react-toastify';
 import SpinnerLoader from '@/components/common/SpinnerLoader';
+import Image from 'next/image';
 import {
   Button,
   FormControl as MuiFormControl,
@@ -23,6 +24,7 @@ import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import { validateCustomer } from '@/utils/login';
 import CountrySelect from '@/components/common/CountrySelect';
 import CustomFormControl from '@/theme/CustomFormControl';
+
 export default function Login() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -43,15 +45,18 @@ export default function Login() {
       ...prev,
       [target.name]: target.value,
     }));
+
     const data = {
-      ...inputs,
       [target.name]: target.value,
     };
+
     setErrors(validateCustomer(data));
   };
+
   const handleCountryCode = value => {
     setCountryCode('+' + value);
   };
+
   const validateInputs = () => {
     if (!inputs.mobile) {
       toast.error('Mobile number is required');
@@ -63,28 +68,26 @@ export default function Login() {
     }
     return true;
   };
-  const handleLoginSuccess = async session => {
+
+  const handleLoginSuccess = async userData => {
     try {
-      if (!session?.user?.data) {
-        throw new Error('Invalid session data');
-      }
-      const userData = session.user.data;
-      console.log('userData', userData);
       const userProfile = {
         customer_id: userData.customer_id,
         email: userData.email,
         mobile_number: userData.mobile_number,
         name: userData.name,
+        phone_code: userData.phone_code,
       };
 
       // First check OTP verification status
       if (userData.otp_verified === 0) {
         setCookie(null, 'registrationDetail', JSON.stringify(userProfile), {
-          maxAge: 5 * 60,
-          // 5 minutes
+          maxAge: 5 * 60, // 5 minutes
           path: '/',
-          secure: true,
+          sameSite: 'lax',
+          secure: process.env.NODE_ENV === 'production',
         });
+
         toast.info('Please verify your OTP to continue.');
         router.push('/verification');
         return;
@@ -102,7 +105,8 @@ export default function Login() {
           }),
           {
             path: '/',
-            secure: true,
+            sameSite: 'lax',
+            secure: process.env.NODE_ENV === 'production',
           }
         );
         if (userData.default_payment_method === null) {
@@ -113,7 +117,7 @@ export default function Login() {
         }
       } else if (userData.profile_status === 3) {
         // User profile is complete, proceed to main app
-        toast.success(session.user.message || 'Login successful');
+        toast.success(userData.message || 'Login successful');
         router.push('/uniride');
       } else {
         throw new Error('Invalid profile status');
@@ -123,6 +127,7 @@ export default function Login() {
       toast.error('Error processing login response');
     }
   };
+
   const handleSubmit = async e => {
     e.preventDefault();
     try {
@@ -136,14 +141,17 @@ export default function Login() {
         phone_code: countrycode,
         redirect: false,
       });
+
       if (response?.error) {
         throw new Error(response.error);
       }
+
       const session = await getSession();
-      if (!session?.user?.data) {
+      if (!session?.user) {
         throw new Error('Invalid session data received');
       }
-      await handleLoginSuccess(session);
+
+      await handleLoginSuccess(session.user);
     } catch (error) {
       console.error('Login error:', error);
       toast.error(error.message || 'Login failed. Please try again.');
@@ -151,6 +159,7 @@ export default function Login() {
       setLoading(false);
     }
   };
+
   return (
     <ThemeProvider>
       <Head>
@@ -164,23 +173,50 @@ export default function Login() {
         <LoginContainer>
           <Box>
             <LeftSide>
-              <img src="../loginimg.png" alt="login" />
+              <Image
+                src="/loginimg.png"
+                alt="Login illustration"
+                width={500}
+                height={300}
+                priority
+                className="w-full h-auto"
+              />
               <LoginDesc>
                 <Welcome>Welcome to</Welcome>
-                <img src="../logo1.png" alt="logo" />
+                <Image
+                  src="/logo1.png"
+                  alt="Uniride logo"
+                  width={196}
+                  height={75}
+                  priority
+                  className="my-4"
+                />
                 <Typography variant="h4">
                   Our professionally trained drivers will make sure that the customers enjoy a safe
                   and reliable ride.
                 </Typography>
               </LoginDesc>
               <MobilePhone>
-                {' '}
-                <img src="../mobile.png" alt="mobile" />
+                <Image
+                  src="/mobile.png"
+                  alt="Mobile illustration"
+                  width={300}
+                  height={400}
+                  priority
+                  className="w-full h-auto"
+                />
               </MobilePhone>
             </LeftSide>
             <RightSide>
               <SignInHead>
-                <img src="../loginIcon.png" alt="login" />
+                <Image
+                  src="/loginIcon.png"
+                  alt="Login icon"
+                  width={40}
+                  height={40}
+                  priority
+                  className="mb-4"
+                />
                 <Typography
                   variant="h1"
                   sx={{
@@ -285,8 +321,8 @@ export async function getServerSideProps(context) {
     const session = await getSession(context);
 
     // If user is already logged in
-    if (session?.user?.data) {
-      const userData = session.user.data;
+    if (session?.user) {
+      const userData = session.user;
 
       // Redirect based on profile status
       switch (userData.profile_status) {

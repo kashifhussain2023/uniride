@@ -1,10 +1,10 @@
 /* eslint-disable no-console */
 import axios from 'axios';
 import { getSession } from 'next-auth/react';
-const API_BASE_URL = process.env.NEXT_PUBLIC_NEW_API_URL;
+const API_BASE_URL = process.env.NEW_API_URL;
 const headerValue = async () => {
   const session = await getSession();
-  const token = session?.user?.data?.token_code;
+  const token = session?.user?.token_code;
   const header = {
     Accept: 'application/json',
     Authorization: token ? `Bearer ${token}` : '',

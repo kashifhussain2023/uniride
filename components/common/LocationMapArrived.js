@@ -81,10 +81,7 @@ const LocationMapArrived = ({ currentLocation, driverLocation, centerMapLocation
     calculateDirections(driverLocation);
   }, [driverLocation]);
   return (
-    <LoadScript
-      googleMapsApiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}
-      libraries={LIBRARIES}
-    >
+    <LoadScript googleMapsApiKey={process.env.GOOGLE_MAPS_API_KEY} libraries={LIBRARIES}>
       <GoogleMap
         mapContainerStyle={mapContainerStyle}
         center={centerMapLocation}

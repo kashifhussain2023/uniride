@@ -8,9 +8,11 @@ import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 import { Radio, Typography } from '@mui/material';
+import Image from 'next/image';
+
 const SelectGender = ({ open, handleGenderClose, proceedGenderModel }) => {
   const [checked, setChecked] = React.useState('male');
-  
+
   const handleToggle = value => () => {
     setChecked(value);
   };
@@ -49,7 +51,13 @@ const SelectGender = ({ open, handleGenderClose, proceedGenderModel }) => {
           >
             preferred gender of driver
           </Typography>
-          <img src="../selctpreferred.png" />
+          <Image
+            src="/selctpreferred.png"
+            alt="Select preferred"
+            width={24}
+            height={24}
+            className="mr-2"
+          />
         </LeftSection>
         <RightSection>
           <List>

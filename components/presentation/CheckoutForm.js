@@ -16,6 +16,8 @@ import { useRouter } from 'next/router';
 import { useState } from 'react';
 import { toast } from 'react-toastify';
 import SpinnerLoader from '../common/SpinnerLoader';
+import Image from 'next/image';
+
 export default function AddPaymentInfo({ userAuth }) {
   const router = useRouter();
   const stripe = useStripe();
@@ -226,7 +228,13 @@ export default function AddPaymentInfo({ userAuth }) {
               </Grid>
               <Grid lg={6} md={6} sm={12} xs={12}>
                 <AddPaymentImg>
-                  <img src="../addPayment.png" />
+                  <Image
+                    src="/addPayment.png"
+                    alt="Add payment"
+                    width={24}
+                    height={24}
+                    className="mr-2"
+                  />
                 </AddPaymentImg>
               </Grid>
             </Grid>

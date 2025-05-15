@@ -5,7 +5,7 @@ import { useState } from 'react';
 import RideDetails from '../RideDetails';
 import SafeImage from '../SafeImage';
 
-export default function RiderHistory({ riderHistory, setSubTitle, historyDetailData }) {
+export default function RiderHistory({ riderHistory, setSubTitle }) {
   const [rideDetailStatus, setRideDetailStatus] = useState(true);
   const [rideDetail, setRideDetail] = useState();
 

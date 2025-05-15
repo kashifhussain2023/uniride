@@ -50,15 +50,12 @@ export const validateProfileCustomer = inputs => {
  * @returns {Promise<Object>} The profile data
  */
 export async function fetchProfileDetails(token) {
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_NEW_API_URL}/customer/get-profile-details`,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'x-login-method': 'jwt',
-      },
-    }
-  );
+  const response = await fetch(`${process.env.NEW_API_URL}/customer/get-profile-details`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'x-login-method': 'jwt',
+    },
+  });
   if (!response.ok) {
     throw new Error('Failed to fetch profile details');
   }

@@ -13,31 +13,89 @@ const headers = [
     key: 'Referrer-Policy',
     value: 'origin',
   },
-];
-const nextConfig = {
-  env: {
-    NEXT_PUBLIC_API_URL: 'https://www.unirideus.com/api',
-    NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: 'AIzaSyAOtGKS-WQKCVSgJgqXKdmorgzVrh-2JYM',
-    NEXT_PUBLIC_NEXTAUTH_SECRET: 'vZm2zMbZ6nDsns1Eik4fAg59yayyRa8L6/5FLmsje3c=',
-    NEXT_PUBLIC_STRIPE_PUBLIC_KEY: 'pk_test_yDgZEShai3aN7mhuouM2hUPG00Tyk0KRtu',
-    NEXTAUTH_URL: 'https://uniride.frontend:3000',
+  {
+    key: 'X-Frame-Options',
+    value: 'DENY',
   },
-  eslint: {
-    // Warning: This allows production builds to successfully complete even if
-    // your project has ESLint errors.
-    ignoreDuringBuilds: false,
+  {
+    key: 'X-XSS-Protection',
+    value: '1; mode=block',
+  },
+  {
+    key: 'Permissions-Policy',
+    value: 'camera=(), microphone=(), geolocation=(self "https://uniridesocket.24livehost.com")',
+  },
+];
+
+const nextConfig = {
+  compress: true,
+  env: {
+    API_URL: process.env.API_URL,
+    GOOGLE_MAPS_API_KEY: process.env.GOOGLE_MAPS_API_KEY,
+    NEW_API_URL: process.env.NEW_API_URL,
+    NEXT_SOCKET_URL: process.env.NEXT_SOCKET_URL,
+    NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
+    NEXTAUTH_URL: process.env.NEXTAUTH_URL,
+    STRIPE_PUBLIC_KEY: process.env.STRIPE_PUBLIC_KEY,
+  },
+  experimental: {
+    serverComponents: true,
   },
   async headers() {
     return [
       {
-        headers,
-        source: '/(.*)',
+        headers: [
+          ...headers,
+          {
+            key: 'Connection',
+            value: 'keep-alive',
+          },
+          {
+            key: 'Upgrade',
+            value: 'websocket',
+          },
+          {
+            key: 'Access-Control-Allow-Origin',
+            value: '*',
+          },
+          {
+            key: 'Access-Control-Allow-Methods',
+            value: 'GET,POST,OPTIONS',
+          },
+          {
+            key: 'Access-Control-Allow-Headers',
+            value: 'Content-Type, Authorization',
+          },
+          {
+            key: 'Access-Control-Allow-Credentials',
+            value: 'true',
+          },
+        ],
+        source: '/:path*',
       },
     ];
   },
   images: {
-    domains: ['localhost', 'unirideus-rebranding.24livehost.com'],
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
+    domains: ['localhost', 'unirideus-rebranding.24livehost.com', '192.168.8.176:3000'],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+    minimumCacheTTL: 60,
   },
-  reactStrictMode: false,
+  poweredByHeader: false,
+  reactStrictMode: true,
+  swcMinify: true,
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        dns: false,
+        fs: false,
+        net: false,
+        tls: false,
+      };
+    }
+    return config;
+  },
 };
+
 module.exports = nextConfig;

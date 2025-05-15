@@ -11,6 +11,8 @@ import { api } from './api/auth/register';
 import SpinnerLoader from '@/components/common/SpinnerLoader';
 import CountrySelect from '@/components/common/CountrySelect';
 import CustomFormControl from '@/theme/CustomFormControl';
+import Image from 'next/image';
+
 export default function ForgotPassword() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -92,24 +94,50 @@ export default function ForgotPassword() {
         <LoginContainer>
           <Box>
             <LeftSide>
-              <img src="../loginimg.png" />
+              <Image
+                src="/loginimg.png"
+                alt="Login illustration"
+                width={500}
+                height={300}
+                priority
+                className="w-full h-auto"
+              />
               <LoginDesc>
                 <Welcome>Welcome to</Welcome>
-                <img src="../logo1.png" />
+                <Image
+                  src="/logo1.png"
+                  alt="Uniride logo"
+                  width={196}
+                  height={75}
+                  priority
+                  className="my-4"
+                />
                 <Typography variant="h4">
                   Our professionally trained drivers will make sure that the customers enjoy a safe
                   and reliable ride.
                 </Typography>
               </LoginDesc>
-
               <MobilePhone>
-                {' '}
-                <img src="../mobile.png" />
+                <Image
+                  src="/mobile.png"
+                  alt="Mobile illustration"
+                  width={300}
+                  height={400}
+                  priority
+                  className="w-full h-auto"
+                />
               </MobilePhone>
             </LeftSide>
             <RightSide>
               <SignInHead>
-                <img src="../loginIcon.png" />
+                <Image
+                  src="/loginIcon.png"
+                  alt="Login icon"
+                  width={40}
+                  height={40}
+                  priority
+                  className="mb-4"
+                />
                 <Typography
                   variant="h1"
                   sx={{

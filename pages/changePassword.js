@@ -19,6 +19,8 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 import { toast } from 'react-toastify';
+import SafeImage from '@/components/common/SafeImage';
+
 export default function ChangePassword({ userAuth }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -34,9 +36,9 @@ export default function ChangePassword({ userAuth }) {
   });
   const [removeErrors, setRemoveErrors] = useState(false);
   const [showPassword, setShowPassword] = useState({
-    old_password: false,
-    new_password: false,
     confirm_password: false,
+    new_password: false,
+    old_password: false,
   });
 
   const handleClickShowPassword = field => {
@@ -126,7 +128,14 @@ export default function ChangePassword({ userAuth }) {
           <Box>
             <RightSide>
               <SignInHead>
-                <img src="../loginIcon.png" />
+                <SafeImage
+                  src="/loginIcon.png"
+                  alt="Login icon"
+                  width={40}
+                  height={40}
+                  priority
+                  className="mb-4"
+                />
                 <Typography
                   variant="h2"
                   sx={{
@@ -152,11 +161,6 @@ export default function ChangePassword({ userAuth }) {
                   value={inputs.old_password}
                   onChange={handleInputChange}
                   InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <Lock />
-                      </InputAdornment>
-                    ),
                     endAdornment: (
                       <InputAdornment position="end">
                         <IconButton
@@ -166,6 +170,11 @@ export default function ChangePassword({ userAuth }) {
                         >
                           {showPassword.old_password ? <Visibility /> : <VisibilityOff />}
                         </IconButton>
+                      </InputAdornment>
+                    ),
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <Lock />
                       </InputAdornment>
                     ),
                   }}
@@ -188,11 +197,6 @@ export default function ChangePassword({ userAuth }) {
                   value={inputs.new_password}
                   onChange={handleInputChange}
                   InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <Lock />
-                      </InputAdornment>
-                    ),
                     endAdornment: (
                       <InputAdornment position="end">
                         <IconButton
@@ -202,6 +206,11 @@ export default function ChangePassword({ userAuth }) {
                         >
                           {showPassword.new_password ? <Visibility /> : <VisibilityOff />}
                         </IconButton>
+                      </InputAdornment>
+                    ),
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <Lock />
                       </InputAdornment>
                     ),
                   }}
@@ -224,11 +233,6 @@ export default function ChangePassword({ userAuth }) {
                   value={inputs.confirm_password}
                   onChange={handleInputChange}
                   InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <Lock />
-                      </InputAdornment>
-                    ),
                     endAdornment: (
                       <InputAdornment position="end">
                         <IconButton
@@ -238,6 +242,11 @@ export default function ChangePassword({ userAuth }) {
                         >
                           {showPassword.confirm_password ? <Visibility /> : <VisibilityOff />}
                         </IconButton>
+                      </InputAdornment>
+                    ),
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <Lock />
                       </InputAdornment>
                     ),
                   }}

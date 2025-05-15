@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import styled from '@emotion/styled';
 import { Link, Typography } from '@mui/material';
+import Image from 'next/image';
 import RidesFareDialog from './RidesFareDialog';
 export default function RidesCards({
   carsList,
@@ -67,13 +68,14 @@ export default function RidesCards({
               >
                 <Link>
                   <Cars className={'cars' + index}>
-                    <img
+                    <Image
                       src={car.list_car_image}
-                      style={{
-                        height: '60px',
-                        width: '60px',
-                      }}
+                      width={60}
+                      height={60}
                       alt="car image"
+                      style={{
+                        objectFit: 'contain',
+                      }}
                     />
                   </Cars>
                   <CarsDescription>{car.name}</CarsDescription>

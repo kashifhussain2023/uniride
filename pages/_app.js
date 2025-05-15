@@ -13,10 +13,10 @@ const App = ({ Component, pageProps }) => {
         <CssBaseline />
         <ToastContainer
           sx={{
-            zIndex: 9999,
             '& .Toastify__toast-container': {
               zIndex: 9999,
             },
+            zIndex: 9999,
           }}
         />
         <CarProvider>

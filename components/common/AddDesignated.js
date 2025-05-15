@@ -6,7 +6,6 @@ import { DatePickerWrapper, TimePickerWrapper } from './DatePickerWrapper';
 import SafeImage from './SafeImage';
 
 const AddDesignated = ({
-  rideStatus,
   saveDateTime,
   setSaveDateTime,
   selectedDate,

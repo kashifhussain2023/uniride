@@ -1,5 +1,4 @@
 import { GoogleMap, LoadScript, MarkerF } from '@react-google-maps/api';
-import { useEffect, useState } from 'react';
 
 const LocationMapImage = props => {
   const mapContainerStyle = {
@@ -12,7 +11,7 @@ const LocationMapImage = props => {
     lng: parseFloat(props.locationLng) || 0,
   };
   return (
-    <LoadScript googleMapsApiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}>
+    <LoadScript googleMapsApiKey={process.env.GOOGLE_MAPS_API_KEY}>
       <GoogleMap
         mapContainerStyle={mapContainerStyle}
         center={defaultCenter}

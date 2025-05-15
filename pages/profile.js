@@ -4,6 +4,7 @@ import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { setCookie } from 'nookies';
 import { toast } from 'react-toastify';
+import Image from 'next/image';
 
 import styled from '@emotion/styled';
 
@@ -21,7 +22,6 @@ import ThemeProvider from '@/theme/ThemeProvider';
 
 import { api } from '@/utils/api/common';
 import { validateProfileCustomer } from '@/utils/profile';
-import SafeImage from '@/components/common/SafeImage';
 
 const Profile = () => {
   const router = useRouter();
@@ -268,7 +268,7 @@ const Profile = () => {
               </ProfileHead>
 
               <ProfileImg>
-                <SafeImage
+                <Image
                   src={
                     profileImage
                       ? URL.createObjectURL(profileImage)
@@ -279,18 +279,21 @@ const Profile = () => {
                   height={130}
                   className="rounded-full"
                   id="preview"
+                  quality={90}
+                  priority
                 />
                 <span>
                   {!disabled && (
                     <BrowseButn>
                       <Button>
-                        <SafeImage src="../edit.png" alt="Edit" width={22} height={22} />
+                        <Image src="/edit.png" alt="Edit profile" width={22} height={22} priority />
                       </Button>
                       <input
                         type="file"
                         name="profile_picture"
                         onChange={handleInputChange}
                         disabled={disabled}
+                        accept="image/*"
                       />
                     </BrowseButn>
                   )}

@@ -5,7 +5,7 @@ import LargeInnerContent from '@/components/presentation/LargeInnerContent';
 import ThemeProvider from '@/theme/ThemeProvider';
 import { api } from '@/utils/api/common';
 import styled from '@emotion/styled';
-import { useSession } from 'next-auth/react';
+import { signOut, useSession } from 'next-auth/react';
 import Head from 'next/head';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
@@ -45,25 +45,25 @@ export default function RiderHistoryPage() {
     }
   };
 
-    const getRideHistoryDetail = async (request_id) => {
-      const response = await api({
-        method: 'GET',
-        url: `/customer/booking/ride-history-details?request_id=${request_id}`,
+  const getRideHistoryDetail = async request_id => {
+    const response = await api({
+      method: 'GET',
+      url: `/customer/booking/ride-history-details?request_id=${request_id}`,
+    });
+    if (response.status === true) {
+      // setHistoryDetailData(response.data);
+      // setValue(response.data.rated || 0);
+    } else if (response.message === 'Invalid token code') {
+      await signOut({
+        redirect: false,
       });
-      if (response.status === true) {
-        setHistoryDetailData(response.data);
-        setValue(response.data.rated || 0);
-      } else if (response.message === 'Invalid token code') {
-        await signOut({
-          redirect: false,
-        });
-        router.push('/login');
-      }
-    };
-  
-    useEffect(() => {
-      getRideHistoryDetail();
-    }, []);
+      router.push('/login');
+    }
+  };
+
+  useEffect(() => {
+    getRideHistoryDetail();
+  }, []);
 
   useEffect(() => {
     if (status === 'unauthenticated') {

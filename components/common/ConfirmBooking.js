@@ -6,6 +6,8 @@ import { Button, List, ListItem, TextField, Typography } from '@mui/material';
 import { useState } from 'react';
 import { toast } from 'react-toastify';
 import SpinnerLoader from './SpinnerLoader';
+import Image from 'next/image';
+
 export default function ConfirmBooking({
   currentLocation,
   handleComfirmBooking,
@@ -104,7 +106,7 @@ export default function ConfirmBooking({
       <RouteDriver>
         <BookingCarInfo>
           <CarImg>
-            <img src="../car.png" />
+            <Image src="/car.png" alt="Car" width={24} height={24} className="mr-2" />
           </CarImg>
           <div>
             {/* <Typography variant="subtitle3">
@@ -137,7 +139,7 @@ export default function ConfirmBooking({
               <BookingLabel>Payment Method</BookingLabel>
               <Details>Card</Details>
               <BookingIcon>
-                <img src="../cardIcon.png" />
+                <Image src="/cardIcon.png" alt="Card" width={24} height={24} className="mr-2" />
               </BookingIcon>
             </ListItem>
             <ListItem>
@@ -148,7 +150,13 @@ export default function ConfirmBooking({
                     Apply promo code
                   </PromoButton>
                   <BookingIcon>
-                    <img src="../couponIcon.png" />
+                    <Image
+                      src="/couponIcon.png"
+                      alt="Coupon"
+                      width={24}
+                      height={24}
+                      className="mr-2"
+                    />
                   </BookingIcon>
                 </>
               ) : codeStatus ? (
@@ -204,7 +212,13 @@ export default function ConfirmBooking({
                   : '1-' + (comfirmBookingData?.total_passengers || 3)}
               </Details>
               <BookingIcon>
-                <img src="../passenger.png" />
+                <Image
+                  src="/passenger.png"
+                  alt="Passenger"
+                  width={24}
+                  height={24}
+                  className="mr-2"
+                />
               </BookingIcon>
             </ListItem>
           </List>

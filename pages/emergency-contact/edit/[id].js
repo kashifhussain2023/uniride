@@ -16,6 +16,8 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
+import SafeImage from '@/components/common/SafeImage';
+
 export default function EditEmergencyContact() {
   const router = useRouter();
   const { id } = router.query;
@@ -219,7 +221,14 @@ export default function EditEmergencyContact() {
               </ButtonContainer>
             </LeftSection>
             <RightSection>
-              <img src="../../contract.png" />
+              <SafeImage
+                src="/contract.png"
+                alt="Contract icon"
+                width={40}
+                height={40}
+                priority
+                className="mb-4"
+              />
             </RightSection>
           </EmergencyContact>
         </SmallContent>

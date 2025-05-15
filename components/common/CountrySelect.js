@@ -1,6 +1,7 @@
 import styled from '@emotion/styled';
 import Autocomplete from '@mui/material/Autocomplete';
 import TextField from '@mui/material/TextField';
+import Image from 'next/image';
 export default function CountrySelect({ onCountryCode, countrycode, disabled }) {
   // Find the country option that matches the countrycode
   const findDefaultCountry = () => {
@@ -58,12 +59,12 @@ export default function CountrySelect({ onCountryCode, countrycode, disabled }) 
               overflow: 'visible',
             }}
           >
-            <img
+            <Image
               loading="lazy"
-              width="20"
+              width={20}
+              height={15}
               src={`https://flagcdn.com/w20/${option.code.toLowerCase()}.png`}
-              srcSet={`https://flagcdn.com/w40/${option.code.toLowerCase()}.png 2x`}
-              alt=""
+              alt={`${option.label} flag`}
             />
             {option.label} ({option.code}) +{option.phone}
           </CountryDropdown>
