@@ -1,5 +1,6 @@
+import { useEffect, useState } from 'react';
 import styled from '@emotion/styled';
-import { Typography } from '@mui/material';
+import { IconButton, InputAdornment, Typography } from '@mui/material';
 import TextField from '@mui/material/TextField';
 import { GoogleMap, LoadScript, MarkerF, Polyline } from '@react-google-maps/api';
 import { useEffect, useState } from 'react';
@@ -328,6 +329,12 @@ const LocationPickerMap = ({
               lat: parseFloat(currentLocation.lat),
               lng: parseFloat(currentLocation.lng),
             }}
+            label={{
+              text: 'Pickup',
+              color: 'green',
+              fontWeight: 'bold',
+              marginBottom: '30px',
+            }}
           />
         )}
 
@@ -337,6 +344,12 @@ const LocationPickerMap = ({
             position={{
               lat: parseFloat(dropCustomerLocation.lat),
               lng: parseFloat(dropCustomerLocation.lng),
+            }}
+            label={{
+              text: 'Drop-Off',
+              color: 'red',
+              fontWeight: 'bold',
+              marginBottom: '30px',
             }}
           />
         )}
@@ -470,6 +483,23 @@ const LocationPickerMap = ({
                   setLocationType('drop');
                   handleOpenValueModel();
                 }}
+                InputProps={
+                  (rideStatus === 4 || rideStatus === 3) && {
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          onClick={() => {
+                            setLocationType('drop');
+                            handleOpenValueModel();
+                          }}
+                          edge="end"
+                        >
+                          <EditIcon />
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }
+                }
               />
             </DropField>
           </DropinOut>

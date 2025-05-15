@@ -35,10 +35,12 @@ export default function InRoute({
       handleCancelRunningRide();
     }
   };
+
   const handleCallDriver = () => {
-    const phoneNumber = acceptDriverDetail?.driver_info.driver_number; //'+1470-735-7308';
+    const phoneNumber = acceptDriverDetail?.driver_twilio; //'+1470-735-7308';
     window.open(`tel:${phoneNumber}`, '_blank');
   };
+
   const handleOpenSOS = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -106,8 +108,8 @@ export default function InRoute({
             <Typography variant="subtitle2">
               {acceptDriverDetail?.driver_info.driver_name}
             </Typography>
-            Pin for this Trip:
-            <Typography variant="h2" component="h2">
+            <Typography variant="subtitle2"> Pin for this Trip:</Typography>
+            <Typography sx={{ fontSize: 28 }} variant="h2" component="h2">
               {acceptDriverDetail?.request_data.request_otp}
             </Typography>
             <Typography
@@ -119,6 +121,12 @@ export default function InRoute({
               {acceptDriverDetail?.driver_info.vehicle_make}{' '}
               {acceptDriverDetail?.driver_info.vehicle_model}
               {acceptDriverDetail?.driver_info.vehicle_type}
+            </Typography>
+            <Typography variant="subtitle2">
+              <strong>Vehicle Number:</strong> {acceptDriverDetail?.driver_info.vehicle_no || 'N/A'}
+            </Typography>
+            <Typography variant="subtitle2">
+              <strong>Ride Type:</strong> {acceptDriverDetail?.ride_type || 'N/A'}
             </Typography>
             <RatingStar>
               <StarIcon /> {acceptDriverDetail?.driver_info.driver_rating}
@@ -215,6 +223,8 @@ const DriverInfo = styled.div`
     display: flex;
     align-items: center;
     justify-content: space-between;
+    padding: 10px;
+    background: #f6f7f8
   `}
 `;
 const DriverLeft = styled.div`

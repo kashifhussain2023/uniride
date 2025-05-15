@@ -23,14 +23,16 @@ export default function LocationValueModel({
   distance,
   duration,
   confirmButtonText,
+  rideStatus,
+  calculateEstimationPrice,
 }) {
   const [searchBox, setSearchBox] = useState(null);
   const [isCalculating, setIsCalculating] = useState(false);
   const [searchInput, setSearchInput] = useState('');
   const [error, setError] = useState('');
+  const [price, setPrice] = useState(null);
 
   const handleSearchBoxLoad = ref => {
-    console.log('ref', ref);
     setSearchBox(ref);
   };
 
@@ -114,6 +116,17 @@ export default function LocationValueModel({
       dropPickLocation(newLocation, distanceValue, durationValue);
       // handleCloseModel();
       setSearchInput(newLocation.address);
+
+      if (rideStatus === 3) {
+        setIsCalculating(true);
+        const calculatedPrice = await calculateEstimationPrice(
+          currentLocation,
+          newLocation,
+          distance,
+          duration
+        );
+        setPrice(calculatedPrice);
+      }
     } catch (error) {
       console.error('Error getting places:', error);
       setError('Error processing location. Please try again.');
@@ -127,16 +140,18 @@ export default function LocationValueModel({
   };
 
   useEffect(() => {
-    if (open) {
-      if (dropLocation) {
-        setSearchInput(dropLocation.address);
-      } else {
-        setSearchInput('');
+    if (open && currentLocation && dropLocation) {
+      setIsCalculating(true);
+      if (rideStatus === 3) {
+        calculateEstimationPrice(currentLocation, dropLocation, distance, duration).then(
+          calculatedPrice => {
+            setPrice(calculatedPrice);
+            setIsCalculating(false);
+          }
+        );
       }
-      setIsCalculating(false);
-      setError('');
     }
-  }, [open, dropLocation]);
+  }, [open, currentLocation, dropLocation]);
 
   return (
     <LoadScript googleMapsApiKey={process.env.GOOGLE_MAPS_API_KEY} libraries={LIBRARIES}>
@@ -179,16 +194,16 @@ export default function LocationValueModel({
               </StandaloneSearchBox>
             </SearchBoxContainer>
             {error && <div style={{ color: 'red', marginTop: '8px' }}>{error}</div>}
-            {isCalculating && (
-              <div style={{ marginTop: '8px', textAlign: 'center' }}>
-                Calculating distance and duration...
-              </div>
-            )}
             {distance && duration && (
               <DistanceDurationContainer>
                 <Typography variant="body1">Distance: {distance} KM</Typography>
                 <Typography variant="body1">Duration: {duration} Min</Typography>
               </DistanceDurationContainer>
+            )}
+            {(rideStatus === 4 || rideStatus === 3) && price !== null && distance && duration && (
+              <Typography variant="body1">
+                Estimated Price: {price !== null ? `$ ${price}` : 'Calculating...'}
+              </Typography>
             )}
           </DialogContentText>
         </DialogContent>
