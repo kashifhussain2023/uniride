@@ -230,11 +230,10 @@ export default function AddCardForm() {
               <Grid lg={6} md={6} sm={12} xs={12}>
                 <AddPaymentImg>
                   <Image
-                    src="/addPayment.png"
-                    alt="Add payment"
-                    width={24}
-                    height={24}
-                    className="mr-2"
+                    src={`${process.env.NEXTAUTH_URL}/addPayment.png`}
+                    alt="Add Payment"
+                    width={30}
+                    height={30}
                   />
                 </AddPaymentImg>
               </Grid>

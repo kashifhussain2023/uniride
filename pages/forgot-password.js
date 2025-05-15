@@ -95,7 +95,7 @@ export default function ForgotPassword() {
           <Box>
             <LeftSide>
               <Image
-                src="/loginimg.png"
+                src={`${process.env.NEXTAUTH_URL}/loginimg.png`}
                 alt="Login illustration"
                 width={500}
                 height={300}
@@ -105,7 +105,7 @@ export default function ForgotPassword() {
               <LoginDesc>
                 <Welcome>Welcome to</Welcome>
                 <Image
-                  src="/logo1.png"
+                  src={`${process.env.NEXTAUTH_URL}/logo1.png`}
                   alt="Uniride logo"
                   width={196}
                   height={75}
@@ -119,7 +119,7 @@ export default function ForgotPassword() {
               </LoginDesc>
               <MobilePhone>
                 <Image
-                  src="/mobile.png"
+                  src={`${process.env.NEXTAUTH_URL}/mobile.png`}
                   alt="Mobile illustration"
                   width={300}
                   height={400}
@@ -131,7 +131,7 @@ export default function ForgotPassword() {
             <RightSide>
               <SignInHead>
                 <Image
-                  src="/loginIcon.png"
+                  src={`${process.env.NEXTAUTH_URL}/loginIcon.png`}
                   alt="Login icon"
                   width={40}
                   height={40}

@@ -20,7 +20,12 @@ export default function RideDetails({ rideDetail, setRideDetailStatus, setSubTit
         <Stack spacing={2}>
           <Stack direction="row" spacing={2}>
             <Box>
-              <SafeImage src="/map.png" alt="map" width={30} height={30} />
+              <SafeImage
+                src={`${process.env.NEXTAUTH_URL}/map.png`}
+                alt="map"
+                width={30}
+                height={30}
+              />
             </Box>
             <Box>
               <Typography

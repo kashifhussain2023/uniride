@@ -67,7 +67,11 @@ export default function Layout({ children }) {
       />
 
       <Main>
-        {session && session.user.status === true ? <TopBar setOpenDelete={setOpenDelete} /> : ''}
+        {session && session.user.profile_status === 1 ? (
+          <TopBar setOpenDelete={setOpenDelete} />
+        ) : (
+          ''
+        )}
         <Middle>{children}</Middle>
         <CopyRight />
       </Main>

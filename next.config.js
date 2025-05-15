@@ -77,7 +77,12 @@ const nextConfig = {
   },
   images: {
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
-    domains: ['localhost', 'unirideus-rebranding.24livehost.com', '192.168.8.176:3000'],
+    domains: [
+      'localhost',
+      'unirideus-rebranding.24livehost.com',
+      '192.168.8.176',
+      'unirideusadmin.24livehost.com',
+    ],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     minimumCacheTTL: 60,
   },

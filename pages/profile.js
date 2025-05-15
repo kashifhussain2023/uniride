@@ -286,7 +286,13 @@ const Profile = () => {
                   {!disabled && (
                     <BrowseButn>
                       <Button>
-                        <Image src="/edit.png" alt="Edit profile" width={22} height={22} priority />
+                        <Image
+                          src={`${process.env.NEXTAUTH_URL}/edit.png`}
+                          alt="Edit profile"
+                          width={22}
+                          height={22}
+                          priority
+                        />
                       </Button>
                       <input
                         type="file"

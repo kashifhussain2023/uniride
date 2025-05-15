@@ -52,7 +52,7 @@ const SelectGender = ({ open, handleGenderClose, proceedGenderModel }) => {
             preferred gender of driver
           </Typography>
           <Image
-            src="/selctpreferred.png"
+            src={`${process.env.NEXTAUTH_URL}/selctpreferred.png`}
             alt="Select preferred"
             width={24}
             height={24}

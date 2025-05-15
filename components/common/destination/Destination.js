@@ -120,7 +120,13 @@ export default function DestinationList({
                   handleLocation(favorite.fav_lat, favorite.fav_long, favorite.address)
                 }
               >
-                <Image src="/mapIcon.png" alt="Map icon" width={24} height={24} className="mr-2" />
+                <Image
+                  src={`${process.env.NEXTAUTH_URL}/mapIcon.png`}
+                  alt="Map icon"
+                  width={24}
+                  height={24}
+                  className="mr-2"
+                />
                 <Typography variant="h3">{favorite.tag}</Typography>
                 <Typography variant="subtitle1">{favorite.address}</Typography>
               </Detail>

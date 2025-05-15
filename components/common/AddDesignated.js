@@ -132,7 +132,12 @@ const AddDesignated = ({
   return (
     <Container>
       <IconButton onClick={handleOpen}>
-        <SafeImage src="/date-time-icon.png" alt="Date and Time" width={30} height={30} />
+        <SafeImage
+          src={`${process.env.NEXTAUTH_URL}/date-time-icon.png`}
+          alt="Date and Time"
+          width={30}
+          height={30}
+        />
       </IconButton>
       {saveDateTime && (
         <SelectedDateTime onClick={handleOpen}>

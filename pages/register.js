@@ -243,7 +243,7 @@ export default function Login() {
           <Box>
             <LeftSide>
               <Image
-                src="/taxiimg.png"
+                src={`${process.env.NEXTAUTH_URL}/taxiimg.png`}
                 alt="Taxi illustration"
                 width={500}
                 height={300}
@@ -254,7 +254,7 @@ export default function Login() {
             <RightSide>
               <div className="text-center mb-8">
                 <Image
-                  src="/loginIcon.png"
+                  src={`${process.env.NEXTAUTH_URL}/loginIcon.png`}
                   alt="Login icon"
                   width={40}
                   height={40}

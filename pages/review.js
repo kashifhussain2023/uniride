@@ -134,7 +134,7 @@ export default function Review() {
                 <List>
                   <ListItem alignItems="flex-start">
                     <ListItemAvatar>
-                      <Avatar alt="Behavior" src="/behavior.png" />
+                      <Avatar alt="Behavior" src={`${process.env.NEXTAUTH_URL}/behavior.png`} />
                     </ListItemAvatar>
                     <ListItemText
                       primary="Behavior"
@@ -150,7 +150,7 @@ export default function Review() {
 
                   <ListItem alignItems="flex-start">
                     <ListItemAvatar>
-                      <Avatar alt="Punctual" src="/Punctual.png" />
+                      <Avatar alt="Punctual" src={`${process.env.NEXTAUTH_URL}/Punctual.png`} />
                     </ListItemAvatar>
                     <ListItemText
                       primary="Punctual"
@@ -166,7 +166,10 @@ export default function Review() {
 
                   <ListItem alignItems="flex-start">
                     <ListItemAvatar>
-                      <Avatar alt="Cleanliness and Hygiene" src="/Hygiene.png" />
+                      <Avatar
+                        alt="Cleanliness and Hygiene"
+                        src={`${process.env.NEXTAUTH_URL}/Hygiene.png`}
+                      />
                     </ListItemAvatar>
                     <ListItemText
                       primary="Cleanliness and Hygiene"
@@ -182,7 +185,7 @@ export default function Review() {
 
                   <ListItem alignItems="flex-start">
                     <ListItemAvatar>
-                      <Avatar alt="Local Knowledge" src="/local.png" />
+                      <Avatar alt="Local Knowledge" src={`${process.env.NEXTAUTH_URL}/local.png`} />
                     </ListItemAvatar>
                     <ListItemText
                       primary="Local Knowledge"

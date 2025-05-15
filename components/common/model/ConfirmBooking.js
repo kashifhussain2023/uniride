@@ -21,7 +21,7 @@ const ConfirmBooking = ({ open, handleClose }) => {
       <DialogContent>
         <LeftSection>
           <Image
-            src="/ConfirmBooking.png"
+            src={`${process.env.NEXTAUTH_URL}/ConfirmBooking.png`}
             alt="Confirm booking"
             width={24}
             height={24}

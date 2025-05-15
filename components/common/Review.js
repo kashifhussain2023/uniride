@@ -165,7 +165,13 @@ export default function Review({ acceptDriverDetail }) {
           <PageTitle title="Customer" subtitle="Review" images_icon={'../review.png'} />
           {rideResponse?.discount_total && rideResponse?.discount_applied === true && (
             <DiscountLabel>
-              <Image src="/couponIcon.png" alt="Discount" width={24} height={24} className="mr-2" />
+              <Image
+                src={`${process.env.NEXTAUTH_URL}/couponIcon.png`}
+                alt="Discount"
+                width={24}
+                height={24}
+                className="mr-2"
+              />
               <Typography variant="h3" component="h3">
                 {rideResponse?.discount_total} discount applied
               </Typography>

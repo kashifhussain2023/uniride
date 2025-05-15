@@ -106,7 +106,13 @@ export default function ConfirmBooking({
       <RouteDriver>
         <BookingCarInfo>
           <CarImg>
-            <Image src="/car.png" alt="Car" width={24} height={24} className="mr-2" />
+            <Image
+              src={`${process.env.NEXTAUTH_URL}/car.png`}
+              alt="Car"
+              width={24}
+              height={24}
+              className="mr-2"
+            />
           </CarImg>
           <div>
             {/* <Typography variant="subtitle3">
@@ -139,7 +145,13 @@ export default function ConfirmBooking({
               <BookingLabel>Payment Method</BookingLabel>
               <Details>Card</Details>
               <BookingIcon>
-                <Image src="/cardIcon.png" alt="Card" width={24} height={24} className="mr-2" />
+                <Image
+                  src={`${process.env.NEXTAUTH_URL}/cardIcon.png`}
+                  alt="Card"
+                  width={24}
+                  height={24}
+                  className="mr-2"
+                />
               </BookingIcon>
             </ListItem>
             <ListItem>
@@ -151,7 +163,7 @@ export default function ConfirmBooking({
                   </PromoButton>
                   <BookingIcon>
                     <Image
-                      src="/couponIcon.png"
+                      src={`${process.env.NEXTAUTH_URL}/couponIcon.png`}
                       alt="Coupon"
                       width={24}
                       height={24}
@@ -213,7 +225,7 @@ export default function ConfirmBooking({
               </Details>
               <BookingIcon>
                 <Image
-                  src="/passenger.png"
+                  src={`${process.env.NEXTAUTH_URL}/passenger.png`}
                   alt="Passenger"
                   width={24}
                   height={24}

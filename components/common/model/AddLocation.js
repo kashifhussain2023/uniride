@@ -146,10 +146,10 @@ const AddLocation = ({ open, handleClose, userAuth, getFavoriteList }) => {
         <DialogContent>
           <LeftSection>
             <Image
-              src="/locationImage.png"
+              src={`${process.env.NEXTAUTH_URL}/locationImage.png`}
               alt="Location"
-              width={24}
-              height={24}
+              width={30}
+              height={30}
               className="mr-2"
             />
           </LeftSection>
