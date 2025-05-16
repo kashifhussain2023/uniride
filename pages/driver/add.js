@@ -1,6 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 import React, { useEffect, useState } from 'react';
 // import { useRouter } from 'next/router';
+import dynamic from 'next/dynamic';
 import dayjs from 'dayjs';
 import { styled } from '@mui/system';
 import {
@@ -43,6 +44,10 @@ import CountrySelect from '@/components/common/CountrySelect';
 import SafeImage from '@/components/common/SafeImage';
 import CopyRight from '@/components/common/CopyRight';
 const steps = ['Personal Details', 'Vehicle Details', 'Insurance Details'];
+
+const MobileDatePicker = dynamic(() => import('@/components/common/MobileDatesPicker'), {
+  ssr: false,
+});
 
 const AddDriver = () => {
   //const router = useRouter();
@@ -707,17 +712,16 @@ const AddDriver = () => {
               <Grid item xs={12} sm={4}>
                 <DatePicker>
                   <LocalizationProvider dateAdapter={AdapterDayjs}>
-                    {/* <MobileDatePicker
-                      fullWidth
+                    <MobileDatePicker
                       label="Date of Birth"
                       name="dob"
                       maxDate={dayjs()}
-                      value={formValues.dob ? dayjs(formValues.dob) : null}
+                      value={formValues.dob}
                       onChange={newValue => storeDateInState('dob', newValue)}
-                      renderInput={params => (
-                        <TextField {...params} fullWidth error={!!errors.dob} />
-                      )}
-                    /> */}
+                      error={!!errors.dob}
+                      helperText={errors.dob}
+                      fullWidth
+                    />
                   </LocalizationProvider>
                   {errors.dob && <FormHelperText error>{errors.dob}</FormHelperText>}
                 </DatePicker>
@@ -960,7 +964,7 @@ const AddDriver = () => {
               </Grid>
               <Grid item xs={12} sm={4}>
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
-                  {/* <MobileDatePicker
+                  <MobileDatePicker
                     label="License expiry date"
                     value={
                       formValues.licence_expiry_date ? dayjs(formValues.licence_expiry_date) : null
@@ -969,7 +973,7 @@ const AddDriver = () => {
                     renderInput={params => (
                       <TextField {...params} fullWidth error={!!errors.licence_expiry_date} />
                     )}
-                  /> */}
+                  />
                 </LocalizationProvider>
                 {errors.licence_expiry_date && (
                   <FormHelperText error>{errors.licence_expiry_date}</FormHelperText>
@@ -1065,7 +1069,7 @@ const AddDriver = () => {
               </Grid>
               <Grid item xs={12} sm={4}>
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
-                  {/* <MobileDatePicker
+                  <MobileDatePicker
                     label="Car insurance expiry date"
                     value={
                       formValues.car_insurance_expiry_date
@@ -1076,7 +1080,7 @@ const AddDriver = () => {
                     renderInput={params => (
                       <TextField {...params} fullWidth error={!!errors.car_insurance_expiry_date} />
                     )}
-                  /> */}
+                  />
                 </LocalizationProvider>
                 {errors.car_insurance_expiry_date && (
                   <FormHelperText error>{errors.car_insurance_expiry_date}</FormHelperText>
@@ -1084,7 +1088,7 @@ const AddDriver = () => {
               </Grid>
               <Grid item xs={12} sm={4}>
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
-                  {/* <MobileDatePicker
+                  <MobileDatePicker
                     label="Car registration expiry date"
                     value={
                       formValues.car_registration_expiry_date
@@ -1101,7 +1105,7 @@ const AddDriver = () => {
                         error={!!errors.car_registration_expiry_date}
                       />
                     )}
-                  /> */}
+                  />
                 </LocalizationProvider>
                 {errors.car_registration_expiry_date && (
                   <FormHelperText error>{errors.car_registration_expiry_date}</FormHelperText>
