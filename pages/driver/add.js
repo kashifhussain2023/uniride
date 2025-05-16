@@ -548,7 +548,7 @@ const AddDriver = () => {
       <SidebarTop>
         <Logo>
           <SafeImage
-            src={`${process.env.NEXTAUTH_URL}/logo.jpg`}
+            src={`${process.env.NEXTAUTH_URL}/logo1.jpg`}
             alt="logo"
             width={112}
             height={43}
