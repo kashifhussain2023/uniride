@@ -45,7 +45,7 @@ import SafeImage from '@/components/common/SafeImage';
 import CopyRight from '@/components/common/CopyRight';
 const steps = ['Personal Details', 'Vehicle Details', 'Insurance Details'];
 
-const MobileDatePicker = dynamic(() => import('@/components/common/MobileDatesPicker'), {
+const MobileDatesPicker = dynamic(() => import('@/components/common/MobileDatePicker'), {
   ssr: false,
 });
 
@@ -712,7 +712,7 @@ const AddDriver = () => {
               <Grid item xs={12} sm={4}>
                 <DatePicker>
                   <LocalizationProvider dateAdapter={AdapterDayjs}>
-                    <MobileDatePicker
+                    <MobileDatesPicker
                       label="Date of Birth"
                       name="dob"
                       maxDate={dayjs()}
@@ -964,7 +964,7 @@ const AddDriver = () => {
               </Grid>
               <Grid item xs={12} sm={4}>
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
-                  <MobileDatePicker
+                  <MobileDatesPicker
                     label="License expiry date"
                     value={
                       formValues.licence_expiry_date ? dayjs(formValues.licence_expiry_date) : null
@@ -1069,7 +1069,7 @@ const AddDriver = () => {
               </Grid>
               <Grid item xs={12} sm={4}>
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
-                  <MobileDatePicker
+                  <MobileDatesPicker
                     label="Car insurance expiry date"
                     value={
                       formValues.car_insurance_expiry_date
@@ -1088,7 +1088,7 @@ const AddDriver = () => {
               </Grid>
               <Grid item xs={12} sm={4}>
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
-                  <MobileDatePicker
+                  <MobileDatesPicker
                     label="Car registration expiry date"
                     value={
                       formValues.car_registration_expiry_date
