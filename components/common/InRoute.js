@@ -100,7 +100,7 @@ export default function InRoute({
       <PageTitle
         title=""
         subtitle={acceptDriverDetail.ride_status}
-        images_icon={'../iconInRoute.png'}
+        images_icon={`${process.env.NEXTAUTH_URL}/iconInRoute.png`}
       ></PageTitle>
       <RouteDriver>
         <DriverInfo>

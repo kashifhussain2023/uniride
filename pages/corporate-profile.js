@@ -229,7 +229,7 @@ export default function CorporateProfile({ userAuth }) {
                   <PageTitle
                     title="Corporate"
                     subtitle="Profile"
-                    images_icon={'../user-profile.png'}
+                    images_icon={`${process.env.NEXTAUTH_URL}/user-profile.png`}
                   ></PageTitle>
                 </ProfileHead>
                 <Grid
@@ -315,7 +315,7 @@ export default function CorporateProfile({ userAuth }) {
                 <PageTitle
                   title="Corporate"
                   subtitle="Profile"
-                  images_icon={'../user-profile.png'}
+                  images_icon={`${process.env.NEXTAUTH_URL}/user-profile.png`}
                 ></PageTitle>
               </ProfileHead>
               <Grid

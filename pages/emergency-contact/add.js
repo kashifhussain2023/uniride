@@ -123,7 +123,7 @@ export default function EmergencyContactAdd() {
                 }}
                 title="Emergency"
                 subtitle="Contact"
-                images_icon={'../iconInRoute.png'}
+                images_icon={`${process.env.NEXTAUTH_URL}/iconInRoute.png`}
               ></PageTitle>
               <Typography
                 variant="h3"

@@ -157,7 +157,7 @@ const AddLocation = ({ open, handleClose, userAuth, getFavoriteList }) => {
             <PageTitle
               title="My"
               subtitle="Location"
-              images_icon={'../AddLocationIcon.png'}
+              images_icon={'/AddLocationIcon.png'}
             ></PageTitle>
 
             <FormControl>

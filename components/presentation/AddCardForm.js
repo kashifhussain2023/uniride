@@ -176,7 +176,7 @@ export default function AddCardForm() {
                 <PageTitle
                   title="Add"
                   subtitle="Payment Info"
-                  images_icon={`${process.env.NEXTAUTH_URL}/payment.png`}
+                  images_icon={`/payment.png`}
                 ></PageTitle>
 
                 <Typography

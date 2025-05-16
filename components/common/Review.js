@@ -162,7 +162,7 @@ export default function Review({ acceptDriverDetail }) {
       <SpinnerLoader loading={reviewLoading} />
       <PannelSection>
         <LeftPannel>
-          <PageTitle title="Customer" subtitle="Review" images_icon={'../review.png'} />
+          <PageTitle title="Customer" subtitle="Review" images_icon={'/review.png'} />
           {rideResponse?.discount_total && rideResponse?.discount_applied === true && (
             <DiscountLabel>
               <Image

@@ -6,7 +6,7 @@ import Stack from '@mui/material/Stack';
 export default function UniriderDriver() {
   return (
     <>
-      <PageTitle title="UniRide" subtitle="Driver" images_icon={'../driver.png'}></PageTitle>
+      <PageTitle title="UniRide" subtitle="Driver" images_icon={'/driver.png'}></PageTitle>
 
       <RouteDriver>
         <MessageBox>

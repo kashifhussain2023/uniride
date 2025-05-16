@@ -47,7 +47,11 @@ export default function RiderHistoryDetail() {
       <Layout>
         <LargeInnerContent>
           <Box>
-            <PageTitle title="Rider" subtitle="History Detail" images_icon={'../history.png'} />
+            <PageTitle
+              title="Rider"
+              subtitle="History Detail"
+              images_icon={`${process.env.NEXTAUTH_URL}/history.png`}
+            />
 
             <HistoryImage>
               <SafeImage

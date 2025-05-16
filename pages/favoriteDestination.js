@@ -61,7 +61,7 @@ export default function FavoriteDestination({ userAuth }) {
               <PageTitle
                 title="Favorite"
                 subtitle="Destination"
-                images_icon={'../location.png'}
+                images_icon={`${process.env.NEXTAUTH_URL}/location.png`}
               ></PageTitle>
               <ButtonArea>
                 <Button variant="containedSecondary" onClick={handleOpenLocationModel}>

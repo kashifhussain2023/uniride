@@ -78,7 +78,7 @@ const ScheduleRide = ({ session }) => {
               <PageTitle
                 title="Schedule Your"
                 subtitle="Rides"
-                images_icon={'../location.png'}
+                images_icon={`${process.env.NEXTAUTH_URL}/location.png`}
               ></PageTitle>
             </HeadSection>
             <Grid container spacing={3}>

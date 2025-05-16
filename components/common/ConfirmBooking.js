@@ -101,7 +101,11 @@ export default function ConfirmBooking({
   return (
     <>
       <SpinnerLoader loading={loading} />
-      <PageTitle title="Confirm Your" subtitle="Booking" images_icon={'../confirm.png'}></PageTitle>
+      <PageTitle
+        title="Confirm Your"
+        subtitle="Booking"
+        images_icon={`${process.env.NEXTAUTH_URL}/confirm.png`}
+      ></PageTitle>
 
       <RouteDriver>
         <BookingCarInfo>
