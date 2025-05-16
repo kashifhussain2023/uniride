@@ -1,5 +1,6 @@
+/* eslint-disable @next/next/no-img-element */
 import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/router';
+// import { useRouter } from 'next/router';
 import dayjs from 'dayjs';
 import { styled } from '@mui/system';
 import {
@@ -44,7 +45,7 @@ import CopyRight from '@/components/common/CopyRight';
 const steps = ['Personal Details', 'Vehicle Details', 'Insurance Details'];
 
 const AddDriver = () => {
-  const router = useRouter();
+  //const router = useRouter();
   const [activeStep, setActiveStep] = useState(0);
   const [countrycode, setCountryCode] = useState('+1');
   const [formValues, setFormValues] = useState({
@@ -94,12 +95,12 @@ const AddDriver = () => {
   const [states, setStates] = useState([]);
   const [counties, setCounties] = useState([]);
   const [cities, setCities] = useState([]);
-  const [fares, setFares] = useState([]);
+  //const [fares, setFares] = useState([]);
   const [selectedState, setSelectedState] = useState(null);
   const [selectedCounty, setSelectedCounty] = useState(null);
   const [selectedCity, setSelectedCity] = useState(null);
-  const [settings, setSettings] = useState();
-  const [existingDriver, setExistingDriver] = useState();
+  //const [settings, setSettings] = useState();
+  //const [existingDriver, setExistingDriver] = useState();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [vehicleTypes, setVehicleTypes] = useState([]);
@@ -109,12 +110,12 @@ const AddDriver = () => {
   const [termsLoading, setTermsLoading] = useState(false);
   const [innerAcceptTerms, setInnerAcceptTerms] = useState(false);
 
-  const pageTitle = 'Driver Registration';
-  const scrumbItems = [
-    { path: '/', title: 'Home' },
-    { path: '/admin/drivers/active', title: 'Active' },
-    { path: '#', title: 'Add' },
-  ];
+  // const pageTitle = 'Driver Registration';
+  // const scrumbItems = [
+  //   { path: '/', title: 'Home' },
+  //   { path: '/admin/drivers/active', title: 'Active' },
+  //   { path: '#', title: 'Add' },
+  // ];
 
   const handleStateChange = e => {
     const stateId = e.target.value;
@@ -364,7 +365,7 @@ const AddDriver = () => {
     }
   };
   const handleNext = () => {
-    const { allErrors, stepErrors } = validateForm();
+    const { stepErrors } = validateForm();
 
     if (Object.keys(stepErrors).length > 0) {
       const firstErrorField = Object.keys(stepErrors)[0];
@@ -482,23 +483,23 @@ const AddDriver = () => {
     fetchVehicleTypes();
   }, []);
 
-  useEffect(() => {
-    const fetchSettings = async () => {
-      const queryParams = new URLSearchParams();
-      if (formValues.email) queryParams.append('email', formValues.email);
-      if (formValues.phone) queryParams.append('phone', formValues.phone);
-      const response = await fetch(`/api/v2/drivers/add?${queryParams.toString()}`);
-      const data = await response.json();
-      setExistingDriver(data.existingDriver);
-      const filteredSettings = data.data.filter(link => {
-        return link.key === 'IOS_DRIVER_LINK' || link.key === 'ANDROID_DRIVER_LINK';
-      });
+  // useEffect(() => {
+  //   const fetchSettings = async () => {
+  //     const queryParams = new URLSearchParams();
+  //     if (formValues.email) queryParams.append('email', formValues.email);
+  //     if (formValues.phone) queryParams.append('phone', formValues.phone);
+  //     const response = await fetch(`/api/v2/drivers/add?${queryParams.toString()}`);
+  //     //const data = await response.json();
+  //     //setExistingDriver(data.existingDriver);
+  //     // const filteredSettings = data.data.filter(link => {
+  //     //   return link.key === 'IOS_DRIVER_LINK' || link.key === 'ANDROID_DRIVER_LINK';
+  //     // });
 
-      setSettings(filteredSettings);
-    };
+  //     //setSettings(filteredSettings);
+  //   };
 
-    fetchSettings();
-  }, []);
+  //   fetchSettings();
+  // }, []);
 
   useEffect(() => {
     if (termsModalOpen) {
@@ -1276,13 +1277,13 @@ const AddDriver = () => {
 
 export default AddDriver;
 
-const DragAndDropContainer = styled('div')(({ theme }) => ({
-  border: '2px dashed #ccc',
-  color: '#777',
-  cursor: 'pointer',
-  padding: theme.spacing(3),
-  textAlign: 'center',
-}));
+// const DragAndDropContainer = styled('div')(({ theme }) => ({
+//   border: '2px dashed #ccc',
+//   color: '#777',
+//   cursor: 'pointer',
+//   padding: theme.spacing(3),
+//   textAlign: 'center',
+// }));
 
 const FormContainer = styled(Box)(({ theme }) => ({
   '.MuiInputAdornment-root': {
@@ -1356,13 +1357,13 @@ const Logo = styled(Box)`
   `}
 `;
 
-const Footer = styled(Box)`
-  ${({ theme }) => ` 
-    display: flex;
-    justify-content: center;
-    padding: ${theme.spacing(2)};    
-    border-bottom: 1px solid #f2f2f7;
-    box-shadow: 0px 2px 25px 0px rgba(0, 0, 0, 0.14);
-    
-  `}
-`;
+// const Footer = styled(Box)`
+//   ${({ theme }) => `
+//     display: flex;
+//     justify-content: center;
+//     padding: ${theme.spacing(2)};
+//     border-bottom: 1px solid #f2f2f7;
+//     box-shadow: 0px 2px 25px 0px rgba(0, 0, 0, 0.14);
+
+//   `}
+// `;
