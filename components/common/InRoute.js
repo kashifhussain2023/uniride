@@ -143,7 +143,7 @@ export default function InRoute({
               />
               <div>
                 <Image
-                  src={acceptDriverDetail?.driver_info.driver_image}
+                  src={acceptDriverDetail?.driver_info.driver_image || '/avatar.png'}
                   alt="Driver"
                   width={100}
                   height={100}

@@ -82,6 +82,7 @@ const nextConfig = {
       'unirideus-rebranding.24livehost.com',
       '192.168.8.176',
       'unirideusadmin.24livehost.com',
+      'flagcdn.com',
     ],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     minimumCacheTTL: 60,

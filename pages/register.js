@@ -378,7 +378,14 @@ export default function Login() {
 
                 <SignUpFt>
                   <Button variant="contained" color="primary" onClick={handleSubmit}>
-                    Sign Up
+                    Sign Up as customer
+                  </Button>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={() => router.push('/driver/add')}
+                  >
+                    Register as driver
                   </Button>
                   <Register>
                     <span>Already Registered</span>

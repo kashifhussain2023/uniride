@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
 import styled from '@emotion/styled';
+import { Edit } from '@mui/icons-material';
 import { IconButton, InputAdornment, Typography } from '@mui/material';
 import TextField from '@mui/material/TextField';
 import { GoogleMap, LoadScript, MarkerF, Polyline } from '@react-google-maps/api';
@@ -494,7 +494,7 @@ const LocationPickerMap = ({
                           }}
                           edge="end"
                         >
-                          <EditIcon />
+                          <Edit />
                         </IconButton>
                       </InputAdornment>
                     ),

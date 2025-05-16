@@ -39,6 +39,8 @@ import { toast } from 'react-toastify';
 import axiosInstance from '@/utils/api/axiosInstance';
 import Link from 'next/link';
 import CountrySelect from '@/components/common/CountrySelect';
+import SafeImage from '@/components/common/SafeImage';
+import CopyRight from '@/components/common/CopyRight';
 const steps = ['Personal Details', 'Vehicle Details', 'Insurance Details'];
 
 const AddDriver = () => {
@@ -537,7 +539,16 @@ const AddDriver = () => {
     <>
       {/* <GenericHead title={pageTitle} description="Browse our selection of data." /> */}
       {/* <PageTitle title={pageTitle} items={scrumbItems} /> */}
-
+      <SidebarTop>
+        <Logo>
+          <SafeImage
+            src={`${process.env.NEXTAUTH_URL}/logo.jpg`}
+            alt="logo"
+            width={112}
+            height={43}
+          />
+        </Logo>
+      </SidebarTop>
       <LayoutBox>
         <Typography sx={{ marginBottom: '20px', textAlign: 'center' }} variant="h3">
           Driver Registration
@@ -549,7 +560,6 @@ const AddDriver = () => {
             </Step>
           ))}
         </Stepper>
-
         <FormContainer>
           {activeStep === 0 && (
             <Grid container spacing={2}>
@@ -1259,6 +1269,7 @@ const AddDriver = () => {
           </Box>
         </FormContainer>
       </LayoutBox>
+      <CopyRight />
     </>
   );
 };
@@ -1274,11 +1285,30 @@ const DragAndDropContainer = styled('div')(({ theme }) => ({
 }));
 
 const FormContainer = styled(Box)(({ theme }) => ({
+  '.MuiInputAdornment-root': {
+    '.MuiInputBase-root': {
+      '.MuiAutocomplete-clearIndicator': {
+        display: 'none',
+      },
+
+      '.MuiOutlinedInput-notchedOutline': {
+        borderBottom: 0,
+        borderLeft: 0,
+        borderTop: 0,
+      },
+
+      borderRadius: 0,
+      paddingRight: '22px !important',
+    },
+
+    maxWidth: '50px !important',
+  },
   backgroundColor: '#fff',
   border: 'none',
   borderRadius: theme.spacing(1),
   boxShadow: theme.shadows[2],
   margin: theme.spacing(2, 0),
+
   padding: theme.spacing(4),
 }));
 
@@ -1294,4 +1324,45 @@ const DatePicker = styled(Box)`
   > div {
     width: 100%;
   }
+`;
+
+const SidebarTop = styled(Box)`
+  ${({ theme }) => ` 
+    padding: ${theme.spacing(1, 2)};    
+    border-bottom: 1px solid #f2f2f7;
+    box-shadow: 0px 2px 25px 0px rgba(0, 0, 0, 0.14);
+    position: fixed;
+    background: #fff;
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    z-index: 2;
+
+    + div {
+      margin: 0 auto;
+      margin-top: 90px;
+      max-width: 1000px;
+    }
+  `}
+`;
+
+const Logo = styled(Box)`
+  ${({ theme }) => `
+    width: 112px;
+    position: relative;
+    top: 5px;
+    margin-right: ${theme.spacing(2)};
+  `}
+`;
+
+const Footer = styled(Box)`
+  ${({ theme }) => ` 
+    display: flex;
+    justify-content: center;
+    padding: ${theme.spacing(2)};    
+    border-bottom: 1px solid #f2f2f7;
+    box-shadow: 0px 2px 25px 0px rgba(0, 0, 0, 0.14);
+    
+  `}
 `;
