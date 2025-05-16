@@ -28,7 +28,7 @@ import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { useDropzone } from 'react-dropzone';
-import { MobileDatePicker } from '@mui/x-date-pickers';
+// import { MobileDatePicker } from '@mui/x-date-pickers';
 import validator from 'validator';
 import {
   stepFieldsMap,
@@ -707,7 +707,7 @@ const AddDriver = () => {
               <Grid item xs={12} sm={4}>
                 <DatePicker>
                   <LocalizationProvider dateAdapter={AdapterDayjs}>
-                    <MobileDatePicker
+                    {/* <MobileDatePicker
                       fullWidth
                       label="Date of Birth"
                       name="dob"
@@ -717,7 +717,7 @@ const AddDriver = () => {
                       renderInput={params => (
                         <TextField {...params} fullWidth error={!!errors.dob} />
                       )}
-                    />
+                    /> */}
                   </LocalizationProvider>
                   {errors.dob && <FormHelperText error>{errors.dob}</FormHelperText>}
                 </DatePicker>
@@ -960,7 +960,7 @@ const AddDriver = () => {
               </Grid>
               <Grid item xs={12} sm={4}>
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
-                  <MobileDatePicker
+                  {/* <MobileDatePicker
                     label="License expiry date"
                     value={
                       formValues.licence_expiry_date ? dayjs(formValues.licence_expiry_date) : null
@@ -969,7 +969,7 @@ const AddDriver = () => {
                     renderInput={params => (
                       <TextField {...params} fullWidth error={!!errors.licence_expiry_date} />
                     )}
-                  />
+                  /> */}
                 </LocalizationProvider>
                 {errors.licence_expiry_date && (
                   <FormHelperText error>{errors.licence_expiry_date}</FormHelperText>
@@ -1065,7 +1065,7 @@ const AddDriver = () => {
               </Grid>
               <Grid item xs={12} sm={4}>
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
-                  <MobileDatePicker
+                  {/* <MobileDatePicker
                     label="Car insurance expiry date"
                     value={
                       formValues.car_insurance_expiry_date
@@ -1076,7 +1076,7 @@ const AddDriver = () => {
                     renderInput={params => (
                       <TextField {...params} fullWidth error={!!errors.car_insurance_expiry_date} />
                     )}
-                  />
+                  /> */}
                 </LocalizationProvider>
                 {errors.car_insurance_expiry_date && (
                   <FormHelperText error>{errors.car_insurance_expiry_date}</FormHelperText>
@@ -1084,7 +1084,7 @@ const AddDriver = () => {
               </Grid>
               <Grid item xs={12} sm={4}>
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
-                  <MobileDatePicker
+                  {/* <MobileDatePicker
                     label="Car registration expiry date"
                     value={
                       formValues.car_registration_expiry_date
@@ -1101,7 +1101,7 @@ const AddDriver = () => {
                         error={!!errors.car_registration_expiry_date}
                       />
                     )}
-                  />
+                  /> */}
                 </LocalizationProvider>
                 {errors.car_registration_expiry_date && (
                   <FormHelperText error>{errors.car_registration_expiry_date}</FormHelperText>
