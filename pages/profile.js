@@ -256,15 +256,11 @@ const Profile = () => {
           <SmallContent>
             <ProfileBox>
               <ProfileHead>
-<<<<<<< HEAD
-                <PageTitle title="My" subtitle="Profile" images_icon={'/user-profile.png'} />
-=======
                 <PageTitle
                   title="My"
                   subtitle="Profile"
                   images_icon={`${process.env.NEXTAUTH_URL}/user-profile.png`}
                 />
->>>>>>> fa07906f6d095badebec0bb7ca38c8b84423c1be
 
                 <ProfileBtn>
                   {disabled && (

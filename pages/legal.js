@@ -18,15 +18,11 @@ export default function privacyPolicy() {
       <Layout>
         <LargeInnerContent>
           <CMSSection>
-<<<<<<< HEAD
-            <PageTitle title="Legal" subtitle="Policy" images_icon={'/location.png'}></PageTitle>
-=======
             <PageTitle
               title="Legal"
               subtitle="Policy"
               images_icon={`${process.env.NEXTAUTH_URL}/location.png`}
             ></PageTitle>
->>>>>>> fa07906f6d095badebec0bb7ca38c8b84423c1be
             <Typography
               variant="h4"
               sx={{

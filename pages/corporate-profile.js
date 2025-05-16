@@ -229,11 +229,7 @@ export default function CorporateProfile({ userAuth }) {
                   <PageTitle
                     title="Corporate"
                     subtitle="Profile"
-<<<<<<< HEAD
-                    images_icon={'/user-profile.png'}
-=======
                     images_icon={`${process.env.NEXTAUTH_URL}/user-profile.png`}
->>>>>>> fa07906f6d095badebec0bb7ca38c8b84423c1be
                   ></PageTitle>
                 </ProfileHead>
                 <Grid
@@ -319,11 +315,7 @@ export default function CorporateProfile({ userAuth }) {
                 <PageTitle
                   title="Corporate"
                   subtitle="Profile"
-<<<<<<< HEAD
-                  images_icon={'/user-profile.png'}
-=======
                   images_icon={`${process.env.NEXTAUTH_URL}/user-profile.png`}
->>>>>>> fa07906f6d095badebec0bb7ca38c8b84423c1be
                 ></PageTitle>
               </ProfileHead>
               <Grid
