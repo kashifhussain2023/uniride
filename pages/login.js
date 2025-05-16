@@ -24,7 +24,7 @@ import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import { validateCustomer } from '@/utils/login';
 import CountrySelect from '@/components/common/CountrySelect';
 import CustomFormControl from '@/theme/CustomFormControl';
-
+import SafeImage from '@/components/common/SafeImage';
 export default function Login() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -173,7 +173,7 @@ export default function Login() {
         <LoginContainer>
           <Box>
             <LeftSide>
-              <Image
+              <SafeImage
                 src={`${process.env.NEXTAUTH_URL}/loginimg.png`}
                 alt="Login illustration"
                 width={500}
