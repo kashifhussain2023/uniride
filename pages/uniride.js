@@ -418,25 +418,25 @@ export default function Dashboard() {
     }
 
     const payload = {
-      ride_id: acceptDriverDetail.ride_id,
+      car_type_id: carTypeId,
+      distance: String(distance || '6.8'),
       dropoff_lat: String(dropLocation.lat),
       dropoff_lng: String(dropLocation.lng),
       dropoff_name: String(dropLocation.address),
-      distance: String(distance || '6.8'),
+      ride_id: acceptDriverDetail.ride_id,
       time: String(duration || '22'),
-      car_type_id: carTypeId,
     };
 
     // Emit the update destination event
     socketHelpers.updateDestination(payload, {
+      onError: error => {
+        console.error('Failed to update destination:', error);
+        toast.error(error.message || 'Failed to update drop location.');
+      },
       onSuccess: response => {
         console.log('Destination updated successfully:', response);
         setOpenValueModel(false);
         toast.success(response.message || 'Drop location updated successfully.');
-      },
-      onError: error => {
-        console.error('Failed to update destination:', error);
-        toast.error(error.message || 'Failed to update drop location.');
       },
     });
   };
@@ -553,10 +553,10 @@ export default function Dashboard() {
 
   const listeningChangeLocation = async () => {
     await socketHelpers.trackingRide({
-      setLoading,
       setDriverLocation,
       setEndRideData,
       setInRRoute,
+      setLoading,
       setSelectRide,
       setShowReview,
     });

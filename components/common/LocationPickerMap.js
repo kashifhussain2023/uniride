@@ -330,10 +330,10 @@ const LocationPickerMap = ({
               lng: parseFloat(currentLocation.lng),
             }}
             label={{
-              text: 'Pickup',
               color: 'green',
               fontWeight: 'bold',
               marginBottom: '30px',
+              text: 'Pickup',
             }}
           />
         )}
@@ -346,10 +346,10 @@ const LocationPickerMap = ({
               lng: parseFloat(dropCustomerLocation.lng),
             }}
             label={{
-              text: 'Drop-Off',
               color: 'red',
               fontWeight: 'bold',
               marginBottom: '30px',
+              text: 'Drop-Off',
             }}
           />
         )}

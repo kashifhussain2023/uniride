@@ -7,7 +7,9 @@ const socketEvents = {
   CANCEL_RIDE: 'cancelRide',
   CAR_AVAILABILITY_RESPONSE: 'carAvailabilityResponse',
   CAR_LOCATIONS: 'carLocations',
+  CHANGE_LOCATION: 'trackRide',
   CHANGE_REQUEST_STATUS: 'changeRequestStatus',
+  DESTINATION_REQUEST_STATUS: 'destinationRequestStatus',
   DRIVER_ACCEPTED: 'driverAccepted',
   DRIVER_REJECTED: 'driverRejected',
   ERROR: 'error',
@@ -19,7 +21,6 @@ const socketEvents = {
   REQUEST_RIDE_COMPLETENESS: 'requestRideCompleteness',
   REQUEST_SCHEDULE_RIDE_DETAILS: 'requestScheduleRideDetails',
   REQUEST_SENT: 'requestSent',
-  DESTINATION_REQUEST_STATUS: 'destinationRequestStatus',
   REQUEST_STATUS_CHANGED: 'requestStatusChanged',
   REQUEST_TIMEOUT: 'requestTimeOut',
   RESUME_CURRENT_RIDE: 'resumeCurrentRide',
@@ -30,7 +31,6 @@ const socketEvents = {
   SOCKET_SAVED: 'socketSaved',
   UPDATE_DESTINATION_LOCATION: 'updateDestinationLocation',
   UPDATE_DESTINATION_REQUEST: 'updateDestinationRequest',
-  CHANGE_LOCATION: 'trackRide',
 };
 
 // Debug flag - set to true to enable detailed logging
@@ -589,52 +589,6 @@ const socketService = new SocketService();
 
 // Basic socket helper functions
 const socketHelpers = {
-  async updateDestination(payload, { onSuccess, onError }) {
-    debugLog('Emitting updateDestinationRequest event', payload);
-  
-    try {
-      socketService.emit(socketEvents.UPDATE_DESTINATION_LOCATION, payload);
-  
-      // Remove previous listeners to prevent duplicate toasts
-      socketService.removeAllListeners(socketEvents.UPDATE_DESTINATION_REQUEST);
-  
-      socketService.on(socketEvents.UPDATE_DESTINATION_REQUEST, response => {
-        debugLog('Received updateDestinationRequest response', response);
-        if (onSuccess) onSuccess(response);
-      });
-  
-      socketService.on(socketEvents.ERROR, error => {
-        errorLog('Error in updateDestinationRequest', error);
-        toast.error(error.message || 'Failed to update destination.');
-        if (onError) onError(error);
-      });
-    } catch (error) {
-      errorLog('Error emitting updateDestinationRequest', error);
-      if (onError) onError(error);
-    }
-  },
-
-  listeningDestinationRequestStatus(onStatus) {
-    // Remove previous listeners to prevent duplicate toasts
-    socketService.removeAllListeners(socketEvents.DESTINATION_REQUEST_STATUS);
-  
-    socketService.on(socketEvents.DESTINATION_REQUEST_STATUS, response => {
-      debugLog('Received destinationRequestStatus event:', response);
-      if (response && response.message && response.update_status === 1) {
-        toast.success(response.message);
-      } else {
-        toast.error(response.message);
-      }
-      if (onStatus) onStatus(response);
-    });
-  },
-
-  async trackingRide() {
-    socketService.on(socketEvents.CHANGE_LOCATION, response => {
-      debugLog('Received changeLocation event:', response);
-    });
-  },
-
   // Apply coupon
   async applyCoupon(couponCode, userAuth) {
     try {
@@ -928,6 +882,21 @@ const socketHelpers = {
   // Add socket state check
   isSocketReady,
 
+  listeningDestinationRequestStatus(onStatus) {
+    // Remove previous listeners to prevent duplicate toasts
+    socketService.removeAllListeners(socketEvents.DESTINATION_REQUEST_STATUS);
+
+    socketService.on(socketEvents.DESTINATION_REQUEST_STATUS, response => {
+      debugLog('Received destinationRequestStatus event:', response);
+      if (response && response.message && response.update_status === 1) {
+        toast.success(response.message);
+      } else {
+        toast.error(response.message);
+      }
+      if (onStatus) onStatus(response);
+    });
+  },
+
   // On car locations
   onCarLocations(handler) {
     debugLog('Registering car locations handler');
@@ -1034,6 +1003,37 @@ const socketHelpers = {
   // Set up socket event listeners
   setupSocketEventListeners: setStateFunctions => {
     return socketService.setupSocketEventListeners(setStateFunctions);
+  },
+
+  async trackingRide() {
+    socketService.on(socketEvents.CHANGE_LOCATION, response => {
+      debugLog('Received changeLocation event:', response);
+    });
+  },
+
+  async updateDestination(payload, { onSuccess, onError }) {
+    debugLog('Emitting updateDestinationRequest event', payload);
+
+    try {
+      socketService.emit(socketEvents.UPDATE_DESTINATION_LOCATION, payload);
+
+      // Remove previous listeners to prevent duplicate toasts
+      socketService.removeAllListeners(socketEvents.UPDATE_DESTINATION_REQUEST);
+
+      socketService.on(socketEvents.UPDATE_DESTINATION_REQUEST, response => {
+        debugLog('Received updateDestinationRequest response', response);
+        if (onSuccess) onSuccess(response);
+      });
+
+      socketService.on(socketEvents.ERROR, error => {
+        errorLog('Error in updateDestinationRequest', error);
+        toast.error(error.message || 'Failed to update destination.');
+        if (onError) onError(error);
+      });
+    } catch (error) {
+      errorLog('Error emitting updateDestinationRequest', error);
+      if (onError) onError(error);
+    }
   },
 };
 
