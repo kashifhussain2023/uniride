@@ -158,7 +158,7 @@ export default function EditEmergencyContact() {
                 }}
                 title="Emergency"
                 subtitle="Contact"
-                images_icon={'../../iconInRoute.png'}
+                images_icon={''}
               ></PageTitle>
               <Typography
                 variant="h3"

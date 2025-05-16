@@ -49,14 +49,14 @@ export default function CorporateProfile({ userAuth }) {
   }, [corporateProfile]);
   const getCorporateProfile = async () => {
     try {
-      if (!userAuth?.data?.customer_id || !userAuth?.data?.token_code) {
+      if (!userAuth?.customer_id || !userAuth?.token_code) {
         console.error('Missing user authentication data');
         setLoading(false);
         return;
       }
       const formData = new FormData();
-      formData.append('user_id', userAuth.data.customer_id);
-      formData.append('token_code', userAuth.data.token_code);
+      formData.append('user_id', userAuth.customer_id);
+      formData.append('token_code', userAuth.token_code);
       const response = await api({
         data: formData,
         method: 'GET',
@@ -79,14 +79,14 @@ export default function CorporateProfile({ userAuth }) {
   };
   const getCorporateList = async () => {
     try {
-      if (!userAuth?.data?.customer_id || !userAuth?.data?.token_code) {
+      if (!userAuth?.customer_id || !userAuth?.token_code) {
         console.error('Missing user authentication data');
         setLoading(false);
         return;
       }
       const formData = new FormData();
-      formData.append('customer_id', userAuth.data.customer_id);
-      formData.append('token_code', userAuth.data.token_code);
+      formData.append('customer_id', userAuth.customer_id);
+      formData.append('token_code', userAuth.token_code);
       const response = await api({
         data: formData,
         method: 'GET',
@@ -113,7 +113,7 @@ export default function CorporateProfile({ userAuth }) {
   // Combined data fetching in a single useEffect
   useEffect(() => {
     const fetchData = async () => {
-      if (!userAuth?.data?.customer_id || !userAuth?.data?.token_code) {
+      if (!userAuth?.customer_id || !userAuth?.token_code) {
         console.error('Missing user authentication data');
         setLoading(false);
         toast.error('Authentication data is missing');
@@ -229,7 +229,7 @@ export default function CorporateProfile({ userAuth }) {
                   <PageTitle
                     title="Corporate"
                     subtitle="Profile"
-                    images_icon={'../user-profile.png'}
+                    images_icon={'/user-profile.png'}
                   ></PageTitle>
                 </ProfileHead>
                 <Grid
@@ -315,7 +315,7 @@ export default function CorporateProfile({ userAuth }) {
                 <PageTitle
                   title="Corporate"
                   subtitle="Profile"
-                  images_icon={'../user-profile.png'}
+                  images_icon={'/user-profile.png'}
                 ></PageTitle>
               </ProfileHead>
               <Grid

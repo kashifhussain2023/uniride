@@ -6,7 +6,7 @@ import Layout from '@/components/common/Layout';
 import styled from '@emotion/styled';
 import { useRouter } from 'next/router';
 import CustomFormControl from '@/theme/CustomFormControl';
-import { Typography } from '@mui/material';
+import { Stack, Typography } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import Button from '@mui/material/Button';
 import Checkbox from '@mui/material/Checkbox';
@@ -377,16 +377,18 @@ export default function Login() {
                 </Grid>
 
                 <SignUpFt>
-                  <Button variant="contained" color="primary" onClick={handleSubmit}>
-                    Sign Up as customer
-                  </Button>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={() => router.push('/driver/add')}
-                  >
-                    Register as driver
-                  </Button>
+                  <Stack direction="row" sx={{ gap: '10px' }}>
+                    <Button variant="contained" color="primary" onClick={handleSubmit}>
+                      Sign Up as customer
+                    </Button>
+                    <Button
+                      variant="contained"
+                      color="secondary"
+                      onClick={() => router.push('/driver/add')}
+                    >
+                      Register as driver
+                    </Button>
+                  </Stack>
                   <Register>
                     <span>Already Registered</span>
                     <Button type="text" onClick={() => router.push('/login')}>
@@ -584,6 +586,15 @@ const SignUpFt = styled.div`
     justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
+    .MuiButton-containedSecondary  {
+      background: ${theme.colors.palette.orange};
+      color: ${theme.colors.palette.white};
+      border-color: ${theme.colors.palette.orange};
+
+      &:hover {
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1)
+      }
+    }
     @media (min-width: ${theme.breakpoints.values.md}px) {
       flex-wrap: nowrap;
     }
@@ -594,7 +605,7 @@ const Register = styled.div`
     display: flex;
     align-items: center;
     flex-wrap: wrap;
-    padding-bottom: 15px;
+    padding: 15px 0;
 
     @media (min-width: ${theme.breakpoints.values.md}px) {
       flex-wrap: wrap;

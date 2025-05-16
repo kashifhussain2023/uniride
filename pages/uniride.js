@@ -650,9 +650,7 @@ export default function Dashboard() {
         message={scheduleMsg}
       />
       <Layout>
-        {isLoading ? (
-          <div>Loading...</div>
-        ) : !userAuth ? (
+        {!userAuth ? (
           <div>Please log in to continue</div>
         ) : showReview === false ? (
           <InnerContent>

@@ -4,7 +4,7 @@ import styled from '@emotion/styled';
 import CallOutlinedIcon from '@mui/icons-material/CallOutlined';
 import HighlightOffOutlinedIcon from '@mui/icons-material/HighlightOffOutlined';
 import StarIcon from '@mui/icons-material/Star';
-import { Button, Typography } from '@mui/material';
+import { Box, Button, Stack, Typography } from '@mui/material';
 import { signOut } from 'next-auth/react';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
@@ -103,15 +103,32 @@ export default function InRoute({
         images_icon={'../iconInRoute.png'}
       ></PageTitle>
       <RouteDriver>
-        <DriverInfo>
-          <DriverLeft>
-            <Typography variant="subtitle2">
-              {acceptDriverDetail?.driver_info.driver_name}
-            </Typography>
-            <Typography variant="subtitle2"> Pin for this Trip:</Typography>
-            <Typography sx={{ fontSize: 28 }} variant="h2" component="h2">
-              {acceptDriverDetail?.request_data.request_otp}
-            </Typography>
+        <DriverLeft>
+          <Stack direction="row">
+            <Image
+              src={acceptDriverDetail?.driver_info.driver_image || '/avatar.png'}
+              alt="Driver"
+              width={100}
+              height={100}
+              className="w-full h-auto"
+            />
+            <Box sx={{ flex: 1 }}>
+              <Typography sx={{ fontWeight: 600 }} variant="h6">
+                {acceptDriverDetail?.driver_info.driver_name}
+              </Typography>
+              <RatingStar>
+                <StarIcon /> {acceptDriverDetail?.driver_info.driver_rating}
+              </RatingStar>
+            </Box>
+          </Stack>
+          <Stack direction="row">
+            <Image
+              src={acceptDriverDetail?.driver_info.vehicle_image}
+              alt="Vehicle"
+              width={100}
+              height={100}
+              className="w-full h-auto"
+            />
             <Typography
               variant="subtitle2"
               sx={{
@@ -122,37 +139,26 @@ export default function InRoute({
               {acceptDriverDetail?.driver_info.vehicle_model}
               {acceptDriverDetail?.driver_info.vehicle_type}
             </Typography>
-            <Typography variant="subtitle2">
-              <strong>Vehicle Number:</strong> {acceptDriverDetail?.driver_info.vehicle_no || 'N/A'}
+          </Stack>
+          <Stack direction="row">
+            <Typography variant="subtitle2"> Pin for this Trip:</Typography>
+            <Typography sx={{ fontSize: 28 }} variant="h2" component="h2">
+              {acceptDriverDetail?.request_data.request_otp}
             </Typography>
+          </Stack>
+          <Stack direction="row">
+            <Typography variant="subtitle2"> Ride Type:</Typography>
+
+            <Typography variant="subtitle2">{acceptDriverDetail?.ride_type || 'N/A'}</Typography>
+          </Stack>
+          <Stack direction="row">
+            <Typography variant="subtitle2"> Vehicle no:</Typography>
             <Typography variant="subtitle2">
-              <strong>Ride Type:</strong> {acceptDriverDetail?.ride_type || 'N/A'}
+              {' '}
+              {acceptDriverDetail?.driver_info.vehicle_no || 'N/A'}
             </Typography>
-            <RatingStar>
-              <StarIcon /> {acceptDriverDetail?.driver_info.driver_rating}
-            </RatingStar>
-          </DriverLeft>
-          {
-            <DriverRight>
-              <Image
-                src={acceptDriverDetail?.driver_info.vehicle_image}
-                alt="Vehicle"
-                width={100}
-                height={100}
-                className="w-full h-auto"
-              />
-              <div>
-                <Image
-                  src={acceptDriverDetail?.driver_info.driver_image || '/avatar.png'}
-                  alt="Driver"
-                  width={100}
-                  height={100}
-                  className="w-full h-auto"
-                />
-              </div>
-            </DriverRight>
-          }
-        </DriverInfo>
+          </Stack>
+        </DriverLeft>
         {rideStatus !== 3 && rideStatus !== 4 && (
           <Button
             variant="contained"
@@ -195,7 +201,6 @@ export default function InRoute({
             SOS
           </Button>
         )}
-
         <MessageModel
           open={openSOS}
           close={() => setOpenSOS(false)}
@@ -229,6 +234,22 @@ const DriverInfo = styled.div`
 `;
 const DriverLeft = styled.div`
   ${() => `
+
+    .MuiStack-root  {
+      width: 100%;
+      gap: 15px;
+      align-items: center;
+      border-bottom: 1px solid #f1f1f1;
+      min-height: 50px;
+      justify-content: space-between;
+
+
+      img {
+        width: 60px;
+        height: 60px;
+        border-radius: 5px;
+      }
+    }
     h2 {
       font-weight: 700;
     }

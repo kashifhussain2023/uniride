@@ -4,6 +4,9 @@ import ConfirmBooking from './ConfirmBooking';
 import InRoute from './InRoute';
 import SelectRide from './SelectRide';
 import SelectGender from './model/SelectGender';
+import { useState } from 'react';
+import { Stack, Typography } from '@mui/material';
+import SpinnerLoader from './SpinnerLoader';
 
 // Dynamically import AddDesignated to avoid SSR issues
 const AddDesignated = dynamic(() => import('./AddDesignated'), { ssr: false });
@@ -49,6 +52,30 @@ export default function RiderInfo({
   distance,
   duration,
 }) {
+  const [checked, setChecked] = useState('male');
+
+  const handleToggle = value => () => {
+    setChecked(value);
+  };
+  const handleSelectGender = () => {
+    try {
+      // Call proceedGenderModel and handle the result properly
+      proceedGenderModel(checked);
+
+      // Only call .then() if result is a Promise
+      // if (result && typeof result.then === 'function') {
+      //   result
+      //     .then(() => {
+      //       // Handle success if needed
+      //     })
+      //     .catch(error => {
+      //       console.error('Error in proceedGenderModel:', error);
+      //     });
+      // }
+    } catch (error) {
+      console.error('Error in handleSelectGender:', error);
+    }
+  };
   return (
     <LeftPannel>
       <AddDesignated
@@ -91,6 +118,9 @@ export default function RiderInfo({
             setCouponActive={setCouponActive}
           />
           <SelectGender
+            handleToggle={handleToggle}
+            checked={checked}
+            handleSelectGender={handleSelectGender}
             open={genderModelOpen}
             proceedGenderModel={proceedGenderModel}
             handleGenderClose={handleGenderClose}
@@ -106,7 +136,16 @@ export default function RiderInfo({
           rideStatus={rideStatus}
         />
       ) : (
-        ''
+        <Stack
+          alignItems="center"
+          justifyContent="center"
+          sx={{ height: '100%', position: 'relative', textAlign: 'center' }}
+        >
+          <SpinnerLoader loading={true} />
+          <Typography>
+            Searching for a driver... Please wait while we confirm your ride request...
+          </Typography>
+        </Stack>
       )}
     </LeftPannel>
   );

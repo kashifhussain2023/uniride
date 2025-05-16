@@ -18,7 +18,7 @@ export default function privacyPolicy() {
       <Layout>
         <LargeInnerContent>
           <CMSSection>
-            <PageTitle title="Legal" subtitle="Policy" images_icon={'../location.png'}></PageTitle>
+            <PageTitle title="Legal" subtitle="Policy" images_icon={'/location.png'}></PageTitle>
             <Typography
               variant="h4"
               sx={{

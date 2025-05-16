@@ -17,6 +17,7 @@ const Container = styled.div`
     position: fixed;
     left: 0;
     right: 0;
+    z-index: 3;
     bottom: 0;
     background: ${theme.colors.palette.cream};
 

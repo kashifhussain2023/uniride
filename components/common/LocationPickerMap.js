@@ -329,11 +329,8 @@ const LocationPickerMap = ({
               lat: parseFloat(currentLocation.lat),
               lng: parseFloat(currentLocation.lng),
             }}
-            label={{
-              color: 'green',
-              fontWeight: 'bold',
-              marginBottom: '30px',
-              text: 'Pickup',
+            icon={{
+              url: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png', // change to blue-dot.png, green-dot.png, etc.
             }}
           />
         )}
@@ -344,12 +341,6 @@ const LocationPickerMap = ({
             position={{
               lat: parseFloat(dropCustomerLocation.lat),
               lng: parseFloat(dropCustomerLocation.lng),
-            }}
-            label={{
-              color: 'red',
-              fontWeight: 'bold',
-              marginBottom: '30px',
-              text: 'Drop-Off',
             }}
           />
         )}

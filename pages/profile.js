@@ -256,7 +256,7 @@ const Profile = () => {
           <SmallContent>
             <ProfileBox>
               <ProfileHead>
-                <PageTitle title="My" subtitle="Profile" images_icon={'../user-profile.png'} />
+                <PageTitle title="My" subtitle="Profile" images_icon={'/user-profile.png'} />
 
                 <ProfileBtn>
                   {disabled && (

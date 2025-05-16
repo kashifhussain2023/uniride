@@ -123,7 +123,7 @@ export default function EmergencyContactAdd() {
                 }}
                 title="Emergency"
                 subtitle="Contact"
-                images_icon={'../iconInRoute.png'}
+                images_icon={''}
               ></PageTitle>
               <Typography
                 variant="h3"
@@ -182,6 +182,8 @@ export default function EmergencyContactAdd() {
                 alt="Contract"
                 width={30}
                 height={30}
+                // style={{ height: '100%', width: '100%' }}
+                // className="mb-4"
               />
             </RightSection>
           </EmergencyContact>

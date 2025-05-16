@@ -19,8 +19,8 @@ export default function SaveCards({ userAuth }) {
   const { data: session, update: sessionUpdate } = useSession();
   const getCustomerCardList = async () => {
     const formData = new FormData();
-    formData.append('customer_id', userAuth.customer_id);
-    formData.append('token_code', userAuth.token_code);
+    formData.append('customer_id', userAuth?.customer_id);
+    formData.append('token_code', userAuth?.token_code);
     const response = await api({
       data: formData,
       method: 'POST',

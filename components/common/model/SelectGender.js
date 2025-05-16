@@ -10,31 +10,7 @@ import ListItemText from '@mui/material/ListItemText';
 import { Radio, Typography } from '@mui/material';
 import Image from 'next/image';
 
-const SelectGender = ({ open, handleGenderClose, proceedGenderModel }) => {
-  const [checked, setChecked] = React.useState('male');
-
-  const handleToggle = value => () => {
-    setChecked(value);
-  };
-  const handleSelectGender = () => {
-    try {
-      // Call proceedGenderModel and handle the result properly
-      proceedGenderModel(checked);
-
-      // Only call .then() if result is a Promise
-      // if (result && typeof result.then === 'function') {
-      //   result
-      //     .then(() => {
-      //       // Handle success if needed
-      //     })
-      //     .catch(error => {
-      //       console.error('Error in proceedGenderModel:', error);
-      //     });
-      // }
-    } catch (error) {
-      console.error('Error in handleSelectGender:', error);
-    }
-  };
+const SelectGender = ({ open, handleGenderClose, handleSelectGender, handleToggle, checked }) => {
   const handleClose = () => {
     handleGenderClose();
   };

@@ -29,7 +29,6 @@ import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { useDropzone } from 'react-dropzone';
-// import { MobileDatePicker } from '@mui/x-date-pickers';
 import validator from 'validator';
 import {
   stepFieldsMap,
@@ -963,80 +962,90 @@ const AddDriver = () => {
                 {errors.licence_no && <FormHelperText error>{errors.licence_no}</FormHelperText>}
               </Grid>
               <Grid item xs={12} sm={4}>
-                <LocalizationProvider dateAdapter={AdapterDayjs}>
-                  <MobileDatesPicker
-                    label="License expiry date"
-                    value={
-                      formValues.licence_expiry_date ? dayjs(formValues.licence_expiry_date) : null
-                    }
-                    onChange={newValue => storeDateInState('licence_expiry_date', newValue)}
-                    renderInput={params => (
-                      <TextField {...params} fullWidth error={!!errors.licence_expiry_date} />
+                <DatePicker>
+                  <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <MobileDatesPicker
+                      maxDate={dayjs().add(50, 'year')}
+                      label="License expiry date"
+                      value={
+                        formValues.licence_expiry_date
+                          ? dayjs(formValues.licence_expiry_date)
+                          : null
+                      }
+                      fullWidth
+                      onChange={newValue => storeDateInState('licence_expiry_date', newValue)}
+                      renderInput={params => (
+                        <TextField {...params} fullWidth error={!!errors.licence_expiry_date} />
+                      )}
+                    />
+                  </LocalizationProvider>
+                  {errors.licence_expiry_date && (
+                    <FormHelperText error>{errors.licence_expiry_date}</FormHelperText>
+                  )}
+                </DatePicker>
+              </Grid>
+              <Grid item xs={12} sm={12}>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="subtitle1">Driving license document 1</Typography>
+                    <ImageUpload
+                      fieldKey="driver_license"
+                      imagePreview={
+                        formValues.driver_license
+                          ? URL.createObjectURL(formValues.driver_license)
+                          : null
+                      }
+                      fileName={formValues.driver_license?.name}
+                    />
+                    {errors.driver_license && (
+                      <FormHelperText error>{errors.driver_license}</FormHelperText>
                     )}
-                  />
-                </LocalizationProvider>
-                {errors.licence_expiry_date && (
-                  <FormHelperText error>{errors.licence_expiry_date}</FormHelperText>
-                )}
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <Typography variant="subtitle1">Driving license document 1</Typography>
-                <ImageUpload
-                  fieldKey="driver_license"
-                  imagePreview={
-                    formValues.driver_license
-                      ? URL.createObjectURL(formValues.driver_license)
-                      : null
-                  }
-                  fileName={formValues.driver_license?.name}
-                />
-                {errors.driver_license && (
-                  <FormHelperText error>{errors.driver_license}</FormHelperText>
-                )}
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <Typography variant="subtitle1">Car image 1</Typography>
-                <ImageUpload
-                  fieldKey="carImage1"
-                  imagePreview={
-                    formValues.carImage1 ? URL.createObjectURL(formValues.carImage1) : null
-                  }
-                  fileName={formValues.carImage1?.name}
-                />
-                {errors.carImage1 && <FormHelperText error>{errors.carImage1}</FormHelperText>}
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <Typography variant="subtitle1">Car image 2</Typography>
-                <ImageUpload
-                  fieldKey="carImage2"
-                  imagePreview={
-                    formValues.carImage2 ? URL.createObjectURL(formValues.carImage2) : null
-                  }
-                  fileName={formValues.carImage2?.name}
-                />
-                {errors.carImage2 && <FormHelperText error>{errors.carImage2}</FormHelperText>}
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <Typography variant="subtitle1">Car image 3</Typography>
-                <ImageUpload
-                  fieldKey="carImage3"
-                  imagePreview={
-                    formValues.carImage3 ? URL.createObjectURL(formValues.carImage3) : null
-                  }
-                  fileName={formValues.carImage3?.name}
-                />
-                {errors.carImage3 && <FormHelperText error>{errors.carImage3}</FormHelperText>}
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <Typography variant="subtitle1">Car image 4</Typography>
-                <ImageUpload
-                  fieldKey="carImage4"
-                  imagePreview={
-                    formValues.carImage4 ? URL.createObjectURL(formValues.carImage4) : null
-                  }
-                  fileName={formValues.carImage4?.name}
-                />
-                {errors.carImage4 && <FormHelperText error>{errors.carImage4}</FormHelperText>}
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="subtitle1">Car image 1</Typography>
+                    <ImageUpload
+                      fieldKey="carImage1"
+                      imagePreview={
+                        formValues.carImage1 ? URL.createObjectURL(formValues.carImage1) : null
+                      }
+                      fileName={formValues.carImage1?.name}
+                    />
+                    {errors.carImage1 && <FormHelperText error>{errors.carImage1}</FormHelperText>}
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="subtitle1">Car image 2</Typography>
+                    <ImageUpload
+                      fieldKey="carImage2"
+                      imagePreview={
+                        formValues.carImage2 ? URL.createObjectURL(formValues.carImage2) : null
+                      }
+                      fileName={formValues.carImage2?.name}
+                    />
+                    {errors.carImage2 && <FormHelperText error>{errors.carImage2}</FormHelperText>}
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="subtitle1">Car image 3</Typography>
+                    <ImageUpload
+                      fieldKey="carImage3"
+                      imagePreview={
+                        formValues.carImage3 ? URL.createObjectURL(formValues.carImage3) : null
+                      }
+                      fileName={formValues.carImage3?.name}
+                    />
+                    {errors.carImage3 && <FormHelperText error>{errors.carImage3}</FormHelperText>}
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="subtitle1">Car image 4</Typography>
+                    <ImageUpload
+                      fieldKey="carImage4"
+                      imagePreview={
+                        formValues.carImage4 ? URL.createObjectURL(formValues.carImage4) : null
+                      }
+                      fileName={formValues.carImage4?.name}
+                    />
+                    {errors.carImage4 && <FormHelperText error>{errors.carImage4}</FormHelperText>}
+                  </Grid>
+                </Grid>
               </Grid>
             </Grid>
           )}
@@ -1070,6 +1079,7 @@ const AddDriver = () => {
               <Grid item xs={12} sm={4}>
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                   <MobileDatesPicker
+                    maxDate={dayjs().add(50, 'year')}
                     label="Car insurance expiry date"
                     value={
                       formValues.car_insurance_expiry_date
@@ -1087,59 +1097,66 @@ const AddDriver = () => {
                 )}
               </Grid>
               <Grid item xs={12} sm={4}>
-                <LocalizationProvider dateAdapter={AdapterDayjs}>
-                  <MobileDatesPicker
-                    label="Car registration expiry date"
-                    value={
-                      formValues.car_registration_expiry_date
-                        ? dayjs(formValues.car_registration_expiry_date)
-                        : null
-                    }
-                    onChange={newValue =>
-                      storeDateInState('car_registration_expiry_date', newValue)
-                    }
-                    renderInput={params => (
-                      <TextField
-                        {...params}
-                        fullWidth
-                        error={!!errors.car_registration_expiry_date}
-                      />
+                <DatePicker>
+                  <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <MobileDatesPicker
+                      maxDate={dayjs().add(50, 'year')}
+                      label="Car registration expiry date"
+                      value={
+                        formValues.car_registration_expiry_date
+                          ? dayjs(formValues.car_registration_expiry_date)
+                          : null
+                      }
+                      onChange={newValue =>
+                        storeDateInState('car_registration_expiry_date', newValue)
+                      }
+                      renderInput={params => (
+                        <TextField
+                          {...params}
+                          fullWidth
+                          error={!!errors.car_registration_expiry_date}
+                        />
+                      )}
+                    />
+                  </LocalizationProvider>
+                  {errors.car_registration_expiry_date && (
+                    <FormHelperText error>{errors.car_registration_expiry_date}</FormHelperText>
+                  )}
+                </DatePicker>
+              </Grid>
+              <Grid item xs={12} sm={12}>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="subtitle1">Car registration document</Typography>
+                    <ImageUpload
+                      fieldKey="vehicle_registration"
+                      imagePreview={
+                        formValues.vehicle_registration
+                          ? URL.createObjectURL(formValues.vehicle_registration)
+                          : null
+                      }
+                      fileName={formValues.vehicle_registration?.name}
+                    />
+                    {errors.vehicle_registration && (
+                      <FormHelperText error>{errors.vehicle_registration}</FormHelperText>
                     )}
-                  />
-                </LocalizationProvider>
-                {errors.car_registration_expiry_date && (
-                  <FormHelperText error>{errors.car_registration_expiry_date}</FormHelperText>
-                )}
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <Typography variant="subtitle1">Car registration document</Typography>
-                <ImageUpload
-                  fieldKey="vehicle_registration"
-                  imagePreview={
-                    formValues.vehicle_registration
-                      ? URL.createObjectURL(formValues.vehicle_registration)
-                      : null
-                  }
-                  fileName={formValues.vehicle_registration?.name}
-                />
-                {errors.vehicle_registration && (
-                  <FormHelperText error>{errors.vehicle_registration}</FormHelperText>
-                )}
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <Typography variant="subtitle1">Car insurance document</Typography>
-                <ImageUpload
-                  fieldKey="vehicle_insurance"
-                  imagePreview={
-                    formValues.vehicle_insurance
-                      ? URL.createObjectURL(formValues.vehicle_insurance)
-                      : null
-                  }
-                  fileName={formValues.vehicle_insurance?.name}
-                />
-                {errors.vehicle_insurance && (
-                  <FormHelperText error>{errors.vehicle_insurance}</FormHelperText>
-                )}
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="subtitle1">Car insurance document</Typography>
+                    <ImageUpload
+                      fieldKey="vehicle_insurance"
+                      imagePreview={
+                        formValues.vehicle_insurance
+                          ? URL.createObjectURL(formValues.vehicle_insurance)
+                          : null
+                      }
+                      fileName={formValues.vehicle_insurance?.name}
+                    />
+                    {errors.vehicle_insurance && (
+                      <FormHelperText error>{errors.vehicle_insurance}</FormHelperText>
+                    )}
+                  </Grid>
+                </Grid>
               </Grid>
 
               <Grid item xs={12}>
@@ -1281,17 +1298,15 @@ const AddDriver = () => {
 
 export default AddDriver;
 
-// const DragAndDropContainer = styled('div')(({ theme }) => ({
-//   border: '2px dashed #ccc',
-//   color: '#777',
-//   cursor: 'pointer',
-//   padding: theme.spacing(3),
-//   textAlign: 'center',
-// }));
-
 const FormContainer = styled(Box)(({ theme }) => ({
   '.MuiInputAdornment-root': {
     '.MuiInputBase-root': {
+      '&.Mui-focused': {
+        '.MuiOutlinedInput-notchedOutline': {
+          borderColor: '#eda411',
+        },
+      },
+
       '.MuiAutocomplete-clearIndicator': {
         display: 'none',
       },
@@ -1306,20 +1321,33 @@ const FormContainer = styled(Box)(({ theme }) => ({
       paddingRight: '22px !important',
     },
 
-    maxWidth: '50px !important',
+    maxWidth: '70px !important',
   },
   backgroundColor: '#fff',
   border: 'none',
   borderRadius: theme.spacing(1),
-  boxShadow: theme.shadows[2],
+  boxShadow: '0 4px 10px rgba(0,0,0,0.1)',
   margin: theme.spacing(2, 0),
 
   padding: theme.spacing(4),
 }));
 
 const LayoutBox = styled(Box)(({ theme }) => ({
+  '.MuiStep-root.Mui-completed': {
+    '.MuiStepLabel-iconContainer': {
+      '.MuiSvgIcon-root': {
+        color: '#eda411',
+      },
+    },
+  },
+  '.MuiStepLabel-iconContainer.Mui-active': {
+    '.MuiSvgIcon-root': {
+      color: '#eda411',
+    },
+  },
   height: 'calc(100% - 200px)',
   overflow: 'auto',
+
   padding: theme.spacing(3),
 }));
 
@@ -1345,8 +1373,7 @@ const SidebarTop = styled(Box)`
     z-index: 2;
 
     + div {
-      margin: 0 auto;
-      margin-top: 90px;
+      margin: 90px auto 80px;
       max-width: 1000px;
     }
   `}
@@ -1360,14 +1387,3 @@ const Logo = styled(Box)`
     margin-right: ${theme.spacing(2)};
   `}
 `;
-
-// const Footer = styled(Box)`
-//   ${({ theme }) => `
-//     display: flex;
-//     justify-content: center;
-//     padding: ${theme.spacing(2)};
-//     border-bottom: 1px solid #f2f2f7;
-//     box-shadow: 0px 2px 25px 0px rgba(0, 0, 0, 0.14);
-
-//   `}
-// `;
