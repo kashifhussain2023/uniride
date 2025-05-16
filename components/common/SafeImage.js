@@ -20,7 +20,7 @@ export default function SafeImage({
   width,
   height,
   className = '',
-  fallbackSrc = '/avatar.png',
+  fallbackSrc = '/logo1.png',
   style = {},
   ...props
 }) {
