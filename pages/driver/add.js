@@ -513,8 +513,8 @@ const AddDriver = () => {
         try {
           const res = await fetch(
             termsType === 'privacy'
-              ? `${process.env.NEXT_PUBLIC_POLICY_API}/privacy-policy`
-              : `${process.env.NEXT_PUBLIC_POLICY_API}/terms-and-conditions`
+              ? `${process.env.NEXT_PUBLIC_POLICY_API}`
+              : `${process.env.NEXT_PUBLIC_TERMS_API}`
           );
           const html = await res.text();
 
