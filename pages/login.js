@@ -303,10 +303,7 @@ export default function Login() {
               <Register>
                 <span>Don&apos;t have an account</span>
                 <Button type="text" onClick={() => router.push('/register')}>
-                  <u>Sign Up as customer</u>
-                </Button>
-                <Button type="text" onClick={() => router.push('/driver/add')}>
-                  <u>Sign Up as driver</u>
+                  <u>Sign Up</u>
                 </Button>
               </Register>
             </RightSide>
