@@ -21,7 +21,7 @@ export default function SelectRide({
       <PageTitle
         title="Book Your"
         subtitle="Rides"
-        images_icon={'../icon1.png'}
+        images_icon={'./icon1.png'}
         isAddDesignated={isAddDesignated}
       />
       {isAddDesignated && (
