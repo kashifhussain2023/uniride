@@ -56,7 +56,7 @@ export default function ReviewPage() {
               <PageTitle
                 title="Customer"
                 subtitle="Review"
-                images_icon={'../review.png'}
+                images_icon={`${process.env.NEXTAUTH_URL}/review.png`}
               ></PageTitle>
               <RouteDetail>
                 <ReviewHead>

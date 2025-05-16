@@ -136,7 +136,11 @@ export default function SaveCards({ userAuth }) {
         <SmallContent>
           <SaveCardsBox>
             <SaveCardHead>
-              <PageTitle title="Save" subtitle="Cards" images_icon={'../cards.png'} />
+              <PageTitle
+                title="Save"
+                subtitle="Cards"
+                images_icon={`${process.env.NEXTAUTH_URL}/cards.png`}
+              />
 
               <Button variant="contained" color="primary" onClick={handleAddCardClick}>
                 Add Card

@@ -21,7 +21,7 @@ export default function privacyPolicy() {
             <PageTitle
               title="Privacy"
               subtitle="Policy"
-              images_icon={'../location.png'}
+              images_icon={`${process.env.NEXTAUTH_URL}/location.png`}
             ></PageTitle>
             <Typography
               variant="h4"

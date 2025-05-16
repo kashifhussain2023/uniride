@@ -34,7 +34,7 @@ export default function DriverArrived(handleCancelModelInfo, acceptDriverDetail,
             : ''
         }
         subtitle="Arrived"
-        images_icon={'../driver.png'}
+        images_icon={`${process.env.NEXTAUTH_URL}/driver.png`}
       ></PageTitle>
 
       <RouteDriver>

@@ -92,7 +92,11 @@ export default function RiderHistoryPage() {
       <Layout>
         <LargeInnerContent>
           <Box>
-            <PageTitle title="Ride" subtitle={subTitle} images_icon={'../history.png'}></PageTitle>
+            <PageTitle
+              title="Ride"
+              subtitle={subTitle}
+              images_icon={`${process.env.NEXTAUTH_URL}/history.png`}
+            ></PageTitle>
             <RiderHistory riderHistory={historyData} setSubTitle={setSubTitle} />
           </Box>
         </LargeInnerContent>

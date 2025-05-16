@@ -87,7 +87,7 @@ export default function EmergencyContacts() {
               <PageTitle
                 title="Emergency"
                 subtitle="Contact"
-                images_icon={'../emergencyContact.png'}
+                images_icon={`${process.env.NEXTAUTH_URL}/emergencyContact.png`}
               ></PageTitle>
               <Button
                 variant="contained"

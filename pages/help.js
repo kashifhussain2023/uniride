@@ -51,7 +51,10 @@ export default function Help() {
       <Layout>
         <LargeInnerContent>
           <HelpSection>
-            <PageTitle subtitle="Help" images_icon={'../help.png'}></PageTitle>
+            <PageTitle
+              subtitle="Help"
+              images_icon={`${process.env.NEXTAUTH_URL}/help.png`}
+            ></PageTitle>
             <HelpAccordion>
               {helpData ? (
                 helpData?.map(helpData => (
