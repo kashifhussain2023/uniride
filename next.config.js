@@ -38,9 +38,6 @@ const nextConfig = {
     NEXTAUTH_URL: process.env.NEXTAUTH_URL,
     STRIPE_PUBLIC_KEY: process.env.STRIPE_PUBLIC_KEY,
   },
-  experimental: {
-    serverComponents: true,
-  },
   async headers() {
     return [
       {
@@ -83,6 +80,8 @@ const nextConfig = {
       '192.168.8.176',
       'unirideusadmin.24livehost.com',
       'flagcdn.com',
+      'uniride.frontend',
+      'unirideus.24livehost.com',
     ],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     minimumCacheTTL: 60,

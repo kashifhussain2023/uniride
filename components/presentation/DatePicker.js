@@ -1,12 +1,12 @@
 import styled from '@emotion/styled';
 import { TextField } from '@mui/material';
 import calendarIcon from '../../public/date.png';
-import SafeImage from '../common/SafeImage';
+import Image from 'next/image';
 
 export default function DatePicker() {
   return (
     <DatePickerComponent>
-      <SafeImage src={calendarIcon} alt="Calendar" priority />
+      <Image src={calendarIcon} alt="Calendar" width={30} height={30} priority />
       <TextField id="outlined-basic" label="Filter by Date" variant="outlined" type="date" />
     </DatePickerComponent>
   );

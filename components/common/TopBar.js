@@ -18,7 +18,7 @@ import {
 } from '@mui/material';
 import { Close, ExpandMore, Logout, AccountCircle, PersonAdd, Settings } from '@mui/icons-material';
 import { menuIcons, headerIcons } from '@/utils/constant';
-import SafeImage from './SafeImage';
+import Image from 'next/image';
 
 export const icons = {
   AccountCircle,
@@ -70,12 +70,7 @@ export default function TopBar({ setOpenDelete }) {
     >
       <SidebarTop>
         <Logo>
-          <SafeImage
-            src={`${process.env.NEXTAUTH_URL}/logo.jpg`}
-            alt="logo"
-            width={112}
-            height={43}
-          />
+          <Image src={`${process.env.NEXTAUTH_URL}/logo.jpg`} alt="logo" width={112} height={43} />
         </Logo>
         <DrawerBtn onClick={toggleDrawer(anchor, true)}>
           <Close />
@@ -92,7 +87,12 @@ export default function TopBar({ setOpenDelete }) {
                 onClick={() => router.push(path)}
               >
                 <ListItemIcon>
-                  <SafeImage src={`/${icon.props.src}`} alt={label} width={30} height={30} />
+                  <Image
+                    src={`${process.env.NEXTAUTH_URL}/${icon.props.src}`}
+                    alt={label}
+                    width={30}
+                    height={30}
+                  />
                 </ListItemIcon>
                 {label}
               </MenuItem>
@@ -100,7 +100,7 @@ export default function TopBar({ setOpenDelete }) {
           })}
           <MenuItem key="delete" onClick={openDelete}>
             <ListItemIcon>
-              <SafeImage
+              <Image
                 src={`${process.env.NEXTAUTH_URL}/icon/deleteAccountIcon.png`}
                 alt="Delete Account"
                 width={30}
@@ -118,7 +118,12 @@ export default function TopBar({ setOpenDelete }) {
               return (
                 <MenuItem key={label} onClick={() => router.push(path)}>
                   <ListItemIcon>
-                    <SafeImage src={`/${icon}`} alt={label} width={30} height={30} />
+                    <Image
+                      src={`${process.env.NEXTAUTH_URL}/${icon}`}
+                      alt={label}
+                      width={30}
+                      height={30}
+                    />
                   </ListItemIcon>
                   {label}
                 </MenuItem>
@@ -134,7 +139,7 @@ export default function TopBar({ setOpenDelete }) {
       <Container>
         <LeftBar>
           <Logo>
-            <SafeImage
+            <Image
               src={`${process.env.NEXTAUTH_URL}/logo.jpg`}
               alt="logo"
               width={112}
@@ -145,7 +150,7 @@ export default function TopBar({ setOpenDelete }) {
             {['left'].map(anchor => (
               <React.Fragment key={anchor}>
                 <DrawerBtn onClick={toggleDrawer(anchor, true)}>
-                  <SafeImage
+                  <Image
                     src={`${process.env.NEXTAUTH_URL}/menu-icon.png`}
                     alt="Menu"
                     width={27}

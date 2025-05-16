@@ -2,7 +2,7 @@ import { useRouter } from 'next/router';
 import styled from '@emotion/styled';
 import { Box, Button, Stack, Typography } from '@mui/material';
 import { format } from 'date-fns';
-import SafeImage from './SafeImage';
+import Image from 'next/image';
 import StarIcon from '@mui/icons-material/Star';
 
 export default function RideDetails({ rideDetail, setRideDetailStatus, setSubTitle }) {
@@ -20,12 +20,7 @@ export default function RideDetails({ rideDetail, setRideDetailStatus, setSubTit
         <Stack spacing={2}>
           <Stack direction="row" spacing={2}>
             <Box>
-              <SafeImage
-                src={`${process.env.NEXTAUTH_URL}/map.png`}
-                alt="map"
-                width={30}
-                height={30}
-              />
+              <Image src={`${process.env.NEXTAUTH_URL}/map.png`} alt="map" width={30} height={30} />
             </Box>
             <Box>
               <Typography

@@ -3,7 +3,7 @@ import { Button, Dialog, IconButton, Typography } from '@mui/material';
 import { format } from 'date-fns';
 import { useState } from 'react';
 import { DatePickerWrapper, TimePickerWrapper } from './DatePickerWrapper';
-import SafeImage from './SafeImage';
+import Image from 'next/image';
 
 const AddDesignated = ({
   saveDateTime,
@@ -132,7 +132,7 @@ const AddDesignated = ({
   return (
     <Container>
       <IconButton onClick={handleOpen}>
-        <SafeImage
+        <Image
           src={`${process.env.NEXTAUTH_URL}/date-time-icon.png`}
           alt="Date and Time"
           width={30}

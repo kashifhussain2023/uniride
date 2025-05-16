@@ -15,7 +15,7 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 import { toast } from 'react-toastify';
-import SafeImage from '@/components/common/SafeImage';
+import Image from 'next/image';
 
 export default function EmergencyContactAdd() {
   const router = useRouter();
@@ -177,13 +177,11 @@ export default function EmergencyContactAdd() {
               </Button>
             </LeftSection>
             <RightSection>
-              <SafeImage
-                src="/contract.png"
-                alt="Contract icon"
-                width={40}
-                height={40}
-                priority
-                className="mb-4"
+              <Image
+                src={`${process.env.NEXTAUTH_URL}/contract.png`}
+                alt="Contract"
+                width={30}
+                height={30}
               />
             </RightSection>
           </EmergencyContact>

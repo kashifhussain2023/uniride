@@ -1,4 +1,4 @@
-import SafeImage from '@/components/common/SafeImage';
+import Image from 'next/image';
 
 export const mainMenuItems = [
   {
@@ -17,17 +17,18 @@ export const profileMenus = [
 ];
 export const menuIcons = [
   {
-    icon: <SafeImage src="../icon/profileIcon.png" alt="Profile" width={24} height={24} />,
+    icon: <Image src="/icon/profileIcon.png" alt="Profile" width={24} height={24} unoptimized />,
     label: 'Profile',
     path: '/profile',
   },
   {
     icon: (
-      <SafeImage
-        src="../icon/favoriteLocationIcon.png"
+      <Image
+        src="/icon/favoriteLocationIcon.png"
         alt="Favorite Location"
         width={24}
         height={24}
+        unoptimized
       />
     ),
     label: 'Favorite Location',
@@ -35,11 +36,12 @@ export const menuIcons = [
   },
   {
     icon: (
-      <SafeImage
-        src="../icon/corporateProfileIcon.png"
+      <Image
+        src="/icon/corporateProfileIcon.png"
         alt="Corporate Profile"
         width={24}
         height={24}
+        unoptimized
       />
     ),
     label: 'Corporate Profile',
@@ -47,40 +49,49 @@ export const menuIcons = [
   },
   {
     icon: (
-      <SafeImage
-        src="../icon/emergencyContactIcon.png"
+      <Image
+        src="/icon/emergencyContactIcon.png"
         alt="Emergency Contact"
         width={24}
         height={24}
+        unoptimized
       />
     ),
     label: 'Emergency Contact',
     path: '/emergency-contact',
   },
   {
-    icon: <SafeImage src="../icon/paymentIcon.png" alt="Payment" width={24} height={24} />,
+    icon: <Image src="/icon/paymentIcon.png" alt="Payment" width={24} height={24} unoptimized />,
     label: 'Payment',
     path: '/cards',
   },
   {
     icon: (
-      <SafeImage src="../icon/riderHistoryIcon.png" alt="Rider History" width={24} height={24} />
+      <Image
+        src="/icon/riderHistoryIcon.png"
+        alt="Rider History"
+        width={24}
+        height={24}
+        unoptimized
+      />
     ),
     label: 'Rider History',
     path: 'riderHistory',
   },
   {
-    icon: <SafeImage src="../icon/helpIcon.png" alt="Help" width={24} height={24} />,
+    icon: <Image src="/icon/helpIcon.png" alt="Help" width={24} height={24} unoptimized />,
     label: 'Help',
     path: '/help',
   },
   {
-    icon: <SafeImage src="../icon/LegalIcon.png" alt="Legal" width={24} height={24} />,
+    icon: <Image src="/icon/LegalIcon.png" alt="Legal" width={24} height={24} unoptimized />,
     label: 'Legal',
     path: '/legal',
   },
   {
-    icon: <SafeImage src="../icon/privacyIcon.png" alt="Privacy Policy" width={24} height={24} />,
+    icon: (
+      <Image src="/icon/privacyIcon.png" alt="Privacy Policy" width={24} height={24} unoptimized />
+    ),
     label: 'Privacy Policy',
     path: '/privacyPolicy',
   },
@@ -88,17 +99,17 @@ export const menuIcons = [
 ];
 export const headerIcons = [
   {
-    icon: '../icon/profileIcon.png',
+    icon: '/icon/profileIcon.png',
     label: 'Request A Ride ',
     path: '/uniride',
   },
   {
-    icon: '../icon/favoriteLocationIcon.png',
+    icon: '/icon/favoriteLocationIcon.png',
     label: 'Request For Designated Driver',
     path: '/designated-driver',
   },
   {
-    icon: '../icon/corporateProfileIcon.png',
+    icon: '/icon/corporateProfileIcon.png',
     label: 'Schedule Ride',
     path: '/schedule-ride',
   },

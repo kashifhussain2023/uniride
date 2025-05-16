@@ -19,7 +19,7 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 import { toast } from 'react-toastify';
-import SafeImage from '@/components/common/SafeImage';
+import Image from 'next/image';
 
 export default function ChangePassword({ userAuth }) {
   const router = useRouter();
@@ -128,13 +128,11 @@ export default function ChangePassword({ userAuth }) {
           <Box>
             <RightSide>
               <SignInHead>
-                <SafeImage
-                  src="/loginIcon.png"
-                  alt="Login icon"
-                  width={40}
-                  height={40}
-                  priority
-                  className="mb-4"
+                <Image
+                  src={`${process.env.NEXTAUTH_URL}/loginIcon.png`}
+                  alt="Login Icon"
+                  width={30}
+                  height={30}
                 />
                 <Typography
                   variant="h2"

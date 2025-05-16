@@ -3,7 +3,7 @@ import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import { Typography } from '@mui/material';
 import { useState } from 'react';
 import RideDetails from '../RideDetails';
-import SafeImage from '../SafeImage';
+import Image from 'next/image';
 
 export default function RiderHistory({ riderHistory, setSubTitle }) {
   const [rideDetailStatus, setRideDetailStatus] = useState(true);
@@ -22,7 +22,7 @@ export default function RiderHistory({ riderHistory, setSubTitle }) {
           riderHistory.map((historyItem, index) => (
             <HistoryRow key={index}>
               <HistoryImage onClick={() => rideDetailData(index)}>
-                <SafeImage
+                <Image
                   src={historyItem.path_image || '../mapImg.png'}
                   alt="Map Image"
                   width={345}

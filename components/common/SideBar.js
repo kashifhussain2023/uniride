@@ -22,10 +22,10 @@ import {
   SendTimeExtensionOutlined,
   SettingsOutlined,
 } from '@mui/icons-material';
+import Image from 'next/image';
 import logo from '../../public/logo.png';
 import menuIcon from '../../public/menu-icon.png';
 import { mainMenuItems } from '@/utils/constant';
-import SafeImage from './SafeImage';
 
 export const icons = {
   DashboardOutlined,
@@ -63,11 +63,15 @@ export default function SideBar() {
     <Container shrink={shrink}>
       <LogoContainer shrink={shrink}>
         <Link href="/">
-          <SafeImage src={logo} alt="logo" priority />
+          <Image src={logo} alt="logo" width={112} height={43} priority />
         </Link>
       </LogoContainer>
       <MuiIconButton onClick={handleClickOpen} shrink={shrink}>
-        {shrink ? <EastOutlined /> : <SafeImage src={menuIcon} alt="menu button" priority />}
+        {shrink ? (
+          <EastOutlined />
+        ) : (
+          <Image src={menuIcon} alt="menu button" width={27} height={19} priority />
+        )}
       </MuiIconButton>
       <List component="nav" aria-labelledby="nested-list-subheader">
         {mainMenuItems.map(({ label, path, icon, subMenu }, index) => {
