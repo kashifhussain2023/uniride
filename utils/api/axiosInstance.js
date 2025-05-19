@@ -8,7 +8,7 @@ const getToken = async () => {
 };
 
 const axiosInstance = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_NEW_API_URL,
+  baseURL: process.env.NEW_API_URL,
 });
 
 axiosInstance.interceptors.request.use(

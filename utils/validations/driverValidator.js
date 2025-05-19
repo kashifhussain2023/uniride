@@ -1,5 +1,4 @@
 import validator from 'validator';
-import dayjs from 'dayjs';
 
 export const transformErrorMessage = (field, message) => {
   if (field === 'second_name') {
@@ -20,7 +19,7 @@ export const transformErrorMessage = (field, message) => {
 export const validateField = (field, value) => {
   let error = '';
 
-  if (field !== 'password') {
+  if (field !== 'password' && field !== 'dob') {
     const isEmpty =
       value === null ||
       value === undefined ||
@@ -45,14 +44,6 @@ export const validateField = (field, value) => {
 
   if (field === 'phone' && !validator.isMobilePhone(value)) {
     return 'Invalid phone number';
-  }
-
-  if (field === 'dob') {
-    const today = dayjs().startOf('day');
-    const selectedDate = dayjs(value);
-    if (selectedDate.isAfter(today)) {
-      return 'Date of birth cannot be in the future';
-    }
   }
 
   return error;
@@ -99,6 +90,6 @@ export const stepFieldsMap = {
     'car_registration_expiry_date',
     'vehicle_registration',
     'vehicle_insurance',
+    'accept_terms',
   ],
-  3: ['status', 'security_fee_status', 'is_designated'],
 };

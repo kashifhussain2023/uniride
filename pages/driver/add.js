@@ -53,7 +53,7 @@ const AddDriver = () => {
   const [activeStep, setActiveStep] = useState(0);
   const [countrycode, setCountryCode] = useState('+1');
   const [formValues, setFormValues] = useState({
-    accept_terms: false,
+    accept_terms: null,
     address: '',
     car_insurance_expiry_date: '',
     car_insurance_info: '',
@@ -91,7 +91,7 @@ const AddDriver = () => {
     vehicle_make: '',
     vehicle_model: '',
     vehicle_no: '',
-    vehicle_registration: '',
+    vehicle_registration: null,
     vehicle_type: '',
     year_of_vehicle: null,
   });
@@ -113,30 +113,27 @@ const AddDriver = () => {
   const [termsContent, setTermsContent] = useState('');
   const [termsLoading, setTermsLoading] = useState(false);
   const [innerAcceptTerms, setInnerAcceptTerms] = useState(false);
+  const [successModalOpen, setSuccessModalOpen] = useState(false);
+  const [loading, setLoading] = useState(false); // State to manage loading
 
-  // const pageTitle = 'Driver Registration';
-  // const scrumbItems = [
-  //   { path: '/', title: 'Home' },
-  //   { path: '/admin/drivers/active', title: 'Active' },
-  //   { path: '#', title: 'Add' },
-  // ];
+  const MINIMUM_AGE = 17;
 
   const handleStateChange = e => {
     const stateId = e.target.value;
     setSelectedState(stateId);
     setFormValues(prevData => ({
       ...prevData,
-      state_id: stateId, // Ensure state_id is updated
+      state_id: stateId,
     }));
 
     setErrors(prevErrors => ({
       ...prevErrors,
-      state_id: '', // Clear the error for state_id
+      state_id: '',
     }));
   };
 
   const handleCountryCode = value => {
-    const updatedCountryCode = '+' + value;
+    const updatedCountryCode = `+${value}`;
     setCountryCode(updatedCountryCode);
 
     setFormValues(prev => ({
@@ -150,12 +147,12 @@ const AddDriver = () => {
     setSelectedCounty(countyId);
     setFormValues(prevData => ({
       ...prevData,
-      county_id: countyId, // Ensure county_id is updated
+      county_id: countyId,
     }));
 
     setErrors(prevErrors => ({
       ...prevErrors,
-      county_id: '', // Clear the error for county_id
+      county_id: '',
     }));
   };
 
@@ -259,7 +256,7 @@ const AddDriver = () => {
     const currentStepFields = stepFieldsMap[activeStep];
 
     Object.entries(formValues).forEach(([field, value]) => {
-      if (field !== 'password') {
+      if (field !== 'password' && field !== 'accept_terms') {
         const isEmpty =
           value === null ||
           value === undefined ||
@@ -272,6 +269,27 @@ const AddDriver = () => {
             defaultMessage.charAt(0).toUpperCase() + defaultMessage.slice(1)
           );
         }
+      }
+
+      if (field === 'accept_terms' && !value) {
+        allErrors.accept_terms = 'You must agree to the terms & conditions and privacy policy';
+      }
+
+      if (field === 'dob') {
+        const selectedDate = dayjs(value);
+        const today = dayjs().startOf('day');
+
+        if (!selectedDate) {
+          allErrors.dob = 'Date of birth is required';
+        } else if (selectedDate.isAfter(today)) {
+          allErrors.dob = 'Date of birth cannot be in the future';
+        } else {
+          const age = dayjs().diff(selectedDate, 'year');
+          if (age < 17) {
+            allErrors.dob = 'Age must be greater than 17 years';
+          }
+        }
+        return;
       }
 
       if (field === 'ssn' && value) {
@@ -304,12 +322,14 @@ const AddDriver = () => {
       }
     });
 
-    // Confirm password match validation
+    if (!formValues.password || validator.isEmpty(formValues.password.trim())) {
+      allErrors.password = 'Password is required';
+    }
+
     if (formValues.password !== formValues.confirm_password) {
       allErrors.confirm_password = 'Passwords do not match';
     }
 
-    // Only keep errors relevant to the current step
     currentStepFields.forEach(field => {
       if (allErrors[field]) {
         stepErrors[field] = allErrors[field];
@@ -321,6 +341,17 @@ const AddDriver = () => {
   };
 
   const handleSubmit = async () => {
+    // Validate form first
+    const { stepErrors } = validateForm();
+    if (Object.keys(stepErrors).length > 0) {
+      const firstErrorField = Object.keys(stepErrors)[0];
+      const el = document.querySelector(`[name="${firstErrorField}"]`);
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+
+    setLoading(true);
+
     // Create FormData object
     const formData = new FormData();
 
@@ -360,14 +391,17 @@ const AddDriver = () => {
       const response = await axiosInstance.post('/driver/register', formData);
 
       if (response.data.status === true) {
-        toast.success(response.data.message || 'Driver registered successfully!');
+        setSuccessModalOpen(true);
       } else {
         toast.error(response.data.message || 'Failed to register driver');
       }
     } catch (error) {
       toast.error('An error occurred while registering the driver. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
+
   const handleNext = () => {
     const { stepErrors } = validateForm();
 
@@ -487,24 +521,6 @@ const AddDriver = () => {
     fetchVehicleTypes();
   }, []);
 
-  // useEffect(() => {
-  //   const fetchSettings = async () => {
-  //     const queryParams = new URLSearchParams();
-  //     if (formValues.email) queryParams.append('email', formValues.email);
-  //     if (formValues.phone) queryParams.append('phone', formValues.phone);
-  //     const response = await fetch(`/api/v2/drivers/add?${queryParams.toString()}`);
-  //     //const data = await response.json();
-  //     //setExistingDriver(data.existingDriver);
-  //     // const filteredSettings = data.data.filter(link => {
-  //     //   return link.key === 'IOS_DRIVER_LINK' || link.key === 'ANDROID_DRIVER_LINK';
-  //     // });
-
-  //     //setSettings(filteredSettings);
-  //   };
-
-  //   fetchSettings();
-  // }, []);
-
   useEffect(() => {
     if (termsModalOpen) {
       const fetchTerms = async () => {
@@ -512,8 +528,8 @@ const AddDriver = () => {
         try {
           const res = await fetch(
             termsType === 'privacy'
-              ? `${process.env.NEXT_PUBLIC_POLICY_API}`
-              : `${process.env.NEXT_PUBLIC_TERMS_API}`
+              ? `${process.env.NEXT_PUBLIC_POLICY_API}/privacy-policy`
+              : `${process.env.NEXT_PUBLIC_POLICY_API}/terms-and-conditions`
           );
           const html = await res.text();
 
@@ -716,7 +732,19 @@ const AddDriver = () => {
                       name="dob"
                       maxDate={dayjs()}
                       value={formValues.dob}
-                      onChange={newValue => storeDateInState('dob', newValue)}
+                      // onChange={newValue => storeDateInState('dob', newValue)}
+                      onChange={newValue => {
+                        const age = dayjs().diff(newValue, 'year');
+                        if (age < MINIMUM_AGE) {
+                          setErrors(prev => ({
+                            ...prev,
+                            dob: 'Age must be greater than 17 years.',
+                          }));
+                        } else {
+                          setErrors(prev => ({ ...prev, dob: '' }));
+                          storeDateInState('dob', newValue);
+                        }
+                      }}
                       error={!!errors.dob}
                       helperText={errors.dob}
                       fullWidth
@@ -1165,13 +1193,16 @@ const AddDriver = () => {
                     <Checkbox
                       checked={!!formValues.accept_terms}
                       onChange={e => {
-                        if (!e.target.checked) {
+                        const isChecked = e.target.checked;
+
+                        if (!isChecked) {
                           setFormValues(prev => ({ ...prev, accept_terms: false }));
                         } else {
-                          // Don't check immediately — open modal for inner confirmation
                           setTermsType('accept');
                           setTermsModalOpen(true);
                         }
+
+                        setErrors(prev => ({ ...prev, accept_terms: '' }));
                       }}
                       name="accept_terms"
                       color="primary"
@@ -1290,6 +1321,92 @@ const AddDriver = () => {
             )}
           </Box>
         </FormContainer>
+        <Modal open={successModalOpen || loading} onClose={() => setSuccessModalOpen(false)}>
+          <Box
+            sx={{
+              bgcolor: 'background.paper',
+              boxShadow: 24,
+              left: '50%',
+              maxHeight: '80vh',
+              overflowY: 'auto',
+              p: 4,
+              position: 'absolute',
+              textAlign: 'center',
+              top: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: 400,
+            }}
+          >
+            {loading ? (
+              <Typography variant="body1" gutterBottom>
+                Registering driver, please wait...
+              </Typography>
+            ) : (
+              <>
+                <Typography variant="body1" gutterBottom>
+                  Driver registered successfully!
+                </Typography>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={() => {
+                    setSuccessModalOpen(false); // Close the modal
+                    setActiveStep(0); // Reset to the first step
+                    setFormValues({
+                      accept_terms: null,
+                      address: '',
+                      car_insurance_expiry_date: '',
+                      car_insurance_info: '',
+                      car_insurance_name: '',
+                      car_registration_expiry_date: '',
+                      carImage1: null,
+                      carImage2: null,
+                      carImage3: null,
+                      carImage4: null,
+                      city_id: '',
+                      confirm_password: '',
+                      county_id: '',
+                      dob: '',
+                      driver_license: null,
+                      email: '',
+                      first_name: '',
+                      gender: '',
+                      is_designated: null,
+                      licence_expiry_date: '',
+                      licence_no: null,
+                      middle_name: '',
+                      password: '',
+                      phone: null,
+                      phone_code: countrycode,
+                      postal_code: '',
+                      profile_pic: null,
+                      second_name: '',
+                      security_fee_status: null,
+                      ssn: '',
+                      state_id: '',
+                      status: null,
+                      tag: '',
+                      vehicle_color: '',
+                      vehicle_insurance: '',
+                      vehicle_make: '',
+                      vehicle_model: '',
+                      vehicle_no: '',
+                      vehicle_registration: null,
+                      vehicle_type: '',
+                      year_of_vehicle: null,
+                    });
+                    setSelectedState(null);
+                    setSelectedCounty(null);
+                    setSelectedCity(null);
+                    setErrors({});
+                  }}
+                >
+                  Close
+                </Button>
+              </>
+            )}
+          </Box>
+        </Modal>
       </LayoutBox>
       <CopyRight />
     </>

@@ -35,7 +35,7 @@ export default function CountrySelect({ onCountryCode, countrycode, disabled }) 
       options={countries}
       value={findDefaultCountry()}
       autoHighlight
-      getOptionLabel={option => option.phone}
+      getOptionLabel={option => `+${option.phone}`}
       onChange={handleCountryChange}
       disabled={disabled}
       isOptionEqualToValue={(option, value) =>
