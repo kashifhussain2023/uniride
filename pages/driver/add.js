@@ -317,8 +317,15 @@ const AddDriver = () => {
         }
       }
 
-      if (field === 'phone' && value && !validator.isMobilePhone(value)) {
-        allErrors.phone = 'Invalid phone number';
+      if (field === 'phone' && value) {
+        const numericPhone = value.replace(/\D/g, '');
+        if (
+          !validator.isMobilePhone(value) ||
+          numericPhone.length < 7 ||
+          numericPhone.length > 13
+        ) {
+          allErrors.phone = 'Phone number must be between 7 and 15 digits.';
+        }
       }
     });
 
@@ -732,7 +739,6 @@ const AddDriver = () => {
                       name="dob"
                       maxDate={dayjs()}
                       value={formValues.dob}
-                      // onChange={newValue => storeDateInState('dob', newValue)}
                       onChange={newValue => {
                         const age = dayjs().diff(newValue, 'year');
                         if (age < MINIMUM_AGE) {
@@ -879,8 +885,14 @@ const AddDriver = () => {
                   fullWidth
                   variant="outlined"
                   value={formValues.ssn || ''}
-                  onChange={e => handleInputChange('ssn', e.target.value)}
-                  inputProps={{ maxLength: 9 }}
+                  onChange={e => {
+                    const value = e.target.value.replace(/\D/g, '');
+                    const formattedSSN = value
+                      .replace(/^(\d{3})(\d{2})(\d{0,4})$/, '$1-$2-$3')
+                      .replace(/-$/, '');
+                    handleInputChange('ssn', formattedSSN);
+                  }}
+                  inputProps={{ maxLength: 11 }}
                 />
                 {errors.ssn && <FormHelperText error>{errors.ssn}</FormHelperText>}
               </Grid>

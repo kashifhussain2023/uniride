@@ -1,4 +1,4 @@
-const { createServer } = require('http');
+const { createServer } = require('https');
 const { parse } = require('url');
 const next = require('next');
 const fs = require('fs');
@@ -8,8 +8,14 @@ const dev = process.env.NODE_ENV !== 'production';
 const app = next({ dev });
 const handle = app.getRequestHandler();
 
+const httpsOptions = {
+  ca: fs.readFileSync('certs/ca_25.cert'),
+  cert: fs.readFileSync('certs/ssl_25.cert'),
+  key: fs.readFileSync('certs/ssl_25.key'),
+};
+
 app.prepare().then(() => {
-  const server = createServer((req, res) => {
+  const server = createServer(httpsOptions, (req, res) => {
     // Increase header size limits
     if (!req.maxHeadersCount) {
       req.maxHeadersCount = 100;
