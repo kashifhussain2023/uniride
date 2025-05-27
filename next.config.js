@@ -82,6 +82,7 @@ const nextConfig = {
       'flagcdn.com',
       'uniride.frontend',
       'unirideus.24livehost.com',
+      'uniridedev.24livehost.com',
     ],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     minimumCacheTTL: 60,

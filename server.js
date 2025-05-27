@@ -1,10 +1,10 @@
-const { createServer } = require('https');
+const { createServer } = require('http');
 const { parse } = require('url');
 const next = require('next');
 const fs = require('fs');
 
 // Create the Next.js app
-const dev = process.env.NODE_ENV !== 'production';
+const dev = false;
 const app = next({ dev });
 const handle = app.getRequestHandler();
 
@@ -15,7 +15,7 @@ const httpsOptions = {
 };
 
 app.prepare().then(() => {
-  const server = createServer(httpsOptions, (req, res) => {
+  const server = createServer((req, res) => {
     // Increase header size limits
     if (!req.maxHeadersCount) {
       req.maxHeadersCount = 100;

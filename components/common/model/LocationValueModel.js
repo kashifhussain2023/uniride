@@ -140,9 +140,14 @@ export default function LocationValueModel({
   };
 
   useEffect(() => {
-    if (open && currentLocation && dropLocation) {
-      setIsCalculating(true);
-      if (rideStatus === 3) {
+    if (open) {
+      setSearchInput('');
+      setPrice(null);
+      setError('');
+      setIsCalculating(false);
+
+      if (currentLocation && dropLocation && rideStatus === 3) {
+        setIsCalculating(true);
         calculateEstimationPrice(currentLocation, dropLocation, distance, duration).then(
           calculatedPrice => {
             setPrice(calculatedPrice);
@@ -151,7 +156,7 @@ export default function LocationValueModel({
         );
       }
     }
-  }, [open, currentLocation, dropLocation]);
+  }, [open]);
 
   return (
     <LoadScript googleMapsApiKey={process.env.GOOGLE_MAPS_API_KEY} libraries={LIBRARIES}>
