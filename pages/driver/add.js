@@ -1,6 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 import React, { useEffect, useState } from 'react';
-// import { useRouter } from 'next/router';
+import { useRouter } from 'next/router';
 import dynamic from 'next/dynamic';
 import dayjs from 'dayjs';
 import { styled } from '@mui/system';
@@ -49,7 +49,7 @@ const MobileDatesPicker = dynamic(() => import('@/components/common/MobileDatePi
 });
 
 const AddDriver = () => {
-  //const router = useRouter();
+  const router = useRouter();
   const [activeStep, setActiveStep] = useState(0);
   const [countrycode, setCountryCode] = useState('+1');
   const [formValues, setFormValues] = useState({
@@ -331,6 +331,19 @@ const AddDriver = () => {
 
     if (!formValues.password || validator.isEmpty(formValues.password.trim())) {
       allErrors.password = 'Password is required';
+    } else if (!validator.isLength(formValues.password, { min: 8 })) {
+      allErrors.password = 'Password must be at least 8 characters long';
+    } else if (
+      !validator.isStrongPassword(formValues.password, {
+        minLength: 8,
+        minNumbers: 1,
+        minSymbols: 1,
+        minUppercase: 1,
+        returnScore: false,
+      })
+    ) {
+      allErrors.password =
+        'Password must be strong (include at least 1 uppercase letter, 1 number, and 1 special character)';
     }
 
     if (formValues.password !== formValues.confirm_password) {
@@ -1362,55 +1375,8 @@ const AddDriver = () => {
                   variant="contained"
                   color="primary"
                   onClick={() => {
-                    setSuccessModalOpen(false); // Close the modal
-                    setActiveStep(0); // Reset to the first step
-                    setFormValues({
-                      accept_terms: null,
-                      address: '',
-                      car_insurance_expiry_date: '',
-                      car_insurance_info: '',
-                      car_insurance_name: '',
-                      car_registration_expiry_date: '',
-                      carImage1: null,
-                      carImage2: null,
-                      carImage3: null,
-                      carImage4: null,
-                      city_id: '',
-                      confirm_password: '',
-                      county_id: '',
-                      dob: '',
-                      driver_license: null,
-                      email: '',
-                      first_name: '',
-                      gender: '',
-                      is_designated: null,
-                      licence_expiry_date: '',
-                      licence_no: null,
-                      middle_name: '',
-                      password: '',
-                      phone: null,
-                      phone_code: countrycode,
-                      postal_code: '',
-                      profile_pic: null,
-                      second_name: '',
-                      security_fee_status: null,
-                      ssn: '',
-                      state_id: '',
-                      status: null,
-                      tag: '',
-                      vehicle_color: '',
-                      vehicle_insurance: '',
-                      vehicle_make: '',
-                      vehicle_model: '',
-                      vehicle_no: '',
-                      vehicle_registration: null,
-                      vehicle_type: '',
-                      year_of_vehicle: null,
-                    });
-                    setSelectedState(null);
-                    setSelectedCounty(null);
-                    setSelectedCity(null);
-                    setErrors({});
+                    setSuccessModalOpen(false);
+                    router.push('/login');
                   }}
                 >
                   Close
