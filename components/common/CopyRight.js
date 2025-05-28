@@ -4,7 +4,7 @@ export default function CopyRight() {
   const year = new Date().getFullYear();
   return (
     <Container>
-      <Typography>Uniride ©{year} All rights reserved</Typography>
+      <Typography>UniRide Logistic, LLC ©{year} All rights reserved</Typography>
     </Container>
   );
 }
