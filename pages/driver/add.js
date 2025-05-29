@@ -544,6 +544,10 @@ const AddDriver = () => {
   useEffect(() => {
     if (termsModalOpen) {
       const fetchTerms = async () => {
+        console.log({
+          NEXT_PUBLIC_POLICY_API: process.env.NEXT_PUBLIC_POLICY_API,
+          termsType: termsType,
+        });
         setTermsLoading(true);
         try {
           const res = await fetch(
